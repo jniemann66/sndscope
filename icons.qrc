@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/play-solid.png</file>
+        <file>icons/step-backward-solid.png</file>
+    </qresource>
+</RCC>
