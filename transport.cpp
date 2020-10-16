@@ -66,4 +66,10 @@ void Transport::setPosition(int milliseconds)
     mm->display(time.minute());
     ss->display(time.second());
     ms->display(time.msec());
+    slider->setSliderPosition(milliseconds);
+}
+
+void Transport::setLength(int milliseconds)
+{
+    slider->setMaximum(milliseconds);
 }

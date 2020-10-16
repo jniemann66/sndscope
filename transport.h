@@ -14,6 +14,7 @@ public:
 
     bool getPaused() const;
     void setPaused(bool value);
+    void setLength(int milliseconds);
 
 signals:
     void returnToStartClicked();
