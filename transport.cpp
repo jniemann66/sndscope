@@ -18,6 +18,7 @@ Transport::Transport(QWidget *parent) : QWidget(parent)
     mm = new QLCDNumber(2);
     ss = new QLCDNumber(2);
     ms = new QLCDNumber(3);
+
     hh->setDecMode();
     mm->setDecMode();
     ss->setDecMode();

@@ -27,9 +27,11 @@ protected:
 class ScopeWidget : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit ScopeWidget(QWidget *parent = nullptr);
     QPair<bool, QString> loadSoundFile(const QString &filename);
+    int getLengthMilliseconds();
 
 signals:
     void renderedFrame(int positionMilliseconds);

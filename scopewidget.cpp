@@ -45,6 +45,11 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     return {h->error() == SF_ERR_NO_ERROR, h->strError()};
 }
 
+int ScopeWidget::getLengthMilliseconds()
+{
+    return static_cast<int>(millisecondsPerSample * h->frames());
+}
+
 int ScopeWidget::heightForWidth(int) const
 {
     return width();
@@ -59,11 +64,11 @@ void ScopeWidget::plot()
     QPainter painter(&pixmap);
 
     // darken:
-    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 100}});
+    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 250}});
 
     // prepare pen
     //QPen pen{QColor{255,255,255,20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
-    QPen pen{QColor{94,255,0,20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+    QPen pen{QColor{94, 255, 0, 20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
     //
     painter.setPen(pen);
     painter.setRenderHint(QPainter::Antialiasing);
