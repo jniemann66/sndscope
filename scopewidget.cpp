@@ -29,7 +29,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(480, 480)
     darkenTimer.start();
     mainLayout->addWidget(screenWidget);
     setLayout(mainLayout);
-
 }
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
