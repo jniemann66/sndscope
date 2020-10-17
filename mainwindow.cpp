@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(scopeWidget);
     transportDock->setWidget(transportWidget);
     transportDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::BottomDockWidgetArea, transportDock);
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
 
         // qDebug() << scopeWidget->loadSoundFile("/home/judd/IQ/WFM/12-03-39_105500kHz.wav");
