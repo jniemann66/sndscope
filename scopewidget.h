@@ -38,6 +38,7 @@ public:
 
 public slots:
     void returnToStart();
+    void gotoPosition(int64_t milliSeconds);
 
 signals:
     void renderedFrame(int positionMilliseconds);

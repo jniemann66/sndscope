@@ -56,6 +56,25 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
         emit returnToStartClicked();
     });
 
+    connect(slider, &QSlider::sliderPressed, this, [this]{
+        if(!paused) {
+            emit playPauseToggled(true);
+        }
+    });
+
+    connect(slider, &QSlider::sliderReleased, this, [this]{
+        if(!paused) {
+            emit playPauseToggled(false);
+        }
+
+        QTime time = QTime{0,0,0,0}.addMSecs(slider->value());
+        hh->display(time.hour());
+        mm->display(time.minute());
+        ss->display(time.second());
+        ms->display(time.msec());
+        emit positionChangeRequested(slider->value());
+    });
+
     setPaused(getPaused());
 
     setLayout(mainLayout);

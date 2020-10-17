@@ -19,6 +19,7 @@ public:
 signals:
     void returnToStartClicked();
     void playPauseToggled(bool paused);
+    void positionChangeRequested(int milliseconds);
 
 public slots:
     void setPosition(int milliseconds);

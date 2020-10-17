@@ -83,6 +83,16 @@ void ScopeWidget::returnToStart()
     }
 }
 
+void ScopeWidget::gotoPosition(int64_t milliSeconds)
+{
+    elapsedTimer.restart();
+    if(h != nullptr && !h->error()) {
+        currentFrame = samplesPerMillisecond * milliSeconds;
+        startFrame = currentFrame;
+        h->seek(qMin(currentFrame, h->frames()), SEEK_SET);
+    }
+}
+
 void ScopeWidget::render()
 {
     int64_t toFrame = qMin(h->frames() - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));

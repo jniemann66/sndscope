@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
     connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
+    connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
 
     auto loadResult = scopeWidget->loadSoundFile("/home/judd/Music/05 Spirals.wav");
     if (loadResult.first) {
