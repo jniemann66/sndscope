@@ -22,7 +22,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(480, 480)
 
     connect(&darkenTimer, &QTimer::timeout, this, [this]{
         if(!paused) {
-            plot();
+            render();
             screenWidget->setPixmap(pixmap);
             emit renderedFrame(currentFrame * millisecondsPerSample);
         }
@@ -83,7 +83,7 @@ void ScopeWidget::returnToStart()
     }
 }
 
-void ScopeWidget::plot()
+void ScopeWidget::render()
 {
     int64_t toFrame = qMin(h->frames() - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
     int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));

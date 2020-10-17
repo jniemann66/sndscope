@@ -61,7 +61,7 @@ private:
     int64_t maxFramesToRead{0};
     bool paused{true};
 
-    void plot();
+    void render();
 signals:
 
 };
