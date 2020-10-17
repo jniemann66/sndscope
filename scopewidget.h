@@ -44,7 +44,6 @@ signals:
     void renderedFrame(int positionMilliseconds);
 
 protected:
-    int heightForWidth(int) const override;
 
 private:
     QLabel* screenWidget;

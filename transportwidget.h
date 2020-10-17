@@ -24,6 +24,9 @@ signals:
 public slots:
     void setPosition(int milliseconds);
 
+protected:
+    int heightForWidth(int) const;
+
 private:
     QSlider* slider;
     QPushButton* rtsButton;

@@ -78,6 +78,8 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
     setPaused(getPaused());
 
     setLayout(mainLayout);
+
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
 
 bool TransportWidget::getPaused() const
@@ -108,4 +110,9 @@ void TransportWidget::setPosition(int milliseconds)
 void TransportWidget::setLength(int milliseconds)
 {
     slider->setMaximum(milliseconds);
+}
+
+int TransportWidget::heightForWidth(int width) const
+{
+    return width / 4;
 }

@@ -7,9 +7,10 @@
 #include <QResizeEvent>
 #include <QDebug>
 
-ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(480, 480)
+ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 {
     auto mainLayout = new QVBoxLayout;
+    auto screenLayout = new QHBoxLayout;
     screenWidget = new QLabel;
     sizeTracker = new SizeTracker(this);
 
@@ -29,7 +30,12 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(480, 480)
     });
 
     darkenTimer.start();
-    mainLayout->addWidget(screenWidget);
+    screenLayout->addStretch();
+    screenLayout->addWidget(screenWidget);
+    screenLayout->addStretch();
+    mainLayout->addStretch();
+    mainLayout->addLayout(screenLayout);
+    mainLayout->addStretch();
     setLayout(mainLayout);
 }
 
@@ -51,11 +57,6 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 int ScopeWidget::getLengthMilliseconds()
 {
     return static_cast<int>(millisecondsPerSample * h->frames());
-}
-
-int ScopeWidget::heightForWidth(int) const
-{
-    return width();
 }
 
 bool ScopeWidget::getPaused() const
