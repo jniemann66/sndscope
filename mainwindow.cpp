@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
         // qDebug() << scopeWidget->loadSoundFile("/home/judd/IQ/WFM/12-03-39_105500kHz.wav");
         // qDebug() << scopeWidget->loadSoundFile("/home/judd/IQ/WFM/21-20-26_90700kHz.wav");
 
+    connect(transport, &Transport::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
+
     auto loadResult = scopeWidget->loadSoundFile("/home/judd/Music/05 Spirals.wav");
     if (loadResult.first) {
         transport->setLength(scopeWidget->getLengthMilliseconds());

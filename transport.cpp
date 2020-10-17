@@ -46,6 +46,13 @@ Transport::Transport(QWidget *parent) : QWidget(parent)
     mainLayout->addLayout(sliderLayout);
     mainLayout->addLayout(buttonLayout);
 
+    connect(playPauseButton, &QPushButton::clicked, this, [this]{
+       setPaused(!getPaused()); // toggle
+       emit playPauseToggled(getPaused());
+    });
+
+    setPaused(getPaused());
+
     setLayout(mainLayout);
 }
 
@@ -57,6 +64,11 @@ bool Transport::getPaused() const
 void Transport::setPaused(bool value)
 {
     paused = value;
+    if(paused) {
+        playPauseButton->setIcon(QIcon{":/icons/play-solid.png"});
+    } else {
+        playPauseButton->setIcon(QIcon{":/icons/pause-solid.png"});
+    }
 }
 
 void Transport::setPosition(int milliseconds)

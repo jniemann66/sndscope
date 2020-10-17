@@ -54,6 +54,19 @@ int ScopeWidget::heightForWidth(int) const
     return width();
 }
 
+bool ScopeWidget::getPaused() const
+{
+    return paused;
+}
+
+void ScopeWidget::setPaused(bool value)
+{
+    paused = value;
+    if(paused) {
+
+    }
+}
+
 void ScopeWidget::plot()
 {
     int64_t toFrame = qMin(h->frames() - 1, static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));

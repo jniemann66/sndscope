@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QTime>
 
 #include <sndfile.hh>
 
@@ -33,6 +34,9 @@ public:
     QPair<bool, QString> loadSoundFile(const QString &filename);
     int getLengthMilliseconds();
 
+    bool getPaused() const;
+    void setPaused(bool value);
+
 signals:
     void renderedFrame(int positionMilliseconds);
 
@@ -51,6 +55,7 @@ private:
     int samplesPerMillisecond{0};
     double millisecondsPerSample{0.0};
     int64_t frame{0ll};
+    bool paused{true};
 
     void plot();
 signals:

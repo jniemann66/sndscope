@@ -32,7 +32,7 @@ private:
     QLCDNumber* ss;
     QLCDNumber* ms;
 
-    bool paused{false};
+    bool paused{true};
 };
 
 #endif // TRANSPORT_H
