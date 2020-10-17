@@ -21,11 +21,11 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(480, 480)
     screenWidget->installEventFilter(sizeTracker);
 
     connect(&darkenTimer, &QTimer::timeout, this, [this]{
-       // if(!paused) {
+        if(!paused) {
             plot();
             screenWidget->setPixmap(pixmap);
-            emit renderedFrame(frame * millisecondsPerSample);
-       // }
+            emit renderedFrame(currentFrame * millisecondsPerSample);
+        }
     });
 
     darkenTimer.start();
@@ -41,9 +41,10 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         samplesPerMillisecond = h->samplerate() / 1000;
         millisecondsPerSample = 1000.0 / h->samplerate();
         maxFramesToRead = inputBuffer.size() / h->channels();
+        currentFrame = 0ll;
+        startFrame = 0ll;
     }
 
-    elapsedTimer.start();
     return {h->error() == SF_ERR_NO_ERROR, h->strError()};
 }
 
@@ -65,16 +66,17 @@ bool ScopeWidget::getPaused() const
 void ScopeWidget::setPaused(bool value)
 {
     paused = value;
-    if(paused) {
-
+    if(!paused) {
+        startFrame = currentFrame;
+        elapsedTimer.restart();
     }
 }
 
 void ScopeWidget::plot()
 {
-    int64_t toFrame = qMin(h->frames() - 1, static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
-    int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - frame));
-    frame += framesRead;
+    int64_t toFrame = qMin(h->frames() - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
+    int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
+    currentFrame += framesRead;
 
     QPainter painter(&pixmap);
 

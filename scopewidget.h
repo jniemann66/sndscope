@@ -54,7 +54,8 @@ private:
     QElapsedTimer elapsedTimer;
     int samplesPerMillisecond{0};
     double millisecondsPerSample{0.0};
-    int64_t frame{0ll};
+    int64_t startFrame{0};
+    int64_t currentFrame{0ll};
     int64_t maxFramesToRead{0};
     bool paused{true};
 
