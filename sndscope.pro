@@ -17,12 +17,12 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     scopewidget.cpp \
-    transport.cpp
+    transportwidget.cpp
 
 HEADERS += \
     mainwindow.h \
     scopewidget.h \
-    transport.h
+    transportwidget.h
 
 TRANSLATIONS += \
     sndscope_en_AU.ts

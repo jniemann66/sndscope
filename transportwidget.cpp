@@ -1,11 +1,11 @@
-#include "transport.h"
+#include "transportwidget.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QTime>
 
-Transport::Transport(QWidget *parent) : QWidget(parent)
+TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* sliderLayout = new QHBoxLayout;
@@ -51,17 +51,22 @@ Transport::Transport(QWidget *parent) : QWidget(parent)
        emit playPauseToggled(getPaused());
     });
 
+    connect(rtsButton, &QPushButton::clicked, this, [this]{
+        setPosition(0);
+        emit returnToStartClicked();
+    });
+
     setPaused(getPaused());
 
     setLayout(mainLayout);
 }
 
-bool Transport::getPaused() const
+bool TransportWidget::getPaused() const
 {
     return paused;
 }
 
-void Transport::setPaused(bool value)
+void TransportWidget::setPaused(bool value)
 {
     paused = value;
     if(paused) {
@@ -71,9 +76,9 @@ void Transport::setPaused(bool value)
     }
 }
 
-void Transport::setPosition(int milliseconds)
+void TransportWidget::setPosition(int milliseconds)
 {
-    QTime time = QTime{0, 0, 0, 0}.addMSecs(milliseconds);
+    QTime time = QTime{0,0,0,0}.addMSecs(milliseconds);
     hh->display(time.hour());
     mm->display(time.minute());
     ss->display(time.second());
@@ -81,7 +86,7 @@ void Transport::setPosition(int milliseconds)
     slider->setSliderPosition(milliseconds);
 }
 
-void Transport::setLength(int milliseconds)
+void TransportWidget::setLength(int milliseconds)
 {
     slider->setMaximum(milliseconds);
 }

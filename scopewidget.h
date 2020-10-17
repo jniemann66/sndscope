@@ -33,9 +33,11 @@ public:
     explicit ScopeWidget(QWidget *parent = nullptr);
     QPair<bool, QString> loadSoundFile(const QString &filename);
     int getLengthMilliseconds();
-
     bool getPaused() const;
     void setPaused(bool value);
+
+public slots:
+    void returnToStart();
 
 signals:
     void renderedFrame(int positionMilliseconds);

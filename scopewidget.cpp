@@ -72,6 +72,17 @@ void ScopeWidget::setPaused(bool value)
     }
 }
 
+void ScopeWidget::returnToStart()
+{
+    elapsedTimer.restart();
+    currentFrame = 0ll;
+    startFrame = 0ll;
+
+    if(h != nullptr && !h->error()) {
+        h->seek(0ll, SEEK_SET);
+    }
+}
+
 void ScopeWidget::plot()
 {
     int64_t toFrame = qMin(h->frames() - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
@@ -81,7 +92,7 @@ void ScopeWidget::plot()
     QPainter painter(&pixmap);
 
     // darken:
-    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 250}});
+    painter.fillRect(screenWidget->pixmap().rect(), {QColor{10, 10, 10, 128}});
 
     // prepare pen
     //QPen pen{QColor{255,255,255,20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};

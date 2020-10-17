@@ -1,16 +1,16 @@
-#ifndef TRANSPORT_H
-#define TRANSPORT_H
+#ifndef TRANSPORTWIDGET_H
+#define TRANSPORTWIDGET_H
 
 #include <QWidget>
 #include <QPushButton>
 #include <QSlider>
 #include <QLCDNumber>
 
-class Transport : public QWidget
+class TransportWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Transport(QWidget *parent = nullptr);
+    explicit TransportWidget(QWidget *parent = nullptr);
 
     bool getPaused() const;
     void setPaused(bool value);
@@ -35,4 +35,4 @@ private:
     bool paused{true};
 };
 
-#endif // TRANSPORT_H
+#endif // TRANSPORTWIDGET_H
