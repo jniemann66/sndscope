@@ -36,3 +36,12 @@ MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    QMainWindow::dragEnterEvent(event);
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    QMainWindow::dropEvent(event);
+}
