@@ -42,15 +42,17 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 {
     h.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
-    if(h->error() == SF_ERR_NO_ERROR) {
+    fileLoaded = (h->error() == SF_ERR_NO_ERROR);
+    if(fileLoaded) {
         inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
         samplesPerMillisecond = h->samplerate() / 1000;
         millisecondsPerSample = 1000.0 / h->samplerate();
         maxFramesToRead = inputBuffer.size() / h->channels();
+        totalFrames = h->frames();
         returnToStart();
     }
 
-    return {h->error() == SF_ERR_NO_ERROR, h->strError()};
+    return {fileLoaded, h->strError()};
 }
 
 int ScopeWidget::getLengthMilliseconds()
@@ -65,6 +67,11 @@ bool ScopeWidget::getPaused() const
 
 void ScopeWidget::setPaused(bool value)
 {
+    // disallow unpause if file not loaded
+    if(!value && paused && !fileLoaded) {
+        return;
+    }
+
     paused = value;
     if(!paused) {
         startFrame = currentFrame;
@@ -93,9 +100,19 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
     }
 }
 
+int64_t ScopeWidget::getTotalFrames() const
+{
+    return totalFrames;
+}
+
+void ScopeWidget::setTotalFrames(const int64_t &value)
+{
+    totalFrames = value;
+}
+
 void ScopeWidget::render()
 {
-    int64_t toFrame = qMin(h->frames() - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
+    int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
     int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
     currentFrame += framesRead;
 
@@ -105,13 +122,13 @@ void ScopeWidget::render()
     painter.fillRect(screenWidget->pixmap().rect(), {QColor{10, 10, 10, 128}});
 
     // prepare pen
-    //QPen pen{QColor{255,255,255,20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
     QPen pen{QColor{94, 255, 0, 20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
-    //
+
+    // set pen
     painter.setPen(pen);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // draw:
+    // draw
     for(int64_t i = 0; i < framesRead; i++ ) {
         int64_t j = 2 * i;
         double x = (1.0 + inputBuffer.at(j)) * sizeTracker->cx;

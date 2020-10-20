@@ -36,6 +36,9 @@ public:
     bool getPaused() const;
     void setPaused(bool value);
 
+    int64_t getTotalFrames() const;
+    void setTotalFrames(const int64_t &value);
+
 public slots:
     void returnToStart();
     void gotoPosition(int64_t milliSeconds);
@@ -59,6 +62,8 @@ private:
     int64_t startFrame{0};
     int64_t currentFrame{0ll};
     int64_t maxFramesToRead{0};
+    int64_t totalFrames{0ll};
+    bool fileLoaded{false};
     bool paused{true};
 
     void render();

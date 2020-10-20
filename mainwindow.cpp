@@ -19,15 +19,13 @@ MainWindow::MainWindow(QWidget *parent)
     transportDock->setWidget(transportWidget);
     transportDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::BottomDockWidgetArea, transportDock);
+    setWindowTitle("Drag & drop a wave file");
+    setAcceptDrops(true);
+
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
-
-        // qDebug() << scopeWidget->loadSoundFile("/home/judd/IQ/WFM/12-03-39_105500kHz.wav");
-        // qDebug() << scopeWidget->loadSoundFile("/home/judd/IQ/WFM/21-20-26_90700kHz.wav");
-
     connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
     connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
     connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
-
     connect(this, &MainWindow::fileDrop, [this, scopeWidget, transportWidget](const QString& path){
         auto loadResult = scopeWidget->loadSoundFile(path);
         if (loadResult.first) {
@@ -35,9 +33,6 @@ MainWindow::MainWindow(QWidget *parent)
             setWindowTitle(path);
         }
     });
-
-    setWindowTitle("Drag & drop a wave file");
-    setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
@@ -47,10 +42,8 @@ MainWindow::~MainWindow()
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     auto mimeData = event->mimeData();
-
     if(mimeData->hasFormat("text/plain")) {
         QUrl url{mimeData->text()};
-        qDebug() << url.path();
         event->acceptProposedAction();
     }
 }
