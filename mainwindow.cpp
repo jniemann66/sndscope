@@ -3,6 +3,8 @@
 #include <scopewidget.h>
 #include <QDebug>
 #include <QDockWidget>
+#include <QDropEvent>
+#include <QMimeData>
 
 #include "transportwidget.h"
 
@@ -26,10 +28,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
     connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
 
-    auto loadResult = scopeWidget->loadSoundFile("/home/judd/Music/05 Spirals.wav");
-    if (loadResult.first) {
-        transportWidget->setLength(scopeWidget->getLengthMilliseconds());
-    }
+    connect(this, &MainWindow::fileDrop, [this, scopeWidget, transportWidget](const QString& path){
+        auto loadResult = scopeWidget->loadSoundFile(path);
+        if (loadResult.first) {
+            transportWidget->setLength(scopeWidget->getLengthMilliseconds());
+            setWindowTitle(path);
+        }
+    });
+
+    setWindowTitle("Drag & drop a wave file");
+    setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
@@ -38,10 +46,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    QMainWindow::dragEnterEvent(event);
+    auto mimeData = event->mimeData();
+
+    if(mimeData->hasFormat("text/plain")) {
+        QUrl url{mimeData->text()};
+        qDebug() << url.path();
+        event->acceptProposedAction();
+    }
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    QMainWindow::dropEvent(event);
+    auto mimeData = event->mimeData();
+    if(mimeData->hasFormat("text/plain")) {
+        QUrl url{mimeData->text()};
+        emit fileDrop(url.path());
+    }
 }

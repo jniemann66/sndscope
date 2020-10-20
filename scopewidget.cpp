@@ -47,8 +47,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         samplesPerMillisecond = h->samplerate() / 1000;
         millisecondsPerSample = 1000.0 / h->samplerate();
         maxFramesToRead = inputBuffer.size() / h->channels();
-        currentFrame = 0ll;
-        startFrame = 0ll;
+        returnToStart();
     }
 
     return {h->error() == SF_ERR_NO_ERROR, h->strError()};
