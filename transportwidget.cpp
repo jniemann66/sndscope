@@ -36,6 +36,7 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
     mm->setSegmentStyle(QLCDNumber::Filled);
     ss->setSegmentStyle(QLCDNumber::Filled);
     ms->setSegmentStyle(QLCDNumber::Filled);
+    setButtonsEnabled(false);
 
     playPauseButton->setIcon(QIcon{":/icons/play-solid.png"});
     rtsButton->setIcon(QIcon{":/icons/step-backward-solid.png"});
@@ -124,4 +125,10 @@ void TransportWidget::setLength(int milliseconds)
 int TransportWidget::heightForWidth(int width) const
 {
     return width / 4;
+}
+
+void TransportWidget::setButtonsEnabled(bool value)
+{
+    rtsButton->setEnabled(value);
+    playPauseButton->setEnabled(value);
 }

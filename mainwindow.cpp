@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
     connect(this, &MainWindow::fileDrop, [this, scopeWidget, transportWidget](const QString& path){
         auto loadResult = scopeWidget->loadSoundFile(path);
+        transportWidget->setButtonsEnabled(loadResult.first);
         if (loadResult.first) {
             transportWidget->setLength(scopeWidget->getLengthMilliseconds());
             setWindowTitle(path);
