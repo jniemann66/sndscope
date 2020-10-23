@@ -85,7 +85,7 @@ private:
     double focus;
     int darkenAlpha;
     int beamAlpha;
-    int beamWidth;
+    double beamWidth;
 
     void render();
 signals:

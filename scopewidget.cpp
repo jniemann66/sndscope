@@ -27,6 +27,8 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     pixmap.fill(Qt::black);
     screenWidget->setScaledContents(true);
     darkenTimer.setInterval(1000.0 / 200);
+    setBrightness(32.0);
+    setFocus(50.0);
 
     screenWidget->installEventFilter(sizeTracker);
 
@@ -121,6 +123,7 @@ double ScopeWidget::getFocus() const
 void ScopeWidget::setFocus(double value)
 {
     focus = value;
+    beamWidth = value * 0.01 * 8;
 }
 
 double ScopeWidget::getBrightness() const
@@ -131,7 +134,7 @@ double ScopeWidget::getBrightness() const
 void ScopeWidget::setBrightness(double value)
 {
     brightness = value;
-    beamAlpha = 2.55 * value;
+    beamAlpha = 0.63 * value;
 }
 
 int64_t ScopeWidget::getTotalFrames() const
@@ -156,7 +159,7 @@ void ScopeWidget::render()
     painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 32}});
 
     // prepare pen
-    QPen pen{QColor{94, 255, 0, 20}, 4.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+    QPen pen{QColor{94, 255, 0, beamAlpha}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
     // set pen
     painter.setPen(pen);

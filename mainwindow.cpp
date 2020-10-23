@@ -36,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
 
+    displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
+    displaySettingsWidget->setFocus(scopeWidget->getFocus());
+
     setWindowTitle("Drag & drop a wave file");
     setAcceptDrops(true);
 
@@ -50,6 +53,12 @@ MainWindow::MainWindow(QWidget *parent)
             transportWidget->setLength(scopeWidget->getLengthMilliseconds());
             setWindowTitle(path);
         }
+    });
+    connect(displaySettingsWidget, &DisplaySettingsWidget::brightnessChanged, this, [scopeWidget](double value){
+        scopeWidget->setBrightness(value);
+    });
+    connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
+        scopeWidget->setFocus(value);
     });
 }
 

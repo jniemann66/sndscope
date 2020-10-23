@@ -19,6 +19,8 @@ public:
     void setFocus(double value);
 
 signals:
+    void brightnessChanged(double brightness);
+    void focusChanged(double focus);
 
 protected:
 

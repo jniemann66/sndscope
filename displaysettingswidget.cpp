@@ -25,10 +25,19 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     mainLayout->addStretch();
     setLayout(mainLayout);
 
+
     brightnessSlider->setMaximum(1000);
     focusSlider->setMaximum(1000);
 
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+    connect(brightnessSlider, &QSlider::valueChanged, this, [this](int value){
+        emit brightnessChanged(value * 0.1);
+    });
+
+    connect(focusSlider, &QSlider::valueChanged, this, [this](int value){
+       emit focusChanged((focusSlider->maximum() - value) * 0.1);
+    });
 }
 
 QSize DisplaySettingsWidget::sizeHint() const
@@ -53,5 +62,5 @@ double DisplaySettingsWidget::getFocus() const
 
 void DisplaySettingsWidget::setFocus(double value)
 {
-    focusSlider->setValue(value * 0.01 * focusSlider->maximum());
+    focusSlider->setValue((1.0 - value * 0.01) * focusSlider->maximum());
 }
