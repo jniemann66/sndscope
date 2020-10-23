@@ -21,12 +21,14 @@ unix {
 }
 
 SOURCES += \
+    displaysettingswidget.cpp \
     main.cpp \
     mainwindow.cpp \
     scopewidget.cpp \
     transportwidget.cpp
 
 HEADERS += \
+    displaysettingswidget.h \
     mainwindow.h \
     scopewidget.h \
     transportwidget.h

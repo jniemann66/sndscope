@@ -16,6 +16,7 @@
 #include <QMimeData>
 
 #include "transportwidget.h"
+#include "displaysettingswidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,11 +24,18 @@ MainWindow::MainWindow(QWidget *parent)
     auto scopeWidget = new ScopeWidget(this);
     auto transportDock = new QDockWidget("Transport", this);
     auto transportWidget = new TransportWidget(transportDock);
+    auto displaySettingsDock = new QDockWidget("Display", this);
+    auto displaySettingsWidget = new DisplaySettingsWidget(displaySettingsDock);
 
     setCentralWidget(scopeWidget);
     transportDock->setWidget(transportWidget);
     transportDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(Qt::BottomDockWidgetArea, transportDock);
+
+    displaySettingsDock->setWidget(displaySettingsWidget);
+    displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
+
     setWindowTitle("Drag & drop a wave file");
     setAcceptDrops(true);
 

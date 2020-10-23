@@ -48,6 +48,12 @@ public:
     int64_t getTotalFrames() const;
     void setTotalFrames(const int64_t &value);
 
+    double getBrightness() const;
+    void setBrightness(double value);
+
+    double getFocus() const;
+    void setFocus(double value);
+
 public slots:
     void returnToStart();
     void gotoPosition(int64_t milliSeconds);
@@ -74,6 +80,12 @@ private:
     int64_t totalFrames{0ll};
     bool fileLoaded{false};
     bool paused{true};
+    int screenDrawCounter{0};
+    double brightness;
+    double focus;
+    int darkenAlpha;
+    int beamAlpha;
+    int beamWidth;
 
     void render();
 signals:
