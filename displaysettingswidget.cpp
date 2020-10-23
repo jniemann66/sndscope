@@ -6,8 +6,8 @@
 
 DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 {
-    brightnessSlider = new QSlider(Qt::Vertical);
-    focusSlider = new QSlider(Qt::Vertical);
+    brightnessControl = new QDial;
+    focusControl = new QDial;
 
     auto mainLayout = new QVBoxLayout;
     auto sliderLayout = new QHBoxLayout;
@@ -15,9 +15,9 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     auto focusLayout = new QVBoxLayout;
 
     brightnessLayout->addWidget(new QLabel{"Brightness"});
-    brightnessLayout->addWidget(brightnessSlider);
+    brightnessLayout->addWidget(brightnessControl);
     focusLayout->addWidget(new QLabel{"Focus"});
-    focusLayout->addWidget(focusSlider);
+    focusLayout->addWidget(focusControl);
     sliderLayout->addLayout(brightnessLayout);
     sliderLayout->addLayout(focusLayout);
 
@@ -26,17 +26,19 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     setLayout(mainLayout);
 
 
-    brightnessSlider->setMaximum(1000);
-    focusSlider->setMaximum(1000);
+    brightnessControl->setMaximum(1000);
+    focusControl->setMaximum(1000);
+    brightnessControl->setWrapping(false);
+    focusControl->setWrapping(false);
 
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-    connect(brightnessSlider, &QSlider::valueChanged, this, [this](int value){
+    connect(brightnessControl, &QSlider::valueChanged, this, [this](int value){
         emit brightnessChanged(value * 0.1);
     });
 
-    connect(focusSlider, &QSlider::valueChanged, this, [this](int value){
-       emit focusChanged((focusSlider->maximum() - value) * 0.1);
+    connect(focusControl, &QSlider::valueChanged, this, [this](int value){
+       emit focusChanged((focusControl->maximum() - value) * 0.1);
     });
 }
 
@@ -47,20 +49,20 @@ QSize DisplaySettingsWidget::sizeHint() const
 
 double DisplaySettingsWidget::getBrightness() const
 {
-    return 100.0 * brightnessSlider->value() / brightnessSlider->maximum();
+    return 100.0 * brightnessControl->value() / brightnessControl->maximum();
 }
 
 void DisplaySettingsWidget::setBrightness(double value)
 {
-    brightnessSlider->setValue(value * 0.01 * brightnessSlider->maximum());
+    brightnessControl->setValue(value * 0.01 * brightnessControl->maximum());
 }
 
 double DisplaySettingsWidget::getFocus() const
 {
-    return 100.0 * focusSlider->value() / focusSlider->maximum();
+    return 100.0 * focusControl->value() / focusControl->maximum();
 }
 
 void DisplaySettingsWidget::setFocus(double value)
 {
-    focusSlider->setValue((1.0 - value * 0.01) * focusSlider->maximum());
+    focusControl->setValue((1.0 - value * 0.01) * focusControl->maximum());
 }

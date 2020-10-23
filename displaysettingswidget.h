@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include <QSlider>
+#include <QDial>
 
 class DisplaySettingsWidget : public QWidget
 {
@@ -26,8 +27,8 @@ protected:
 
 
 private:
-    QSlider* brightnessSlider{nullptr};
-    QSlider* focusSlider{nullptr};
+    QDial* brightnessControl{nullptr};
+    QDial* focusControl{nullptr};
 };
 
 #endif // DISPLAYSETTINGSWIDGET_H
