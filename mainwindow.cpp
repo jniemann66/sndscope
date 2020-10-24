@@ -14,6 +14,7 @@
 #include <QDockWidget>
 #include <QDropEvent>
 #include <QMimeData>
+#include <QDir>
 
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
@@ -69,7 +70,7 @@ MainWindow::~MainWindow()
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     auto mimeData = event->mimeData();
-    if(mimeData->hasFormat("text/plain")) {
+	if(mimeData->hasText()) {
         QUrl url{mimeData->text()};
         event->acceptProposedAction();
     }
@@ -78,8 +79,16 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
     auto mimeData = event->mimeData();
-    if(mimeData->hasFormat("text/plain")) {
+	if(mimeData->hasText()) {
         QUrl url{mimeData->text()};
-        emit fileDrop(url.path());
+		QString path = QDir::toNativeSeparators(url.path());
+
+#ifdef Q_OS_WIN
+		if(path.startsWith('\\')) {
+			path.remove(0, 1);
+		}
+#endif
+
+		emit fileDrop(path);
     }
 }

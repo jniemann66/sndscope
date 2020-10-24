@@ -17,6 +17,8 @@
 #include <QElapsedTimer>
 #include <QTime>
 
+#include <memory>
+
 #include <sndfile.hh>
 
 class SizeTracker : public QObject

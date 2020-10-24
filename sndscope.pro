@@ -20,6 +20,20 @@ unix {
     INCLUDEPATH += /usr/include
 }
 
+win32 {
+    LIBSNDFILEPATH = $$PWD/libsndfile-1.0.30-win64
+    message(libsndfile path: $$LIBSNDFILEPATH)
+    LIBS += -L$${LIBSNDFILEPATH}/lib -lsndfile
+    INCLUDEPATH += $${LIBSNDFILEPATH}/include
+
+    #copy libsndfile dll to build folder
+    CONFIG += file_copies
+    COPIES += dlls
+    dlls.files = $$files($${LIBSNDFILEPATH}/bin/sndfile.dll)
+    dlls.path = $$OUT_PWD
+}
+
+
 SOURCES += \
     displaysettingswidget.cpp \
     main.cpp \
