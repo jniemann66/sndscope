@@ -156,7 +156,12 @@ void ScopeWidget::render()
     QPainter painter(&pixmap);
 
     // darken:
-	painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
+#ifdef Q_OS_WIN
+    // todo: resolve overloads of pixmap() (prior to 5.15 returns by-pointer and the other by-value)
+    painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
+#else
+    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 32}});
+#endif
 
     // prepare pen
     QPen pen{QColor{94, 255, 0, beamAlpha}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
