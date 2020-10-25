@@ -156,11 +156,12 @@ void ScopeWidget::render()
     QPainter painter(&pixmap);
 
     // darken:
-#ifdef Q_OS_WIN
-    // todo: resolve overloads of pixmap() (prior to 5.15 returns by-pointer and the other by-value)
-    painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
-#else
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    // since 5.15, use the return-by-value version of pixmap()
     painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 32}});
+#else
+    // prior to 5.15, use the return-by-pointer version or pixmap()
+    painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
 #endif
 
     // prepare pen
