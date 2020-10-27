@@ -88,6 +88,7 @@ private:
     int darkenAlpha;
     int beamAlpha;
     double beamWidth;
+    double beamIntensity;
 
     void render();
 signals:
