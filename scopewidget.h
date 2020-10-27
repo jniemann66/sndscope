@@ -91,6 +91,7 @@ private:
     double beamIntensity;
 
     void render();
+    void calcBeamAlpha();
 signals:
 
 };

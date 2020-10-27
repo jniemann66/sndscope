@@ -125,7 +125,7 @@ void ScopeWidget::setFocus(double value)
     focus = value;
     beamWidth = qMax(0.5, value * 0.01 * 8);
     beamIntensity = 8.0 / (beamWidth * beamWidth);
-    beamAlpha = qMin(0.63 * brightness * beamIntensity, 128.0);
+    calcBeamAlpha();
 }
 
 double ScopeWidget::getBrightness() const
@@ -136,7 +136,12 @@ double ScopeWidget::getBrightness() const
 void ScopeWidget::setBrightness(double value)
 {
     brightness = value;
-    beamAlpha = qMin(0.63 * brightness * beamIntensity, 128.0);
+    calcBeamAlpha();
+}
+
+void ScopeWidget::calcBeamAlpha()
+{
+    beamAlpha = qMin(0.63 * brightness * beamIntensity, 255.0);
 }
 
 int64_t ScopeWidget::getTotalFrames() const
