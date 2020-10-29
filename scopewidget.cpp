@@ -115,6 +115,16 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
     }
 }
 
+QRgb ScopeWidget::getPhosphorColor() const
+{
+    return phosphorColor;
+}
+
+void ScopeWidget::setPhosphorColor(const QRgb &value)
+{
+    phosphorColor = value;
+}
+
 double ScopeWidget::getFocus() const
 {
     return focus;
@@ -172,7 +182,10 @@ void ScopeWidget::render()
 #endif
 
     // prepare pen
-    QPen pen{QColor{94, 255, 0, beamAlpha}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+    //qDebug() << beamAlpha;
+    QColor c{phosphorColor};
+    c.setAlpha(beamAlpha);
+    QPen pen{c, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
     // set pen
     painter.setPen(pen);

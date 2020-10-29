@@ -16,6 +16,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QTime>
+#include <QColor>
 
 #include <memory>
 
@@ -56,6 +57,9 @@ public:
     double getFocus() const;
     void setFocus(double value);
 
+    QRgb getPhosphorColor() const;
+    void setPhosphorColor(const QRgb &value);
+
 public slots:
     void returnToStart();
     void gotoPosition(int64_t milliSeconds);
@@ -87,11 +91,13 @@ private:
     double focus;
     int darkenAlpha;
     int beamAlpha;
+    QRgb phosphorColor{0xff5eff00};
     double beamWidth;
     double beamIntensity;
 
     void render();
     void calcBeamAlpha();
+
 signals:
 
 };
