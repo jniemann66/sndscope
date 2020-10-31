@@ -15,6 +15,7 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QDebug>
+#include <cmath>
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 {
@@ -26,13 +27,14 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     screenWidget->setPixmap(pixmap);
     pixmap.fill(Qt::black);
     screenWidget->setScaledContents(true);
-    darkenTimer.setInterval(1000.0 / 200);
+    plotTimer.setInterval(1000.0 / 200);
     setBrightness(66.0);
     setFocus(50.0);
+    setPersistence(32);
 
     screenWidget->installEventFilter(sizeTracker);
 
-    connect(&darkenTimer, &QTimer::timeout, this, [this]{
+    connect(&plotTimer, &QTimer::timeout, this, [this]{
         if(!paused) {
             render();
             screenDrawCounter++;
@@ -44,7 +46,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
         }
     });
 
-    darkenTimer.start();
+    plotTimer.start();
     screenLayout->addStretch();
     screenLayout->addWidget(screenWidget);
     screenLayout->addStretch();
@@ -115,6 +117,19 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
     }
 }
 
+double ScopeWidget::getPersistence() const
+{
+    return persistence;
+}
+
+void ScopeWidget::setPersistence(double value)
+{
+    persistence = value;
+    constexpr double decayTarget = 0.1; // fraction of original brightness (10%)
+    double n = std::max(0.01, value / plotTimer.interval()); // number of frames to reach decayTarget (can't be zero)
+    darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
+}
+
 QRgb ScopeWidget::getPhosphorColor() const
 {
     return phosphorColor;
@@ -175,7 +190,7 @@ void ScopeWidget::render()
     // darken:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
     // since 5.15, use the return-by-value version of pixmap()
-    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, 32}});
+    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, darkenAlpha}});
 #else
     // prior to 5.15, use the return-by-pointer version or pixmap()
     painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});

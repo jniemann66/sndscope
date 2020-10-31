@@ -60,6 +60,9 @@ public:
     QRgb getPhosphorColor() const;
     void setPhosphorColor(const QRgb &value);
 
+    double getPersistence() const;
+    void setPersistence(double value);
+
 public slots:
     void returnToStart();
     void gotoPosition(int64_t milliSeconds);
@@ -76,7 +79,7 @@ private:
     SizeTracker* sizeTracker;
 
     QPixmap pixmap;
-    QTimer darkenTimer;
+    QTimer plotTimer;
     QElapsedTimer elapsedTimer;
     int samplesPerMillisecond{0};
     double millisecondsPerSample{0.0};
@@ -92,6 +95,7 @@ private:
     int darkenAlpha;
     int beamAlpha;
     QRgb phosphorColor{0xff5eff00};
+    double persistence;
     double beamWidth;
     double beamIntensity;
 
