@@ -19,9 +19,13 @@ public:
     double getFocus() const;
     void setFocus(double value);
 
+    int getPersistence() const;
+    void setPersistence(int value);
+
 signals:
     void brightnessChanged(double brightness);
     void focusChanged(double focus);
+    void persistenceChanged(int persistence);
 
 protected:
 
@@ -29,6 +33,7 @@ protected:
 private:
     QDial* brightnessControl{nullptr};
     QDial* focusControl{nullptr};
+    QDial* persistenceControl{nullptr};
 };
 
 #endif // DISPLAYSETTINGSWIDGET_H

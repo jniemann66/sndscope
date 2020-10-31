@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
     displaySettingsWidget->setFocus(scopeWidget->getFocus());
+    displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
 
     setWindowTitle("Drag & drop a wave file");
     setAcceptDrops(true);
@@ -60,6 +61,9 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
         scopeWidget->setFocus(value);
+    });
+    connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
+       scopeWidget->setPersistence(value);
     });
 }
 
