@@ -5,6 +5,7 @@
 
 #include <QSlider>
 #include <QDial>
+#include <QComboBox>
 
 class DisplaySettingsWidget : public QWidget
 {
@@ -33,6 +34,7 @@ protected:
 private:
     QDial* brightnessControl{nullptr};
     QDial* focusControl{nullptr};
+    QComboBox* phosphorSelectControl{nullptr};
     QDial* persistenceControl{nullptr};
 };
 

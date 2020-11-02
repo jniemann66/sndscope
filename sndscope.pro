@@ -38,12 +38,14 @@ SOURCES += \
     displaysettingswidget.cpp \
     main.cpp \
     mainwindow.cpp \
+    phosphor.cpp \
     scopewidget.cpp \
     transportwidget.cpp
 
 HEADERS += \
     displaysettingswidget.h \
     mainwindow.h \
+    phosphor.h \
     scopewidget.h \
     transportwidget.h
 

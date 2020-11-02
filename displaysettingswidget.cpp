@@ -8,6 +8,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 {
     brightnessControl = new QDial;
     focusControl = new QDial;
+    phosphorSelectControl = new QComboBox;
     persistenceControl = new QDial;
 
     auto mainLayout = new QVBoxLayout;
@@ -15,18 +16,22 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     auto controlLayout2 = new QHBoxLayout;
     auto brightnessLayout = new QVBoxLayout;
     auto focusLayout = new QVBoxLayout;
+    auto phosphorSelectLayout = new QVBoxLayout;
     auto persistenceLayout = new QVBoxLayout;
 
     brightnessLayout->addWidget(new QLabel{"Brightness"});
     brightnessLayout->addWidget(brightnessControl);
     focusLayout->addWidget(new QLabel{"Focus"});
     focusLayout->addWidget(focusControl);
+    phosphorSelectLayout->addWidget(new QLabel("Phosphor"));
+    phosphorSelectLayout->addWidget(phosphorSelectControl);
+    phosphorSelectLayout->setAlignment(Qt::AlignTop);
     persistenceLayout->addWidget(new QLabel{"Persistence"});
     persistenceLayout->addWidget(persistenceControl);
     controlLayout1->addLayout(brightnessLayout);
     controlLayout1->addLayout(focusLayout);
 
-    controlLayout2->addStretch();
+    controlLayout2->addLayout(phosphorSelectLayout);
     controlLayout2->addLayout(persistenceLayout);
 
     mainLayout->addLayout(controlLayout1);
