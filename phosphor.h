@@ -7,7 +7,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-struct Layer
+struct PhosphorLayer
 {
     QColor color;
     double persistence;
@@ -17,7 +17,7 @@ struct Phosphor
 {
 public:
     QString name;
-    QVector<Layer> layers;
+    QVector<PhosphorLayer> layers;
 
     void fromJson(const QJsonObject& o);
     QJsonObject toJson() const;
