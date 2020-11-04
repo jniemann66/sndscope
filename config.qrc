@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>phosphors.json</file>
+    </qresource>
+</RCC>

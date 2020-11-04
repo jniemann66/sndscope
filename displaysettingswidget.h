@@ -36,6 +36,8 @@ private:
     QDial* focusControl{nullptr};
     QComboBox* phosphorSelectControl{nullptr};
     QDial* persistenceControl{nullptr};
+
+    void loadPhosphors(const QString &filename);
 };
 
 #endif // DISPLAYSETTINGSWIDGET_H

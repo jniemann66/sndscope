@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QFile>
 
 DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -95,4 +96,10 @@ int DisplaySettingsWidget::getPersistence() const
 void DisplaySettingsWidget::setPersistence(int value)
 {
     persistenceControl->setValue(value);
+}
+
+void DisplaySettingsWidget::loadPhosphors(const QString& filename)
+{
+    QFile f(filename);
+
 }

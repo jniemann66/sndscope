@@ -1,0 +1,15 @@
+{
+   "phosphors":[
+      {
+         "name":"P31",
+         "layers":[
+            {
+               "red":94,
+               "green":255,
+               "blue":0,
+               "persistence":30
+            }
+         ]
+      }
+   ]
+}
