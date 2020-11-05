@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
        if(colors.count() > 0) {
-            scopeWidget->setPhosphorColor(colors.at(0).rgb());
+            scopeWidget->setPhosphorColor(colors.at(0).rgba());
        }
     });
 

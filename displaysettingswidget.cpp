@@ -70,7 +70,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
            if(phosphor.layers.count() > 0) {
                phosphorColor.setRed(phosphor.layers.at(0).color.red());
                phosphorColor.setGreen(phosphor.layers.at(0).color.green());
-               phosphorColor.setBlue(phosphor.layers.at(0).color.red());
+               phosphorColor.setBlue(phosphor.layers.at(0).color.blue());
                emit phosphorColorChanged({phosphorColor});
                emit persistenceChanged(phosphor.layers.at(0).persistence);
            }
