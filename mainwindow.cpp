@@ -65,6 +65,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
        scopeWidget->setPersistence(value);
     });
+    connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
+       if(colors.count() > 0) {
+            scopeWidget->setPhosphorColor(colors.at(0).rgb());
+       }
+    });
+
+
 }
 
 MainWindow::~MainWindow()

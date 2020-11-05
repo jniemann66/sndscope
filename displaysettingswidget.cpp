@@ -61,6 +61,31 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     connect(persistenceControl, &QDial::valueChanged, this, [this](int value){
        emit persistenceChanged(value);
     });
+
+    connect(phosphorSelectControl, &QComboBox::activated, this, [this]{
+       QString name = phosphorSelectControl->currentText();
+       if(phosphors.contains(name)) {
+           Phosphor phosphor = phosphors.value(name);
+           QColor phosphorColor;
+           if(phosphor.layers.count() > 0) {
+               phosphorColor.setRed(phosphor.layers.at(0).color.red());
+               phosphorColor.setGreen(phosphor.layers.at(0).color.green());
+               phosphorColor.setBlue(phosphor.layers.at(0).color.red());
+               emit phosphorColorChanged({phosphorColor});
+               emit persistenceChanged(phosphor.layers.at(0).persistence);
+           }
+
+       }
+    });
+
+    auto _r  = loadPhosphors(":/phosphors.json");
+    if(_r.first) {
+        phosphorSelectControl->clear();
+        for(const QString& phosphorName : phosphors.keys()) {
+            phosphorSelectControl->addItem(phosphorName);
+        }
+    }
+
 }
 
 QSize DisplaySettingsWidget::sizeHint() const
@@ -98,8 +123,30 @@ void DisplaySettingsWidget::setPersistence(int value)
     persistenceControl->setValue(value);
 }
 
-void DisplaySettingsWidget::loadPhosphors(const QString& filename)
+QPair<bool, QString> DisplaySettingsWidget::loadPhosphors(const QString& filename)
 {
     QFile f(filename);
+    if(f.open(QFile::ReadOnly)) {
+        QJsonParseError e;
+        auto doc = QJsonDocument::fromJson(f.readAll(), &e);
+        if(e.error != QJsonParseError::NoError) {
+            return {false, e.errorString()};
+        }
+        phosphors.clear();
+        QJsonObject o = doc.object();
+        if(o.value("phosphors").isArray()) {
+            auto a = o.value("phosphors").toArray();
+            for(int i = 0; i < a.count(); i++) {
+                if(a.at(i).isObject()) {
+                    Phosphor phosphor;
+                    phosphor.fromJson(a.at(i).toObject());
+                    phosphors.insert(phosphor.name, phosphor);
+                }
+            }
+            return {!phosphors.isEmpty(), ""};
+        }
+    }
+
+    return {false, QString{"Couldn't open '%1'"}.arg(filename)};
 
 }

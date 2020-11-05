@@ -7,6 +7,8 @@
 #include <QDial>
 #include <QComboBox>
 
+#include "phosphor.h"
+
 class DisplaySettingsWidget : public QWidget
 {
     Q_OBJECT
@@ -26,6 +28,7 @@ public:
 signals:
     void brightnessChanged(double brightness);
     void focusChanged(double focus);
+    void phosphorColorChanged(QVector<QColor>);
     void persistenceChanged(int persistence);
 
 protected:
@@ -36,8 +39,9 @@ private:
     QDial* focusControl{nullptr};
     QComboBox* phosphorSelectControl{nullptr};
     QDial* persistenceControl{nullptr};
+    QMap<QString, Phosphor> phosphors;
 
-    void loadPhosphors(const QString &filename);
+    QPair<bool, QString> loadPhosphors(const QString &filename);
 };
 
 #endif // DISPLAYSETTINGSWIDGET_H

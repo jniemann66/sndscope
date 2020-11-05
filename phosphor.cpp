@@ -17,6 +17,7 @@ void Phosphor::fromJson(const QJsonObject &o)
                 layer.color.setRgb(94, 255, 0);
                 layer.persistence = 20;
             }
+            layers.append(layer);
         }
     }
 }
