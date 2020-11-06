@@ -71,10 +71,10 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
                phosphorColor.setRed(phosphor.layers.at(0).color.red());
                phosphorColor.setGreen(phosphor.layers.at(0).color.green());
                phosphorColor.setBlue(phosphor.layers.at(0).color.blue());
+               setPersistence(phosphor.layers.at(0).persistence);
                emit phosphorColorChanged({phosphorColor});
                emit persistenceChanged(phosphor.layers.at(0).persistence);
            }
-
        }
     });
 
@@ -84,6 +84,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
         for(const QString& phosphorName : phosphors.keys()) {
             phosphorSelectControl->addItem(phosphorName);
         }
+        phosphorSelectControl->setCurrentText("P31");
     }
 
 }
