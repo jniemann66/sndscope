@@ -126,8 +126,15 @@ void ScopeWidget::setPersistence(double value)
 {
     persistence = value;
     constexpr double decayTarget = 0.1; // fraction of original brightness (10%)
-    double n = std::max(0.01, value / plotTimer.interval()); // number of frames to reach decayTarget (can't be zero)
-    darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
+    constexpr int minDarkenAlpha = 32;
+    darkenNthFrame = 0;
+    do {
+        ++darkenNthFrame;
+        double n = std::max(0.01, value / plotTimer.interval()) / darkenNthFrame; // number of frames to reach decayTarget (can't be zero)
+        darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
+
+    } while (darkenAlpha < minDarkenAlpha);
+    darkenCooldownCounter = darkenNthFrame;
 }
 
 QRgb ScopeWidget::getPhosphorColor() const
@@ -187,14 +194,18 @@ void ScopeWidget::render()
 
     QPainter painter(&pixmap);
 
-    // darken:
+    if(--darkenCooldownCounter == 0) {
+
+        // darken:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-    // since 5.15, use the return-by-value version of pixmap()
-    painter.fillRect(screenWidget->pixmap().rect(), {QColor{0, 0, 0, darkenAlpha}});
+        // since 5.15, use the return-by-value version of pixmap()
+        painter.fillRect(screenWidget->pixmap().rect(), {QColor{20, 20, 20, darkenAlpha}});
 #else
-    // prior to 5.15, use the return-by-pointer version or pixmap()
-    painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
+        // prior to 5.15, use the return-by-pointer version or pixmap()
+        painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
 #endif
+        darkenCooldownCounter = darkenNthFrame;
+    }
 
     // prepare pen
     //qDebug() << beamAlpha;

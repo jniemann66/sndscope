@@ -93,6 +93,8 @@ private:
     double brightness;
     double focus;
     int darkenAlpha;
+    int darkenNthFrame{1};
+    int darkenCooldownCounter{1};
     int beamAlpha;
     QRgb phosphorColor{0xff5eff00};
     double persistence;
