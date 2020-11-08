@@ -6,8 +6,19 @@
                 {
                     "red":51,
                     "green":255,
-                    "blue":51,
+                    "blue":0,
                     "persistence":95
+                }
+            ]
+        },
+        {
+            "name":"P2",
+            "layers":[
+                {
+                    "red":20,
+                    "green":255,
+                    "blue":127,
+                    "persistence":220
                 }
             ]
         },
@@ -16,7 +27,7 @@
             "layers":[
                 {
                     "red":0,
-                    "green":0,
+                    "green":20,
                     "blue":255,
                     "persistence":20
                 }

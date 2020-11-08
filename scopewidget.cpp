@@ -125,7 +125,9 @@ double ScopeWidget::getPersistence() const
 void ScopeWidget::setPersistence(double value)
 {
     persistence = value;
-    constexpr double decayTarget = 0.1; // fraction of original brightness (10%)
+    // define fraction of original brightness (10%)
+    constexpr double decayTarget = 0.1;
+    // set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
     constexpr int minDarkenAlpha = 32;
     darkenNthFrame = 0;
     do {
