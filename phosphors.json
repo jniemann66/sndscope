@@ -23,6 +23,28 @@
             ]
         },
         {
+            "name":"P3",
+            "layers":[
+                {
+                    "red":255,
+                    "green":176,
+                    "blue":0,
+                    "persistence":30
+                }
+            ]
+        },
+        {
+            "name":"P4",
+            "layers":[
+                {
+                    "red":255,
+                    "green":255,
+                    "blue":255,
+                    "persistence":10
+                }
+            ]
+        },
+        {
             "name":"P11",
             "layers":[
                 {
