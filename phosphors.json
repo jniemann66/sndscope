@@ -40,6 +40,23 @@
             ]
         },
         {
+            "name":"Firegaze",
+            "layers":[
+                {
+                    "red":255,
+                    "green":176,
+                    "blue":0,
+                    "persistence":200
+                },
+                {
+                    "red":96,
+                    "green":96,
+                    "blue":0,
+                    "persistence":200
+                }
+            ]
+        },
+        {
             "name":"P4",
             "layers":[
                 {
@@ -60,8 +77,8 @@
                     "persistence":1000
                 },
                 {
-                    "red":70,
-                    "green":70,
+                    "red":85,
+                    "green":85,
                     "blue":0,
                     "persistence":1000
                 }

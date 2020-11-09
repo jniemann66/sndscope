@@ -100,7 +100,7 @@ private:
     int darkenNthFrame{1};
     int darkenCooldownCounter{1};
     int beamAlpha;
-    QRgb phosphorColor{0xff5eff00};
+    QRgb phosphorColor{0xff3eff6f};
     QColor darkencolor{0, 0, 0, 0};
     bool multiColor{false};
     QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};

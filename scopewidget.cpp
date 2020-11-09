@@ -216,22 +216,21 @@ void ScopeWidget::render()
 
     if(--darkenCooldownCounter == 0) {
 
-        QColor c{darkencolor};
-        c.setAlpha(darkenAlpha);
+        QColor d{darkencolor};
+        d.setAlpha(darkenAlpha);
 
         // darken:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         // since 5.15, use the return-by-value version of pixmap()
-        painter.fillRect(screenWidget->pixmap().rect(), c);
+        painter.fillRect(screenWidget->pixmap().rect(), d);
 #else
         // prior to 5.15, use the return-by-pointer version or pixmap()
-        painter.fillRect(screenWidget->pixmap()->rect(), c);
+        painter.fillRect(screenWidget->pixmap()->rect(), d);
 #endif
         darkenCooldownCounter = darkenNthFrame;
     }
 
     // prepare pen
-    //qDebug() << beamAlpha;
     QColor c{phosphorColor};
     c.setAlpha(beamAlpha);
     QPen pen{c, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
