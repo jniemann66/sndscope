@@ -117,6 +117,23 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
     }
 }
 
+bool ScopeWidget::getMultiColor() const
+{
+    return multiColor;
+}
+
+void ScopeWidget::setMultiColor(bool value, const QColor& color)
+{
+    multiColor = value;
+    if(multiColor) {
+        compositionMode = QPainter::CompositionMode_HardLight;
+        darkencolor = color;
+    } else {
+        compositionMode = QPainter::CompositionMode_SourceOver;
+        darkencolor = QColor{0, 0, 0, 0};
+    }
+}
+
 double ScopeWidget::getPersistence() const
 {
     return persistence;
@@ -195,16 +212,20 @@ void ScopeWidget::render()
     currentFrame += framesRead;
 
     QPainter painter(&pixmap);
+    painter.setCompositionMode(compositionMode);
 
     if(--darkenCooldownCounter == 0) {
+
+        QColor c{darkencolor};
+        c.setAlpha(darkenAlpha);
 
         // darken:
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         // since 5.15, use the return-by-value version of pixmap()
-        painter.fillRect(screenWidget->pixmap().rect(), {QColor{20, 20, 20, darkenAlpha}});
+        painter.fillRect(screenWidget->pixmap().rect(), c);
 #else
         // prior to 5.15, use the return-by-pointer version or pixmap()
-        painter.fillRect(screenWidget->pixmap()->rect(), {QColor{0, 0, 0, 32}});
+        painter.fillRect(screenWidget->pixmap()->rect(), c);
 #endif
         darkenCooldownCounter = darkenNthFrame;
     }

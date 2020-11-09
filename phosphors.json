@@ -4,7 +4,7 @@
             "name":"P1",
             "layers":[
                 {
-                    "red":51,
+                    "red":0,
                     "green":255,
                     "blue":0,
                     "persistence":95
@@ -17,7 +17,13 @@
                 {
                     "red":20,
                     "green":255,
-                    "blue":127,
+                    "blue":192,
+                    "persistence":220
+                },
+                {
+                    "red":0,
+                    "green":32,
+                    "blue":0,
                     "persistence":220
                 }
             ]
@@ -29,7 +35,7 @@
                     "red":255,
                     "green":176,
                     "blue":0,
-                    "persistence":30
+                    "persistence":130
                 }
             ]
         },
@@ -37,10 +43,27 @@
             "name":"P4",
             "layers":[
                 {
-                    "red":255,
-                    "green":255,
+                    "red":246,
+                    "green":250,
                     "blue":255,
                     "persistence":10
+                }
+            ]
+        },
+        {
+            "name":"P7",
+            "layers":[
+                {
+                    "red":160,
+                    "green":160,
+                    "blue":255,
+                    "persistence":1000
+                },
+                {
+                    "red":70,
+                    "green":70,
+                    "blue":0,
+                    "persistence":1000
                 }
             ]
         },
@@ -49,7 +72,7 @@
             "layers":[
                 {
                     "red":0,
-                    "green":20,
+                    "green":56,
                     "blue":255,
                     "persistence":20
                 }
@@ -59,9 +82,9 @@
             "name":"P31",
             "layers":[
                 {
-                    "red":94,
+                    "red":62,
                     "green":255,
-                    "blue":0,
+                    "blue":111,
                     "persistence":32
                 }
             ]

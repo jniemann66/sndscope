@@ -70,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
             scopeWidget->setPhosphorColor(colors.at(0).rgba());
        }
     });
+    connect(displaySettingsWidget, &DisplaySettingsWidget::multiColorPhosphorChanged, this, [scopeWidget](bool multi, const QColor& altColor){
+       scopeWidget->setMultiColor(multi, altColor);
+    });
 
 
 }

@@ -17,6 +17,7 @@
 #include <QElapsedTimer>
 #include <QTime>
 #include <QColor>
+#include <QPainter>
 
 #include <memory>
 
@@ -63,6 +64,9 @@ public:
     double getPersistence() const;
     void setPersistence(double value);
 
+    bool getMultiColor() const;
+    void setMultiColor(bool value, const QColor &color);
+
 public slots:
     void returnToStart();
     void gotoPosition(int64_t milliSeconds);
@@ -97,6 +101,9 @@ private:
     int darkenCooldownCounter{1};
     int beamAlpha;
     QRgb phosphorColor{0xff5eff00};
+    QColor darkencolor{0, 0, 0, 0};
+    bool multiColor{false};
+    QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
     double persistence;
     double beamWidth;
     double beamIntensity;

@@ -66,14 +66,22 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
        QString name = phosphorSelectControl->currentText();
        if(phosphors.contains(name)) {
            Phosphor phosphor = phosphors.value(name);
-           QColor phosphorColor;
-           if(phosphor.layers.count() > 0) {
-               phosphorColor.setRed(phosphor.layers.at(0).color.red());
-               phosphorColor.setGreen(phosphor.layers.at(0).color.green());
-               phosphorColor.setBlue(phosphor.layers.at(0).color.blue());
+           QVector<QColor> phosphorColors;
+           for (int i = 0; i < phosphor.layers.count(); i++) {
+               const auto& c = phosphor.layers.at(i).color;
+               QColor phosphorColor{c.red(), c.green(), c.blue(), 255};
+               phosphorColors.append(c);
+           }
+
+           if(phosphorColors.count() > 0) {
                setPersistence(phosphor.layers.at(0).persistence);
-               emit phosphorColorChanged({phosphorColor});
+               emit phosphorColorChanged({phosphorColors.at(0)});
                emit persistenceChanged(phosphor.layers.at(0).persistence);
+               if(phosphorColors.count() > 1) {
+                   emit multiColorPhosphorChanged(true, phosphorColors.at(1));
+               } else {
+                   emit multiColorPhosphorChanged(false, QColor{0, 0, 0, 0});
+               }
            }
        }
     });
