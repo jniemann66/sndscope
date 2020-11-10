@@ -117,20 +117,30 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
     }
 }
 
+QColor ScopeWidget::getBackgroundColor() const
+{
+    return backgroundColor;
+}
+
+void ScopeWidget::setBackgroundColor(const QColor &value)
+{
+    backgroundColor = value;
+}
+
 bool ScopeWidget::getMultiColor() const
 {
     return multiColor;
 }
 
-void ScopeWidget::setMultiColor(bool value, const QColor& color)
+void ScopeWidget::setMultiColor(bool value, const QColor& altColor)
 {
     multiColor = value;
     if(multiColor) {
         compositionMode = QPainter::CompositionMode_HardLight;
-        darkencolor = color;
+        darkencolor = altColor;
     } else {
         compositionMode = QPainter::CompositionMode_SourceOver;
-        darkencolor = QColor{0, 0, 0, 0};
+        darkencolor = backgroundColor;
     }
 }
 

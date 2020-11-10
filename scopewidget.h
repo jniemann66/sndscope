@@ -65,7 +65,10 @@ public:
     void setPersistence(double value);
 
     bool getMultiColor() const;
-    void setMultiColor(bool value, const QColor &color);
+    void setMultiColor(bool value, const QColor& altColor);
+
+    QColor getBackgroundColor() const;
+    void setBackgroundColor(const QColor &value);
 
 public slots:
     void returnToStart();
@@ -102,11 +105,13 @@ private:
     int beamAlpha;
     QRgb phosphorColor{0xff3eff6f};
     QColor darkencolor{0, 0, 0, 0};
+    QColor backgroundColor{0, 0, 0, 0};
     bool multiColor{false};
     QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
     double persistence;
     double beamWidth;
     double beamIntensity;
+
 
     void render();
     void calcBeamAlpha();
