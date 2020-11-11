@@ -202,7 +202,7 @@ void ScopeWidget::setBrightness(double value)
 
 void ScopeWidget::calcBeamAlpha()
 {
-    beamAlpha = qMin(0.63 * brightness * beamIntensity, 255.0);
+    beamAlpha = qMin(1.27 * brightness * beamIntensity, 255.0);
 }
 
 int64_t ScopeWidget::getTotalFrames() const

@@ -18,13 +18,13 @@
                     "red":20,
                     "green":255,
                     "blue":192,
-                    "persistence":220
+                    "persistence":440
                 },
                 {
                     "red":0,
                     "green":32,
                     "blue":0,
-                    "persistence":220
+                    "persistence":440
                 }
             ]
         },
@@ -105,6 +105,18 @@
                     "persistence":32
                 }
             ]
+        },
+        {
+            "name":"P5",
+            "layers":[
+                {
+                    "red":0,
+                    "green":112,
+                    "blue":255,
+                    "persistence":20
+                }
+            ]
         }
+
     ]
 }
