@@ -5,7 +5,7 @@
 # You should have received a copy of GNU Lesser General Public License v2.1
 # with this file. If not, please refer to: https://github.com/jniemann66/sndscope
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -35,6 +35,7 @@ win32 {
 
 
 SOURCES += \
+    audiooutput.cpp \
     displaysettingswidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
     transportwidget.cpp
 
 HEADERS += \
+    audiooutput.h \
     displaysettingswidget.h \
     mainwindow.h \
     phosphor.h \
