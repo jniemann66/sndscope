@@ -23,6 +23,8 @@
 
 #include <sndfile.hh>
 
+#include "audiooutput.h"
+
 class SizeTracker : public QObject
 {
     Q_OBJECT
@@ -84,7 +86,8 @@ private:
     std::unique_ptr<SndfileHandle> h;
     QVector<double> inputBuffer;
     SizeTracker* sizeTracker;
-
+    AudioOutputQueue audioOutputQueue;
+    QAudioFormat audioFormat;
     QPixmap pixmap;
     QTimer plotTimer;
     QElapsedTimer elapsedTimer;

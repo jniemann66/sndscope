@@ -13,8 +13,10 @@ public:
     explicit AudioOutputQueue(QObject *parent = nullptr);
     void setConfiguration(const QAudioDeviceInfo &audioDevice, const QAudioFormat &format = QAudioFormat());
     void addAudio(const QByteArray& buf);
+    void addAudio(const QVector<double> &buf);
     void play();
     void stop();
+
 
 signals:
 

@@ -61,6 +61,21 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     h.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
     fileLoaded = (h->error() == SF_ERR_NO_ERROR);
     if(fileLoaded) {
+
+        // set up audio output, based on sounfile properties
+        audioFormat.setSampleRate(h->samplerate());
+        audioFormat.setChannelCount(h->channels());
+        audioFormat.setSampleSize(32);
+        audioFormat.setCodec("audio/pcm");
+        audioFormat.setByteOrder(QAudioFormat::LittleEndian);
+        audioFormat.setSampleType(QAudioFormat::Float);
+        auto audioDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
+        audioOutputQueue.setConfiguration(audioDeviceInfo, audioFormat);
+        qDebug() << audioDeviceInfo.deviceName();
+
+//        audioOutputQueue.play();
+
+        // set up rendering parameters, based on soundfile properties
         inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
         samplesPerMillisecond = h->samplerate() / 1000;
         millisecondsPerSample = 1000.0 / h->samplerate();
@@ -248,6 +263,9 @@ void ScopeWidget::render()
     // set pen
     painter.setPen(pen);
     painter.setRenderHint(QPainter::Antialiasing);
+
+    // send audio
+    //audioOutputQueue.addAudio(inputBuffer);
 
     // draw
     for(int64_t i = 0; i < framesRead; i++ ) {
