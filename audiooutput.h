@@ -16,6 +16,7 @@ public:
     void addAudio(const QVector<double> &buf);
     void play();
     void stop();
+    int64_t size() const;
 
 
 signals:

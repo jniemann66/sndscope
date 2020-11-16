@@ -72,8 +72,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         auto audioDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
         audioOutputQueue.setConfiguration(audioDeviceInfo, audioFormat);
         qDebug() << audioDeviceInfo.deviceName();
-
-//        audioOutputQueue.play();
+        //audioOutputQueue.play();
 
         // set up rendering parameters, based on soundfile properties
         inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
@@ -241,6 +240,7 @@ void ScopeWidget::render()
 
     if(--darkenCooldownCounter == 0) {
 
+        //qDebug() << audioOutputQueue.size();
         QColor d{darkencolor};
         d.setAlpha(darkenAlpha);
 
@@ -268,10 +268,9 @@ void ScopeWidget::render()
     //audioOutputQueue.addAudio(inputBuffer);
 
     // draw
-    for(int64_t i = 0; i < framesRead; i++ ) {
-        int64_t j = 2 * i;
-        double x = (1.0 + inputBuffer.at(j)) * sizeTracker->cx;
-        double y = (1.0 - inputBuffer.at(j + 1)) * sizeTracker->cx;
+    for(int64_t i = 0; i < 2 * framesRead; i+= 2 ) {
+        double x = (1.0 + inputBuffer.at(i)) * sizeTracker->cx;
+        double y = (1.0 - inputBuffer.at(i + 1)) * sizeTracker->cx;
         painter.drawPoint(x,y);
     }
 }

@@ -11,6 +11,7 @@ void AudioOutputQueue::setConfiguration(const QAudioDeviceInfo& audioDevice, con
     _output->setVolume(1.0);
     qDebug() << _output->state() << _output->error();
 
+
 }
 
 void AudioOutputQueue::addAudio(const QByteArray &buf)
@@ -30,5 +31,13 @@ void AudioOutputQueue::play()
     if(_output.get() != nullptr) {
         queue.setDevice(_output->start());
     }
+}
+
+int64_t AudioOutputQueue::size() const
+{
+    if(queue.device() != nullptr) {
+        return queue.device()->size();
+    }
+    return 0;
 }
 

@@ -74,6 +74,12 @@ MainWindow::MainWindow(QWidget *parent)
        scopeWidget->setMultiColor(multi, altColor);
     });
 
+    // get a list of audio output devices
+    auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
+    qDebug() << "Audio Output Devices";
+    for(const QAudioDeviceInfo& device : devices) {
+        qDebug() << device.deviceName();
+    }
 
 }
 
