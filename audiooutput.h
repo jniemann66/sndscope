@@ -12,8 +12,7 @@ class AudioOutputQueue : public QObject
 public:
     explicit AudioOutputQueue(QObject *parent = nullptr);
     void setConfiguration(const QAudioDeviceInfo &audioDevice, const QAudioFormat &format = QAudioFormat());
-    void addAudio(const QByteArray& buf);
-    void addAudio(const QVector<double> &buf);
+    void addAudio(float val);
     void play();
     void stop();
     int64_t size() const;

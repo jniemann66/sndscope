@@ -14,16 +14,11 @@ void AudioOutputQueue::setConfiguration(const QAudioDeviceInfo& audioDevice, con
 
 }
 
-void AudioOutputQueue::addAudio(const QByteArray &buf)
-{
-    queue << buf;
-}
 
-void AudioOutputQueue::addAudio(const QVector<double> &buf)
-{
-    for(int i  = 0; i < buf.length(); i++) {
-        queue << static_cast<float>(buf.at(i));
-    }
+
+void AudioOutputQueue::addAudio(float val)
+{   
+    queue << val;
 }
 
 void AudioOutputQueue::play()
