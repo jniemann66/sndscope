@@ -276,8 +276,6 @@ void ScopeWidget::render()
         //audioOutputQueue.addAudio(ch0val);
         //audioOutputQueue.addAudio(ch1val);
     }
-
-    qDebug() << audioOutputQueue.size();
 }
 
 SizeTracker::SizeTracker(QObject *parent) : QObject(parent)
