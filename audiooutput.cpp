@@ -1,8 +1,10 @@
 #include "audiooutput.h"
 #include <QDebug>
 
-AudioOutputQueue::AudioOutputQueue(QObject *parent) : QObject(parent)
+AudioOutputQueue::AudioOutputQueue(QObject *parent) : QObject(parent), datastream(&buffer, QIODevice::WriteOnly)
 {
+    //datastream.setVersion(???) //todo
+    datastream.setFloatingPointPrecision(QDataStream::SinglePrecision);
 }
 
 void AudioOutputQueue::setConfiguration(const QAudioDeviceInfo& audioDevice, const QAudioFormat& format)
@@ -10,29 +12,24 @@ void AudioOutputQueue::setConfiguration(const QAudioDeviceInfo& audioDevice, con
     _output.reset(new QAudioOutput(audioDevice, format));
     _output->setVolume(1.0);
     qDebug() << _output->state() << _output->error();
-
-
 }
-
-
 
 void AudioOutputQueue::addAudio(float val)
 {   
-    queue << val;
+    datastream << val;
 }
 
 void AudioOutputQueue::play()
 {
     if(_output.get() != nullptr) {
-        queue.setDevice(_output->start());
+        _output->start(datastream.device());
     }
 }
 
 int64_t AudioOutputQueue::size() const
 {
-    if(queue.device() != nullptr) {
-        return queue.device()->size();
+    if(datastream.device() != nullptr) {
+        return datastream.device()->size();
     }
     return 0;
 }
-

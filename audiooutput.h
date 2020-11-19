@@ -23,7 +23,8 @@ signals:
 private:
     std::unique_ptr<QAudioOutput> _output;
     QAudioDeviceInfo audioDeviceInfo;
-    QDataStream queue;
+    QDataStream datastream;
+    QByteArray buffer;
 };
 
 #endif // AUDIOOUTPUT_H

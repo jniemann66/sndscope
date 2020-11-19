@@ -62,7 +62,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     fileLoaded = (h->error() == SF_ERR_NO_ERROR);
     if(fileLoaded) {
 
-        // set up audio output, based on sounfile properties
+        // set up audio output, based on soundfile properties
         audioFormat.setSampleRate(h->samplerate());
         audioFormat.setChannelCount(h->channels());
         audioFormat.setSampleSize(32);
@@ -240,7 +240,6 @@ void ScopeWidget::render()
 
     if(--darkenCooldownCounter == 0) {
 
-
         QColor d{darkencolor};
         d.setAlpha(darkenAlpha);
 
@@ -266,17 +265,19 @@ void ScopeWidget::render()
 
     // draw
     for(int64_t i = 0; i < 2 * framesRead; i+= 2 ) {
+        // get sample values for each channel
+        float ch0val = inputBuffer.at(i);
+        float ch1val = inputBuffer.at(i + 1);
         // plot point
-        double x = (1.0 + inputBuffer.at(i)) * sizeTracker->cx;
-        double y = (1.0 - inputBuffer.at(i + 1)) * sizeTracker->cx;
-        painter.drawPoint(x,y);
+        float x = (1.0 + ch0val) * sizeTracker->cx;
+        float y = (1.0 - ch1val) * sizeTracker->cx;
+        painter.drawPoint(QPointF{x,y});
         // send audio
-        //audioOutputQueue.addAudio(inputBuffer.at(i));
-        //audioOutputQueue.addAudio(inputBuffer.at(i + 1));
+        //audioOutputQueue.addAudio(ch0val);
+        //audioOutputQueue.addAudio(ch1val);
     }
 
-
-  //  qDebug() << audioOutputQueue.size();
+    qDebug() << audioOutputQueue.size();
 }
 
 SizeTracker::SizeTracker(QObject *parent) : QObject(parent)

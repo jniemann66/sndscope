@@ -84,7 +84,7 @@ protected:
 private:
     QLabel* screenWidget;
     std::unique_ptr<SndfileHandle> h;
-    QVector<double> inputBuffer;
+    QVector<float> inputBuffer;
     SizeTracker* sizeTracker;
     AudioOutputQueue audioOutputQueue;
     QAudioFormat audioFormat;
