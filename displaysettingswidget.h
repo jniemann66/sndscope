@@ -6,6 +6,7 @@
 #include <QSlider>
 #include <QDial>
 #include <QComboBox>
+#include <QPushButton>
 
 #include "phosphor.h"
 
@@ -41,6 +42,7 @@ private:
     QComboBox* phosphorSelectControl{nullptr};
     QDial* persistenceControl{nullptr};
     QMap<QString, Phosphor> phosphors;
+    QPushButton* clearScreenButton{nullptr};
 
     QPair<bool, QString> loadPhosphors(const QString &filename);
 };

@@ -11,6 +11,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     focusControl = new QDial;
     phosphorSelectControl = new QComboBox;
     persistenceControl = new QDial;
+    clearScreenButton = new QPushButton("C");
 
     auto mainLayout = new QVBoxLayout;
     auto controlLayout1 = new QHBoxLayout;
@@ -19,6 +20,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     auto focusLayout = new QVBoxLayout;
     auto phosphorSelectLayout = new QVBoxLayout;
     auto persistenceLayout = new QVBoxLayout;
+    auto clearScreenLayout = new QHBoxLayout;
 
     brightnessLayout->addWidget(new QLabel{"Brightness"});
     brightnessLayout->addWidget(brightnessControl);
@@ -29,6 +31,8 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     phosphorSelectLayout->setAlignment(Qt::AlignTop);
     persistenceLayout->addWidget(new QLabel{"Persistence"});
     persistenceLayout->addWidget(persistenceControl);
+    clearScreenLayout->addWidget(clearScreenButton);
+    clearScreenLayout->addStretch();
     controlLayout1->addLayout(brightnessLayout);
     controlLayout1->addLayout(focusLayout);
 
@@ -37,6 +41,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 
     mainLayout->addLayout(controlLayout1);
     mainLayout->addLayout(controlLayout2);
+    mainLayout->addLayout(clearScreenLayout);
     mainLayout->addStretch();
     setLayout(mainLayout);
 
