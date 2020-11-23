@@ -11,7 +11,9 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     focusControl = new QDial;
     phosphorSelectControl = new QComboBox;
     persistenceControl = new QDial;
-    clearScreenButton = new QPushButton("C");
+    clearScreenButton = new QPushButton;
+    clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
+    clearScreenButton->setIconSize({32, 32});
 
     auto mainLayout = new QVBoxLayout;
     auto controlLayout1 = new QHBoxLayout;
