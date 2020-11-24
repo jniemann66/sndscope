@@ -278,6 +278,25 @@ void ScopeWidget::render()
     }
 }
 
+void ScopeWidget::wipeScreen()
+{
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(compositionMode);
+
+    QColor d{darkencolor};
+    d.setAlpha(255);
+
+    // darken:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    // since 5.15, use the return-by-value version of pixmap()
+    painter.fillRect(screenWidget->pixmap().rect(), d);
+#else
+    // prior to 5.15, use the return-by-pointer version or pixmap()
+    painter.fillRect(screenWidget->pixmap()->rect(), d);
+#endif
+
+}
+
 SizeTracker::SizeTracker(QObject *parent) : QObject(parent)
 {
 }
@@ -295,3 +314,5 @@ bool SizeTracker::eventFilter(QObject *obj, QEvent* event)
 
     return QObject::eventFilter(obj, event);
 }
+
+

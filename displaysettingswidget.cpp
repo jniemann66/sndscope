@@ -13,7 +13,8 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     persistenceControl = new QDial;
     clearScreenButton = new QPushButton;
     clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
-    clearScreenButton->setIconSize({32, 32});
+    clearScreenButton->setIconSize({48, 48});
+    clearScreenButton->setToolTip("Wipe Screen");
 
     auto mainLayout = new QVBoxLayout;
     auto controlLayout1 = new QHBoxLayout;
@@ -22,7 +23,6 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     auto focusLayout = new QVBoxLayout;
     auto phosphorSelectLayout = new QVBoxLayout;
     auto persistenceLayout = new QVBoxLayout;
-    auto clearScreenLayout = new QHBoxLayout;
 
     brightnessLayout->addWidget(new QLabel{"Brightness"});
     brightnessLayout->addWidget(brightnessControl);
@@ -30,11 +30,11 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     focusLayout->addWidget(focusControl);
     phosphorSelectLayout->addWidget(new QLabel("Phosphor"));
     phosphorSelectLayout->addWidget(phosphorSelectControl);
+    phosphorSelectLayout->addWidget(clearScreenButton);
     phosphorSelectLayout->setAlignment(Qt::AlignTop);
     persistenceLayout->addWidget(new QLabel{"Persistence"});
     persistenceLayout->addWidget(persistenceControl);
-    clearScreenLayout->addWidget(clearScreenButton);
-    clearScreenLayout->addStretch();
+
     controlLayout1->addLayout(brightnessLayout);
     controlLayout1->addLayout(focusLayout);
 
@@ -43,7 +43,6 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 
     mainLayout->addLayout(controlLayout1);
     mainLayout->addLayout(controlLayout2);
-    mainLayout->addLayout(clearScreenLayout);
     mainLayout->addStretch();
     setLayout(mainLayout);
 
@@ -91,6 +90,10 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
                }
            }
        }
+    });
+
+    connect(clearScreenButton, &QPushButton::pressed, this, [this]{
+        emit wipeScreenRequested();
     });
 
     auto _r  = loadPhosphors(":/phosphors.json");

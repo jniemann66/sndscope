@@ -32,6 +32,7 @@ signals:
     void phosphorColorChanged(QVector<QColor>);
     void persistenceChanged(int persistence);
     void multiColorPhosphorChanged(bool multicolor, const QColor& altColor);
+    void wipeScreenRequested();
 
 protected:
 

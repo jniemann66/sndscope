@@ -56,23 +56,30 @@ MainWindow::MainWindow(QWidget *parent)
             setWindowTitle(path);
         }
     });
+
     connect(displaySettingsWidget, &DisplaySettingsWidget::brightnessChanged, this, [scopeWidget](double value){
         scopeWidget->setBrightness(value);
     });
+
     connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
         scopeWidget->setFocus(value);
     });
+
     connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
        scopeWidget->setPersistence(value);
     });
+
     connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
        if(colors.count() > 0) {
             scopeWidget->setPhosphorColor(colors.at(0).rgba());
        }
     });
+
     connect(displaySettingsWidget, &DisplaySettingsWidget::multiColorPhosphorChanged, this, [scopeWidget](bool multi, const QColor& altColor){
        scopeWidget->setMultiColor(multi, altColor);
     });
+
+    connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
     // get a list of audio output devices
     auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
