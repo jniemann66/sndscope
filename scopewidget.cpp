@@ -295,6 +295,9 @@ void ScopeWidget::wipeScreen()
     painter.fillRect(screenWidget->pixmap()->rect(), d);
 #endif
 
+    // force write to screen
+    screenWidget->setPixmap(pixmap);
+    screenDrawCounter = 0;
 }
 
 SizeTracker::SizeTracker(QObject *parent) : QObject(parent)
