@@ -12,9 +12,25 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     phosphorSelectControl = new QComboBox;
     persistenceControl = new QDial;
     clearScreenButton = new QPushButton;
+
     clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
     clearScreenButton->setIconSize({48, 48});
     clearScreenButton->setToolTip("Wipe Screen");
+
+    // set properties of dial controls
+    brightnessControl->setMaximum(1000);
+    focusControl->setMaximum(1000);
+    persistenceControl->setMaximum(1500);
+    brightnessControl->setNotchesVisible(true);
+    brightnessControl->setNotchTarget(100);
+    focusControl->setNotchesVisible(true);
+    focusControl->setNotchTarget(100);
+    persistenceControl->setNotchesVisible(true);
+    persistenceControl->setNotchTarget(100);
+
+    brightnessControl->setWrapping(false);
+    focusControl->setWrapping(false);
+    persistenceControl->setWrapping(false);
 
     auto mainLayout = new QVBoxLayout;
     auto controlLayout1 = new QHBoxLayout;
@@ -46,13 +62,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     mainLayout->addStretch();
     setLayout(mainLayout);
 
-    brightnessControl->setMaximum(1000);
-    focusControl->setMaximum(1000);
-    persistenceControl->setMaximum(1500);
 
-    brightnessControl->setWrapping(false);
-    focusControl->setWrapping(false);
-    persistenceControl->setWrapping(false);
 
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
