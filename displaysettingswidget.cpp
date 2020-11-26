@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFile>
+#include <QGroupBox>
 
 DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -13,9 +14,23 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     persistenceControl = new QDial;
     clearScreenButton = new QPushButton;
 
+
+
     clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
     clearScreenButton->setIconSize({48, 48});
     clearScreenButton->setToolTip("Wipe Screen");
+
+
+
+    auto mainLayout = new QVBoxLayout;
+    auto controlLayout1 = new QHBoxLayout;
+    auto controlLayout2 = new QHBoxLayout;
+    auto brightnessLayout = new QVBoxLayout;
+    auto focusLayout = new QVBoxLayout;
+    auto phosphorSelectLayout = new QVBoxLayout;
+    auto persistenceLayout = new QVBoxLayout;
+    auto beamGroupBox = new QGroupBox("Beam");
+    auto phosphorGroupBox = new QGroupBox("Phosphor");
 
     // set properties of dial controls
     brightnessControl->setMaximum(1000);
@@ -27,18 +42,9 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     focusControl->setNotchTarget(100);
     persistenceControl->setNotchesVisible(true);
     persistenceControl->setNotchTarget(100);
-
     brightnessControl->setWrapping(false);
     focusControl->setWrapping(false);
     persistenceControl->setWrapping(false);
-
-    auto mainLayout = new QVBoxLayout;
-    auto controlLayout1 = new QHBoxLayout;
-    auto controlLayout2 = new QHBoxLayout;
-    auto brightnessLayout = new QVBoxLayout;
-    auto focusLayout = new QVBoxLayout;
-    auto phosphorSelectLayout = new QVBoxLayout;
-    auto persistenceLayout = new QVBoxLayout;
 
     brightnessLayout->addWidget(new QLabel{"Brightness"});
     brightnessLayout->addWidget(brightnessControl);
@@ -57,8 +63,11 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     controlLayout2->addLayout(phosphorSelectLayout);
     controlLayout2->addLayout(persistenceLayout);
 
-    mainLayout->addLayout(controlLayout1);
-    mainLayout->addLayout(controlLayout2);
+    beamGroupBox->setLayout(controlLayout1);
+    phosphorGroupBox->setLayout(controlLayout2);
+    mainLayout->addWidget(beamGroupBox);
+    mainLayout->addWidget(phosphorGroupBox);
+
     mainLayout->addStretch();
     setLayout(mainLayout);
 
