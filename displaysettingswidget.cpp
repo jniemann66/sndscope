@@ -14,14 +14,6 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     persistenceControl = new QDial;
     clearScreenButton = new QPushButton;
 
-
-
-    clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
-    clearScreenButton->setIconSize({48, 48});
-    clearScreenButton->setToolTip("Wipe Screen");
-
-
-
     auto mainLayout = new QVBoxLayout;
     auto controlLayout1 = new QHBoxLayout;
     auto controlLayout2 = new QHBoxLayout;
@@ -32,7 +24,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     auto beamGroupBox = new QGroupBox("Beam");
     auto phosphorGroupBox = new QGroupBox("Phosphor");
 
-    // set properties of dial controls
+    // set widget properties
     brightnessControl->setMaximum(1000);
     focusControl->setMaximum(1000);
     persistenceControl->setMaximum(1500);
@@ -45,7 +37,11 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     brightnessControl->setWrapping(false);
     focusControl->setWrapping(false);
     persistenceControl->setWrapping(false);
+    clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
+    clearScreenButton->setIconSize({48, 48});
+    clearScreenButton->setToolTip("Wipe Screen");
 
+    // organize layouts
     brightnessLayout->addWidget(new QLabel{"Brightness"});
     brightnessLayout->addWidget(brightnessControl);
     focusLayout->addWidget(new QLabel{"Focus"});
@@ -56,22 +52,16 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     phosphorSelectLayout->setAlignment(Qt::AlignTop);
     persistenceLayout->addWidget(new QLabel{"Persistence"});
     persistenceLayout->addWidget(persistenceControl);
-
     controlLayout1->addLayout(brightnessLayout);
     controlLayout1->addLayout(focusLayout);
-
     controlLayout2->addLayout(phosphorSelectLayout);
     controlLayout2->addLayout(persistenceLayout);
-
     beamGroupBox->setLayout(controlLayout1);
     phosphorGroupBox->setLayout(controlLayout2);
     mainLayout->addWidget(beamGroupBox);
     mainLayout->addWidget(phosphorGroupBox);
-
     mainLayout->addStretch();
     setLayout(mainLayout);
-
-
 
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
@@ -123,7 +113,6 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
         }
         phosphorSelectControl->setCurrentText("P31");
     }
-
 }
 
 QSize DisplaySettingsWidget::sizeHint() const
