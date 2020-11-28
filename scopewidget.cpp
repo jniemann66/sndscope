@@ -24,10 +24,14 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     screenWidget = new QLabel;
     sizeTracker = new SizeTracker(this);
 
+    constexpr int virtualFPS = 200; // number of virtual frames per second
+    constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
+    constexpr int v_to_s_Ratio{4}; // number of virtual frames per screen frame
+
     screenWidget->setPixmap(pixmap);
     pixmap.fill(Qt::black);
     screenWidget->setScaledContents(true);
-    plotTimer.setInterval(1000.0 / 200);
+    plotTimer.setInterval(plotInterval);
     setBrightness(66.0);
     setFocus(50.0);
     setPersistence(32);
@@ -38,7 +42,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
         if(!paused) {
             render();
             screenDrawCounter++;
-            if(screenDrawCounter == 4) {
+            if(screenDrawCounter == v_to_s_Ratio) {
                 screenWidget->setPixmap(pixmap);
                 screenDrawCounter = 0;
             }
@@ -317,5 +321,3 @@ bool SizeTracker::eventFilter(QObject *obj, QEvent* event)
 
     return QObject::eventFilter(obj, event);
 }
-
-

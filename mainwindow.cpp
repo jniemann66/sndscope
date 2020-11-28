@@ -19,8 +19,7 @@
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     auto scopeWidget = new ScopeWidget(this);
     auto transportDock = new QDockWidget("Transport", this);
