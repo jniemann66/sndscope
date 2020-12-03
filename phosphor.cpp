@@ -36,6 +36,5 @@ QJsonObject Phosphor::toJson() const
         a.append(layerObj);
     }
     o.insert("layers", a);
-
-    return o; // todo
+    return o;
 }
