@@ -276,9 +276,13 @@ void ScopeWidget::render()
         float x = (1.0 + ch0val) * sizeTracker->cx;
         float y = (1.0 - ch1val) * sizeTracker->cx;
         painter.drawPoint(QPointF{x,y});
+
+#ifdef SNDSCOPE_INCLUDE_AUDIO
         // send audio
-        //audioOutputQueue.addAudio(ch0val);
-        //audioOutputQueue.addAudio(ch1val);
+        audioOutputQueue.addAudio(ch0val);
+        audioOutputQueue.addAudio(ch1val);
+#endif
+
     }
 }
 
