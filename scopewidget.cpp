@@ -66,6 +66,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     fileLoaded = (h->error() == SF_ERR_NO_ERROR);
     if(fileLoaded) {
 
+#ifdef SNDSCOPE_INCLUDE_AUDIO
         // set up audio output, based on soundfile properties
         audioFormat.setSampleRate(h->samplerate());
         audioFormat.setChannelCount(h->channels());
@@ -77,6 +78,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         audioOutputQueue.setConfiguration(audioDeviceInfo, audioFormat);
         qDebug() << audioDeviceInfo.deviceName();
       //  audioOutputQueue.play();
+#endif
 
         // set up rendering parameters, based on soundfile properties
         inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage

@@ -3,7 +3,6 @@
 
 AudioOutputQueue::AudioOutputQueue(QObject *parent) : QObject(parent), datastream(&buffer, QIODevice::WriteOnly)
 {
-    //datastream.setVersion(???) //todo
     datastream.setFloatingPointPrecision(QDataStream::SinglePrecision);
 }
 

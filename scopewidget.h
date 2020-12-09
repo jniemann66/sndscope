@@ -87,8 +87,12 @@ private:
     std::unique_ptr<SndfileHandle> h;
     QVector<float> inputBuffer;
     SizeTracker* sizeTracker;
+
+#ifdef SNDSCOPE_INCLUDE_AUDIO
     AudioOutputQueue audioOutputQueue;
     QAudioFormat audioFormat;
+#endif
+
     QPixmap pixmap;
     QTimer plotTimer;
     QElapsedTimer elapsedTimer;
