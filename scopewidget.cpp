@@ -77,7 +77,6 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         auto audioDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
         audioOutputQueue.setConfiguration(audioDeviceInfo, audioFormat);
         qDebug() << audioDeviceInfo.deviceName();
-      //  audioOutputQueue.play();
 #endif
 
         // set up rendering parameters, based on soundfile properties
