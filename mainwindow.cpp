@@ -16,6 +16,7 @@
 #include <QMimeData>
 #include <QDir>
 #include <QMenuBar>
+#include <QFileDialog>
 
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
@@ -45,8 +46,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setAcceptDrops(true);
 
     fileMenu = menuBar()->addMenu("&File");
-    fileMenu->addAction("&Open", []{
-       qDebug() << "Booyah";
+    fileMenu->addAction("&Open", [this]{
+       QString fileName = QFileDialog::getOpenFileName(this,
+                       tr("Open Sound File"), "/home/judd", tr("Sound Files (*.aif, *.aifc, *.aiff, *.au, *.avr, *.caf, *.flac, *.htk, *.iff, *.mat, *.mpc, *.oga, *.paf, *.pvf, *.raw, *.rf64, *.sd2, *.sds, *.sf, *.voc, *.w64, *.wav, *.wve, *.xi)"));
+       qDebug() << fileName;
     });
 
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
