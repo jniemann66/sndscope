@@ -46,10 +46,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setAcceptDrops(true);
 
     fileMenu = menuBar()->addMenu("&File");
-    fileMenu->addAction("&Open ...", [this]{
-       QString fileName = QFileDialog::getOpenFileName(this,
-                       tr("Open Sound File"), QDir::homePath(), tr("Sound Files (*.aif, *.aifc, *.aiff, *.au, *.avr, *.caf, *.flac, *.htk, *.iff, *.mat, *.mpc, *.oga, *.paf, *.pvf, *.raw, *.rf64, *.sd2, *.sds, *.sf, *.voc, *.w64, *.wav, *.wve, *.xi)"));
-       qDebug() << fileName;
+    fileMenu->addAction("&Open ...", [this, scopeWidget, transportWidget]{
+       QString path = QFileDialog::getOpenFileName(this,
+                       tr("Open Sound File"), QDir::homePath(), tr("Sound Files (*.aif *.aifc *.aiff *.au *.avr *.caf *.flac *.htk *.iff *.mat *.mpc *.oga *.paf *.pvf *.raw *.rf64 *.sd2 *.sds *.sf *.voc *.w64 *.wav *.wve *.xi)"));
+       auto loadResult = scopeWidget->loadSoundFile(path);
+       transportWidget->setButtonsEnabled(loadResult.first);
+       if (loadResult.first) {
+           transportWidget->setLength(scopeWidget->getLengthMilliseconds());
+           setWindowTitle(path);
+       }
     });
 
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
