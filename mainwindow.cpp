@@ -15,6 +15,7 @@
 #include <QDropEvent>
 #include <QMimeData>
 #include <QDir>
+#include <QMenuBar>
 
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
@@ -42,6 +43,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     setWindowTitle("Drag & drop a wave file");
     setAcceptDrops(true);
+
+    fileMenu = menuBar()->addMenu("&File");
+    fileMenu->addAction("&Open", []{
+       qDebug() << "Booyah";
+    });
 
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
     connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);

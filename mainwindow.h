@@ -29,6 +29,8 @@ protected:
     void dropEvent(QDropEvent *event) override;
 
 private:
+    QMenu* fileMenu{nullptr};
+
 
 };
 
