@@ -86,7 +86,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
        emit persistenceChanged(value);
     });
 
-    connect(phosphorSelectControl, &QComboBox::activated, this, [this]{
+    connect(phosphorSelectControl, QOverload<int>::of(&QComboBox::activated), this, [this]{
        QString name = phosphorSelectControl->currentText();
        if(phosphors.contains(name)) {
            Phosphor phosphor = phosphors.value(name);

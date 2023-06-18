@@ -23,10 +23,12 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     auto screenLayout = new QHBoxLayout;
     screenWidget = new QLabel;
     sizeTracker = new SizeTracker(this);
+    audioController = new AudioController(this);
 
-    constexpr int virtualFPS = 200; // number of virtual frames per second
+    constexpr int virtualFPS = 100; // number of virtual frames per second
+    constexpr int screenFPS = 50;
+    constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
     constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
-    constexpr int v_to_s_Ratio{4}; // number of virtual frames per screen frame
 
     screenWidget->setPixmap(pixmap);
     pixmap.fill(Qt::black);
@@ -46,7 +48,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
                 screenWidget->setPixmap(pixmap);
                 screenDrawCounter = 0;
             }
-            emit renderedFrame(currentFrame * millisecondsPerSample);
+            emit renderedFrame(currentFrame * millisecondsPerFrame);
         }
     });
 
@@ -66,26 +68,24 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     fileLoaded = (h->error() == SF_ERR_NO_ERROR);
     if(fileLoaded) {
 
-#ifdef SNDSCOPE_INCLUDE_AUDIO
-        // set up audio output, based on soundfile properties
+        // set up rendering parameters, based on soundfile properties
+        inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
+        framesPerMillisecond = h->samplerate() / 1000;
+        millisecondsPerFrame = 1000.0 / h->samplerate();
+        maxFramesToRead = inputBuffer.size() / h->channels();
+        totalFrames = h->frames();
+        returnToStart();
+
+        // set up audio
         audioFormat.setSampleRate(h->samplerate());
         audioFormat.setChannelCount(h->channels());
         audioFormat.setSampleSize(32);
         audioFormat.setCodec("audio/pcm");
         audioFormat.setByteOrder(QAudioFormat::LittleEndian);
         audioFormat.setSampleType(QAudioFormat::Float);
-        auto audioDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
-        audioOutputQueue.setConfiguration(audioDeviceInfo, audioFormat);
-        qDebug() << audioDeviceInfo.deviceName();
-#endif
-
-        // set up rendering parameters, based on soundfile properties
-        inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
-        samplesPerMillisecond = h->samplerate() / 1000;
-        millisecondsPerSample = 1000.0 / h->samplerate();
-        maxFramesToRead = inputBuffer.size() / h->channels();
-        totalFrames = h->frames();
-        returnToStart();
+        auto device = QAudioDeviceInfo::defaultOutputDevice();
+        audioController->initializeAudio(audioFormat, device);
+        qDebug() << "Bytes per frame" << audioFormat.bytesPerFrame();
     }
 
     return {fileLoaded, h->strError()};
@@ -93,7 +93,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 
 int ScopeWidget::getLengthMilliseconds()
 {
-    return static_cast<int>(millisecondsPerSample * h->frames());
+    return static_cast<int>(millisecondsPerFrame * h->frames());
 }
 
 bool ScopeWidget::getPaused() const
@@ -110,6 +110,7 @@ void ScopeWidget::setPaused(bool value)
 
     paused = value;
     if(!paused) {
+         pushOut=audioController->start();
         startFrame = currentFrame;
         elapsedTimer.restart();
     }
@@ -130,7 +131,7 @@ void ScopeWidget::gotoPosition(int64_t milliSeconds)
 {
     elapsedTimer.restart();
     if(h != nullptr && !h->error()) {
-        currentFrame = samplesPerMillisecond * milliSeconds;
+        currentFrame = framesPerMillisecond * milliSeconds;
         startFrame = currentFrame;
         h->seek(qMin(currentFrame, h->frames()), SEEK_SET);
     }
@@ -236,9 +237,10 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
-    int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * samplesPerMillisecond));
+    int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
     int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
-    currentFrame += framesRead;
+
+
 
     QPainter painter(&pixmap);
     painter.setCompositionMode(compositionMode);
@@ -277,14 +279,11 @@ void ScopeWidget::render()
         float x = (1.0 + ch0val) * sizeTracker->cx;
         float y = (1.0 - ch1val) * sizeTracker->cx;
         painter.drawPoint(QPointF{x,y});
-
-#ifdef SNDSCOPE_INCLUDE_AUDIO
-        // send audio
-        audioOutputQueue.addAudio(ch0val);
-        audioOutputQueue.addAudio(ch1val);
-#endif
-
     }
+
+    const int bytesPerFrame = audioFormat.bytesPerFrame();
+    pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
+    currentFrame += framesRead;
 }
 
 void ScopeWidget::wipeScreen()

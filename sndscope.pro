@@ -5,14 +5,9 @@
 # You should have received a copy of GNU Lesser General Public License v2.1
 # with this file. If not, please refer to: https://github.com/jniemann66/sndscope
 
-QT       += core gui multimedia
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui multimedia widgets
 
 CONFIG += c++11
-
-#disable deprecated stuff (won't compile)
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 #import libsndfile
 unix {
@@ -35,7 +30,7 @@ win32 {
 
 
 SOURCES += \
-    audiooutput.cpp \
+    audiocontroller.cpp \
     displaysettingswidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -44,7 +39,7 @@ SOURCES += \
     transportwidget.cpp
 
 HEADERS += \
-    audiooutput.h \
+    audiocontroller.h \
     displaysettingswidget.h \
     mainwindow.h \
     phosphor.h \
@@ -53,11 +48,6 @@ HEADERS += \
 
 TRANSLATIONS += \
     sndscope_en_AU.ts
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
     config.qrc \

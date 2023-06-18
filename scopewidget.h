@@ -23,7 +23,7 @@
 
 #include <sndfile.hh>
 
-#include "audiooutput.h"
+#include "audiocontroller.h"
 
 class SizeTracker : public QObject
 {
@@ -86,18 +86,18 @@ private:
     QLabel* screenWidget;
     std::unique_ptr<SndfileHandle> h;
     QVector<float> inputBuffer;
+    QVector<float> audioOutBuffer;
     SizeTracker* sizeTracker;
+    QIODevice* pushOut{nullptr};
 
-#ifdef SNDSCOPE_INCLUDE_AUDIO
-    AudioOutputQueue audioOutputQueue;
+    AudioController *audioController{nullptr};
     QAudioFormat audioFormat;
-#endif
 
     QPixmap pixmap;
     QTimer plotTimer;
     QElapsedTimer elapsedTimer;
-    int samplesPerMillisecond{0};
-    double millisecondsPerSample{0.0};
+    int framesPerMillisecond{0};
+    double millisecondsPerFrame{0.0};
     int64_t startFrame{0};
     int64_t currentFrame{0ll};
     int64_t maxFramesToRead{0};
