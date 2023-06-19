@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2021 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -39,6 +39,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
     persistenceControl->setMaximum(1500);
     brightnessControl->setNotchesVisible(true);
     brightnessControl->setNotchTarget(100);
+    brightnessControl->setWrapping(false);
     focusControl->setNotchesVisible(true);
     focusControl->setNotchTarget(100);
     persistenceControl->setNotchesVisible(true);

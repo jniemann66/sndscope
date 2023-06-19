@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2021 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -22,7 +22,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     auto mainLayout = new QVBoxLayout;
     auto screenLayout = new QHBoxLayout;
     screenWidget = new QLabel;
-    sizeTracker = new SizeTracker(this);
     audioController = new AudioController(this);
 
     constexpr int virtualFPS = 100; // number of virtual frames per second
@@ -37,8 +36,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     setBrightness(66.0);
     setFocus(50.0);
     setPersistence(32);
-
-    screenWidget->installEventFilter(sizeTracker);
 
     connect(&plotTimer, &QTimer::timeout, this, [this]{
         if(!paused) {
@@ -64,21 +61,21 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 {
-    h.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
-    fileLoaded = (h->error() == SF_ERR_NO_ERROR);
+    sndfile.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
+    fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
     if(fileLoaded) {
 
         // set up rendering parameters, based on soundfile properties
-        inputBuffer.resize(h->channels() * h->samplerate()); // 1s of storage
-        framesPerMillisecond = h->samplerate() / 1000;
-        millisecondsPerFrame = 1000.0 / h->samplerate();
-        maxFramesToRead = inputBuffer.size() / h->channels();
-        totalFrames = h->frames();
+        inputBuffer.resize(sndfile->channels() * sndfile->samplerate()); // 1s of storage
+        framesPerMillisecond = sndfile->samplerate() / 1000;
+        millisecondsPerFrame = 1000.0 / sndfile->samplerate();
+        maxFramesToRead = inputBuffer.size() / sndfile->channels();
+        totalFrames = sndfile->frames();
         returnToStart();
 
         // set up audio
-        audioFormat.setSampleRate(h->samplerate());
-        audioFormat.setChannelCount(h->channels());
+        audioFormat.setSampleRate(sndfile->samplerate());
+        audioFormat.setChannelCount(sndfile->channels());
         audioFormat.setSampleSize(32);
         audioFormat.setCodec("audio/pcm");
         audioFormat.setByteOrder(QAudioFormat::LittleEndian);
@@ -88,12 +85,12 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         qDebug() << "Bytes per frame" << audioFormat.bytesPerFrame();
     }
 
-    return {fileLoaded, h->strError()};
+    return {fileLoaded, sndfile->strError()};
 }
 
 int ScopeWidget::getLengthMilliseconds()
 {
-    return static_cast<int>(millisecondsPerFrame * h->frames());
+    return static_cast<int>(millisecondsPerFrame * sndfile->frames());
 }
 
 bool ScopeWidget::getPaused() const
@@ -122,18 +119,18 @@ void ScopeWidget::returnToStart()
     currentFrame = 0ll;
     startFrame = 0ll;
 
-    if(h != nullptr && !h->error()) {
-        h->seek(0ll, SEEK_SET);
+    if(sndfile != nullptr && !sndfile->error()) {
+        sndfile->seek(0ll, SEEK_SET);
     }
 }
 
 void ScopeWidget::gotoPosition(int64_t milliSeconds)
 {
     elapsedTimer.restart();
-    if(h != nullptr && !h->error()) {
+    if(sndfile != nullptr && !sndfile->error()) {
         currentFrame = framesPerMillisecond * milliSeconds;
         startFrame = currentFrame;
-        h->seek(qMin(currentFrame, h->frames()), SEEK_SET);
+        sndfile->seek(qMin(currentFrame, sndfile->frames()), SEEK_SET);
     }
 }
 
@@ -238,9 +235,7 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 void ScopeWidget::render()
 {
     int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
-    int64_t framesRead = h->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
-
-
+    int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
 
     QPainter painter(&pixmap);
     painter.setCompositionMode(compositionMode);
@@ -276,8 +271,8 @@ void ScopeWidget::render()
         float ch0val = inputBuffer.at(i);
         float ch1val = inputBuffer.at(i + 1);
         // plot point
-        float x = (1.0 + ch0val) * sizeTracker->cx;
-        float y = (1.0 - ch1val) * sizeTracker->cx;
+        float x = (1.0 + ch0val) * cx;
+        float y = (1.0 - ch1val) * cx;
         painter.drawPoint(QPointF{x,y});
     }
 
@@ -308,20 +303,9 @@ void ScopeWidget::wipeScreen()
     screenDrawCounter = 0;
 }
 
-SizeTracker::SizeTracker(QObject *parent) : QObject(parent)
+void ScopeWidget::resizeEvent(QResizeEvent* event)
 {
-}
-
-bool SizeTracker::eventFilter(QObject *obj, QEvent* event)
-{
-    if(event->type() == QEvent::Resize) {
-        QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-        auto sz = resizeEvent->size();
-        w = sz.width();
-        h = sz.height();
-        cx = w / 2;
-        cy = h / 2;
-    }
-
-    return QObject::eventFilter(obj, event);
+    const auto sz = event->size();
+    cx = sz.width() / 2;
+    cy = sz.width() / 2;
 }

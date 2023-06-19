@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2021 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -18,27 +18,13 @@
 #include <QTime>
 #include <QColor>
 #include <QPainter>
+#include <QResizeEvent>
 
 #include <memory>
 
 #include <sndfile.hh>
 
 #include "audiocontroller.h"
-
-class SizeTracker : public QObject
-{
-    Q_OBJECT
-public:
-
-    SizeTracker(QObject* parent);
-    double cx;
-    double cy;
-    double w;
-    double h;
-
-protected:
-    bool eventFilter(QObject* obj, QEvent* event) override;
-};
 
 class ScopeWidget : public QWidget
 {
@@ -81,17 +67,20 @@ signals:
     void renderedFrame(int positionMilliseconds);
 
 protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     QLabel* screenWidget;
-    std::unique_ptr<SndfileHandle> h;
+    std::unique_ptr<SndfileHandle> sndfile;
     QVector<float> inputBuffer;
     QVector<float> audioOutBuffer;
-    SizeTracker* sizeTracker;
     QIODevice* pushOut{nullptr};
 
     AudioController *audioController{nullptr};
     QAudioFormat audioFormat;
+
+    double cx;
+    double cy;
 
     QPixmap pixmap;
     QTimer plotTimer;
