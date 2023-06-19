@@ -57,6 +57,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
        }
     });
 
+    preferencesMenu = menuBar()->addMenu("&Preferences");
+    QAction* squareDisplayOption = preferencesMenu->addAction("Square Display");
+    squareDisplayOption->setCheckable(true);
+    squareDisplayOption->setChecked(scopeWidget->getConstrainToSquare());
+
+    connect(squareDisplayOption, &QAction::toggled, this, [scopeWidget](bool checked){
+        scopeWidget->setConstrainToSquare(checked);
+    });
+
     connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
     connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
     connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);

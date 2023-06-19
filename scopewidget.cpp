@@ -9,11 +9,9 @@
 
 #include "scopewidget.h"
 
-#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QEvent>
-#include <QResizeEvent>
 #include <QDebug>
 #include <cmath>
 
@@ -22,13 +20,14 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     screenWidget = new PictureBox(&pixmap);
     audioController = new AudioController(this);
     auto mainLayout = new QVBoxLayout;
-    auto screenLayout = new QHBoxLayout;
+    screenLayout = new QHBoxLayout;
 
     constexpr int virtualFPS = 100; // number of virtual frames per second
     constexpr int screenFPS = 50;
     constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
     constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
 
+    setConstrainToSquare(constrainToSquare);
     pixmap.fill(Qt::black);
     plotTimer.setInterval(plotInterval);
     setBrightness(66.0);
@@ -53,9 +52,9 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     });
 
     plotTimer.start();
-    screenLayout->addStretch();
-    screenLayout->addWidget(screenWidget);
-    screenLayout->addStretch();
+
+    // !!
+
     mainLayout->addLayout(screenLayout);
     setLayout(mainLayout);
 }
@@ -88,7 +87,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
     return {fileLoaded, sndfile->strError()};
 }
 
-int ScopeWidget::getLengthMilliseconds()
+int ScopeWidget::getLengthMilliseconds() const
 {
     return static_cast<int>(millisecondsPerFrame * sndfile->frames());
 }
@@ -287,6 +286,31 @@ void ScopeWidget::wipeScreen()
     screenDrawCounter = 0;
 }
 
+bool ScopeWidget::getConstrainToSquare() const
+{
+    return constrainToSquare;
+}
+
+void ScopeWidget::setConstrainToSquare(bool value)
+{
+    constrainToSquare = value;
+    screenWidget->setConstrainToSquare(value);
+
+    for(int i = 0; i < screenLayout->count(); i++) {
+        screenLayout->removeItem(screenLayout->itemAt(i));
+    }
+
+    if(constrainToSquare) {
+        screenLayout->addStretch();
+    }
+
+    screenLayout->addWidget(screenWidget);
+
+    if(constrainToSquare) {
+        screenLayout->addStretch();
+    }
+}
+
 void ScopeWidget::calcCenter()
 {
     cx = pixmap.width() / 2;
@@ -296,4 +320,19 @@ void ScopeWidget::calcCenter()
 void PictureBox::setAllowPixmapResolutionChange(bool value)
 {
     allowPixmapResolutionChange = value;
+}
+
+bool PictureBox::getAllowPixmapResolutionChange() const
+{
+    return allowPixmapResolutionChange;
+}
+
+bool PictureBox::getConstrainToSquare() const
+{
+    return constrainToSquare;
+}
+
+void PictureBox::setConstrainToSquare(bool value)
+{
+    constrainToSquare = value;
 }

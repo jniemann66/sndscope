@@ -23,6 +23,7 @@
 #include <QResizeEvent>
 #include <QDebug>
 #include <QPixmap>
+#include <QHBoxLayout>
 
 #include <sndfile.hh>
 
@@ -40,13 +41,20 @@ public:
         resizeCooldown.setInterval(200);
 
         connect(&resizeCooldown, &QTimer::timeout, this, [this]{
+            const int w = width();
             const int h = height();
-            qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%1").arg(h);
+            qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
             *PictureBox::pixmap = PictureBox::pixmap->scaledToHeight(h);
             emit pixmapResolutionChanged(PictureBox::pixmap->size());
         });
     }
 
+    // getters
+    bool getConstrainToSquare() const;
+    bool getAllowPixmapResolutionChange() const;
+
+    // setters
+    void setConstrainToSquare(bool value);
     void setAllowPixmapResolutionChange(bool value);
 
 signals:
@@ -54,19 +62,23 @@ signals:
 
 protected:
     void resizeEvent(QResizeEvent *event) override {
-        auto h = event->size().height();
-        auto w = event->size().width();
-        if(w != h) {
-            setFixedWidth(h);
-            if(allowPixmapResolutionChange) {
-                resizeCooldown.start();
+        if(constrainToSquare) {
+            auto h = event->size().height();
+            auto w = event->size().width();
+            if(w != h) {
+                setFixedWidth(h);
             }
+        }
+
+        if(event->size() != event->oldSize() && allowPixmapResolutionChange) {
+            resizeCooldown.start();
         }
     }
 
 private:
     QTimer resizeCooldown;
     QPixmap *pixmap{nullptr};
+    bool constrainToSquare{true};
     bool allowPixmapResolutionChange{true};
 };
 
@@ -77,30 +89,29 @@ class ScopeWidget : public QWidget
 public:
     explicit ScopeWidget(QWidget *parent = nullptr);
     QPair<bool, QString> loadSoundFile(const QString &filename);
-    int getLengthMilliseconds();
+
+    // getters
+    int getLengthMilliseconds() const;
     bool getPaused() const;
-    void setPaused(bool value);
-
     int64_t getTotalFrames() const;
-    void setTotalFrames(const int64_t &value);
-
     double getBrightness() const;
-    void setBrightness(double value);
-
     double getFocus() const;
-    void setFocus(double value);
-
     QRgb getPhosphorColor() const;
-    void setPhosphorColor(const QRgb &value);
-
     double getPersistence() const;
-    void setPersistence(double value);
-
     bool getMultiColor() const;
-    void setMultiColor(bool value, const QColor& altColor);
-
     QColor getBackgroundColor() const;
+    bool getConstrainToSquare() const;
+
+    // setters
+    void setPaused(bool value);
+    void setTotalFrames(const int64_t &value);
+    void setBrightness(double value);
+    void setFocus(double value);
+    void setPhosphorColor(const QRgb &value);
+    void setPersistence(double value);
+    void setMultiColor(bool value, const QColor& altColor);
     void setBackgroundColor(const QColor &value);
+    void setConstrainToSquare(bool value);
 
 public slots:
     void returnToStart();
@@ -119,8 +130,9 @@ private:
     QVector<float> audioOutBuffer;
     QIODevice* pushOut{nullptr};
     AudioController *audioController{nullptr};
-    QAudioFormat audioFormat;
+    QHBoxLayout *screenLayout;
 
+    QAudioFormat audioFormat;
     QPixmap pixmap;
 
     // midpoint of pixmap
@@ -152,6 +164,7 @@ private:
     double persistence;
     double beamWidth;
     double beamIntensity;
+    bool constrainToSquare{true};
 
     void calcCenter();
     void render();
