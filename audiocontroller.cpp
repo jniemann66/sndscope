@@ -37,7 +37,7 @@ void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDe
     audioOutput->setBufferSize(2 * format.sampleRate() * format.bytesPerFrame());
 
     connect(audioOutput.get(), &QAudioOutput::stateChanged, this, [this]{
-        qDebug() << "state" << audioOutput->state();
+        qDebug().noquote() << "Audio Status:" << audioOutput->state();
     });
 
 }

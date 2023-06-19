@@ -95,10 +95,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
     // get a list of audio output devices
+    // todo: user selection from ComboBox
     auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
-    qDebug() << "Audio Output Devices";
+    qDebug().noquote() << "Audio Output Devices";
     for(const QAudioDeviceInfo& device : devices) {
-        qDebug() << device.deviceName();
+        qDebug().noquote() << device.deviceName();
     }
 
 }

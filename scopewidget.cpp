@@ -19,23 +19,26 @@
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 {
+    screenWidget = new PictureBox(&pixmap);
+    audioController = new AudioController(this);
     auto mainLayout = new QVBoxLayout;
     auto screenLayout = new QHBoxLayout;
-    screenWidget = new QLabel;
-    audioController = new AudioController(this);
 
     constexpr int virtualFPS = 100; // number of virtual frames per second
     constexpr int screenFPS = 50;
     constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
     constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
 
-    screenWidget->setPixmap(pixmap);
     pixmap.fill(Qt::black);
-    screenWidget->setScaledContents(true);
     plotTimer.setInterval(plotInterval);
     setBrightness(66.0);
     setFocus(50.0);
     setPersistence(32);
+    calcCenter();
+
+    connect(screenWidget, &PictureBox::pixmapResolutionChanged, this, [this](){
+        calcCenter();
+    });
 
     connect(&plotTimer, &QTimer::timeout, this, [this]{
         if(!paused) {
@@ -53,9 +56,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
     screenLayout->addStretch();
     screenLayout->addWidget(screenWidget);
     screenLayout->addStretch();
-    mainLayout->addStretch();
     mainLayout->addLayout(screenLayout);
-    mainLayout->addStretch();
     setLayout(mainLayout);
 }
 
@@ -82,7 +83,6 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
         audioFormat.setSampleType(QAudioFormat::Float);
         auto device = QAudioDeviceInfo::defaultOutputDevice();
         audioController->initializeAudio(audioFormat, device);
-        qDebug() << "Bytes per frame" << audioFormat.bytesPerFrame();
     }
 
     return {fileLoaded, sndfile->strError()};
@@ -234,32 +234,24 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
-    int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
-    int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
+    const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
+    const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
 
     QPainter painter(&pixmap);
     painter.setCompositionMode(compositionMode);
 
     if(--darkenCooldownCounter == 0) {
-
+        // darken:
         QColor d{darkencolor};
         d.setAlpha(darkenAlpha);
-
-        // darken:
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-        // since 5.15, use the return-by-value version of pixmap()
-        painter.fillRect(screenWidget->pixmap().rect(), d);
-#else
-        // prior to 5.15, use the return-by-pointer version or pixmap()
-        painter.fillRect(screenWidget->pixmap()->rect(), d);
-#endif
+        painter.fillRect(pixmap.rect(), d);
         darkenCooldownCounter = darkenNthFrame;
-    }
+   }
 
     // prepare pen
     QColor c{phosphorColor};
     c.setAlpha(beamAlpha);
-    QPen pen{c, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+    const QPen pen{c, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
     // set pen
     painter.setPen(pen);
@@ -272,7 +264,7 @@ void ScopeWidget::render()
         float ch1val = inputBuffer.at(i + 1);
         // plot point
         float x = (1.0 + ch0val) * cx;
-        float y = (1.0 - ch1val) * cx;
+        float y = (1.0 - ch1val) * cy;
         painter.drawPoint(QPointF{x,y});
     }
 
@@ -290,22 +282,18 @@ void ScopeWidget::wipeScreen()
     d.setAlpha(255);
 
     // darken:
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-    // since 5.15, use the return-by-value version of pixmap()
-    painter.fillRect(screenWidget->pixmap().rect(), d);
-#else
-    // prior to 5.15, use the return-by-pointer version or pixmap()
-    painter.fillRect(screenWidget->pixmap()->rect(), d);
-#endif
+    painter.fillRect(pixmap.rect(), d);
 
-    // force write to screen
-    screenWidget->setPixmap(pixmap);
     screenDrawCounter = 0;
 }
 
-void ScopeWidget::resizeEvent(QResizeEvent* event)
+void ScopeWidget::calcCenter()
 {
-    const auto sz = event->size();
-    cx = sz.width() / 2;
-    cy = sz.width() / 2;
+    cx = pixmap.width() / 2;
+    cy = pixmap.height() / 2;
+}
+
+void PictureBox::setAllowPixmapResolutionChange(bool value)
+{
+    allowPixmapResolutionChange = value;
 }

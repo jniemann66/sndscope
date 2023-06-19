@@ -10,6 +10,8 @@
 #ifndef SCOPEWIDGET_H
 #define SCOPEWIDGET_H
 
+#include <memory>
+
 #include <QWidget>
 #include <QPixmap>
 #include <QLabel>
@@ -19,12 +21,54 @@
 #include <QColor>
 #include <QPainter>
 #include <QResizeEvent>
-
-#include <memory>
+#include <QDebug>
+#include <QPixmap>
 
 #include <sndfile.hh>
 
 #include "audiocontroller.h"
+
+class PictureBox : public QLabel
+{
+    Q_OBJECT
+public:
+    PictureBox(QPixmap* pixmap, QWidget* parent = nullptr) : QLabel(parent), pixmap(pixmap)
+    {
+        setPixmap(*pixmap);
+        setScaledContents(true);
+        resizeCooldown.setSingleShot(true);
+        resizeCooldown.setInterval(200);
+
+        connect(&resizeCooldown, &QTimer::timeout, this, [this]{
+            const int h = height();
+            qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%1").arg(h);
+            *PictureBox::pixmap = PictureBox::pixmap->scaledToHeight(h);
+            emit pixmapResolutionChanged(PictureBox::pixmap->size());
+        });
+    }
+
+    void setAllowPixmapResolutionChange(bool value);
+
+signals:
+    void pixmapResolutionChanged(const QSizeF& size);
+
+protected:
+    void resizeEvent(QResizeEvent *event) override {
+        auto h = event->size().height();
+        auto w = event->size().width();
+        if(w != h) {
+            setFixedWidth(h);
+            if(allowPixmapResolutionChange) {
+                resizeCooldown.start();
+            }
+        }
+    }
+
+private:
+    QTimer resizeCooldown;
+    QPixmap *pixmap{nullptr};
+    bool allowPixmapResolutionChange{true};
+};
 
 class ScopeWidget : public QWidget
 {
@@ -67,22 +111,22 @@ signals:
     void renderedFrame(int positionMilliseconds);
 
 protected:
-    void resizeEvent(QResizeEvent *event) override;
 
 private:
-    QLabel* screenWidget;
+    PictureBox* screenWidget;
     std::unique_ptr<SndfileHandle> sndfile;
     QVector<float> inputBuffer;
     QVector<float> audioOutBuffer;
     QIODevice* pushOut{nullptr};
-
     AudioController *audioController{nullptr};
     QAudioFormat audioFormat;
 
+    QPixmap pixmap;
+
+    // midpoint of pixmap
     double cx;
     double cy;
 
-    QPixmap pixmap;
     QTimer plotTimer;
     QElapsedTimer elapsedTimer;
     int framesPerMillisecond{0};
@@ -109,7 +153,7 @@ private:
     double beamWidth;
     double beamIntensity;
 
-
+    void calcCenter();
     void render();
     void calcBeamAlpha();
 
