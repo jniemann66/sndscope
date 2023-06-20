@@ -16,8 +16,8 @@ object_script.*.Debug
 *_plugin_import.cpp
 /.qmake.cache
 /.qmake.stash
-*.pro.user
-*.pro.user.*
+#*.pro.user
+#*.pro.user.*
 *.qbs.user
 *.qbs.user.*
 *.moc
@@ -50,3 +50,6 @@ compile_commands.json
 
 # QtCreator local machine specific files for imported projects
 *creator.user*
+
+#misc
+#package-lock.json
