@@ -15,22 +15,22 @@
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+	MainWindow(QWidget *parent = nullptr);
+	~MainWindow();
 
 signals:
-    void fileDrop(const QString& path);
+	void fileDrop(const QString& path);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
 
 private:
-    QMenu* fileMenu{nullptr};
-    QMenu* preferencesMenu{nullptr};
+	QMenu* fileMenu{nullptr};
+	QMenu* preferencesMenu{nullptr};
 
 
 };

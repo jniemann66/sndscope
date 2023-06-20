@@ -18,18 +18,18 @@
 
 struct PhosphorLayer
 {
-    QColor color;
-    double persistence;
+	QColor color;
+	double persistence;
 };
 
 struct Phosphor
 {
 public:
-    QString name;
-    QVector<PhosphorLayer> layers;
+	QString name;
+	QVector<PhosphorLayer> layers;
 
-    void fromJson(const QJsonObject& o);
-    QJsonObject toJson() const;
+	void fromJson(const QJsonObject& o);
+	QJsonObject toJson() const;
 
 };
 

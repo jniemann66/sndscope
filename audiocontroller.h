@@ -9,18 +9,16 @@
 
 class AudioController : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit AudioController(QObject *parent = nullptr);
-    void initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo);
+	explicit AudioController(QObject *parent = nullptr);
+	void initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo);
+	QIODevice *start();
 
-    QIODevice *start();
 signals:
 
 private:
-    std::unique_ptr<QAudioOutput> audioOutput;
-
-
+	std::unique_ptr<QAudioOutput> audioOutput;
 };
 
 #endif // AUDIOCONTROLLER_H

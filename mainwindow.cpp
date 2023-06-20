@@ -21,96 +21,98 @@
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 {
-    auto scopeWidget = new ScopeWidget(this);
-    auto transportDock = new QDockWidget("Transport", this);
-    auto transportWidget = new TransportWidget(transportDock);
-    auto displaySettingsDock = new QDockWidget("Display", this);
-    auto displaySettingsWidget = new DisplaySettingsWidget(displaySettingsDock);
+	auto scopeWidget = new ScopeWidget(this);
+	auto transportDock = new QDockWidget("Transport", this);
+	auto transportWidget = new TransportWidget(transportDock);
+	auto displaySettingsDock = new QDockWidget("Display", this);
+	auto displaySettingsWidget = new DisplaySettingsWidget(displaySettingsDock);
 
-    setCentralWidget(scopeWidget);
-    transportDock->setWidget(transportWidget);
-    transportDock->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::BottomDockWidgetArea, transportDock);
+	setCentralWidget(scopeWidget);
+	transportDock->setWidget(transportWidget);
+	transportDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::BottomDockWidgetArea, transportDock);
 
-    displaySettingsDock->setWidget(displaySettingsWidget);
-    displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
-    addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
+	displaySettingsDock->setWidget(displaySettingsWidget);
+	displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
 
-    displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
-    displaySettingsWidget->setFocus(scopeWidget->getFocus());
-    displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
+	displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
+	displaySettingsWidget->setFocus(scopeWidget->getFocus());
+	displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
 
-    setWindowTitle("Drag & drop a wave file");
-    setAcceptDrops(true);
+	setWindowTitle("Drag & drop a wave file");
+	setAcceptDrops(true);
 
-    fileMenu = menuBar()->addMenu("&File");
-    fileMenu->addAction("&Open ...", [this, scopeWidget, transportWidget]{
-       QString path = QFileDialog::getOpenFileName(this,
-                       tr("Open Sound File"), QDir::homePath(), tr("Sound Files (*.aif *.aifc *.aiff *.au *.avr *.caf *.flac *.htk *.iff *.mat *.mpc *.oga *.paf *.pvf *.raw *.rf64 *.sd2 *.sds *.sf *.voc *.w64 *.wav *.wve *.xi)"));
-       auto loadResult = scopeWidget->loadSoundFile(path);
-       transportWidget->setButtonsEnabled(loadResult.first);
-       if (loadResult.first) {
-           transportWidget->setLength(scopeWidget->getLengthMilliseconds());
-           setWindowTitle(path);
-       }
-    });
+	fileMenu = menuBar()->addMenu("&File");
+	fileMenu->addAction("&Open ...", this, [this, scopeWidget, transportWidget]{
+		QString path = QFileDialog::getOpenFileName(this,
+													tr("Open Sound File"),
+													QDir::homePath(),
+													tr("Sound Files (*.aif *.aifc *.aiff *.au *.avr *.caf *.flac *.htk *.iff *.mat *.mpc *.oga *.paf *.pvf *.raw *.rf64 *.sd2 *.sds *.sf *.voc *.w64 *.wav *.wve *.xi)")
+													);
+		auto loadResult = scopeWidget->loadSoundFile(path);
+		transportWidget->setButtonsEnabled(loadResult.first);
+		if (loadResult.first) {
+			transportWidget->setLength(scopeWidget->getLengthMilliseconds());
+			setWindowTitle(path);
+		}
+	});
 
-    preferencesMenu = menuBar()->addMenu("&Preferences");
-    QAction* squareDisplayOption = preferencesMenu->addAction("Square Display");
-    squareDisplayOption->setCheckable(true);
-    squareDisplayOption->setChecked(scopeWidget->getConstrainToSquare());
+	preferencesMenu = menuBar()->addMenu("&Preferences");
+	QAction* squareDisplayOption = preferencesMenu->addAction("Square Display");
+	squareDisplayOption->setCheckable(true);
+	squareDisplayOption->setChecked(scopeWidget->getConstrainToSquare());
 
-    connect(squareDisplayOption, &QAction::toggled, this, [scopeWidget](bool checked){
-        scopeWidget->setConstrainToSquare(checked);
-    });
+	connect(squareDisplayOption, &QAction::toggled, this, [scopeWidget](bool checked){
+		scopeWidget->setConstrainToSquare(checked);
+	});
 
-    connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
-    connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
-    connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
-    connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
-    connect(this, &MainWindow::fileDrop, [this, scopeWidget, transportWidget](const QString& path){
-        auto loadResult = scopeWidget->loadSoundFile(path);
-        transportWidget->setButtonsEnabled(loadResult.first);
-        if (loadResult.first) {
-            transportWidget->setLength(scopeWidget->getLengthMilliseconds());
-            setWindowTitle(path);
-        }
-    });
+	connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
+	connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
+	connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
+	connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
+	connect(this, &MainWindow::fileDrop, this, [this, scopeWidget, transportWidget](const QString& path){
+		auto loadResult = scopeWidget->loadSoundFile(path);
+		transportWidget->setButtonsEnabled(loadResult.first);
+		if (loadResult.first) {
+			transportWidget->setLength(scopeWidget->getLengthMilliseconds());
+			setWindowTitle(path);
+		}
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::brightnessChanged, this, [scopeWidget](double value){
-        scopeWidget->setBrightness(value);
-    });
+	connect(displaySettingsWidget, &DisplaySettingsWidget::brightnessChanged, this, [scopeWidget](double value){
+		scopeWidget->setBrightness(value);
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
-        scopeWidget->setFocus(value);
-    });
+	connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
+		scopeWidget->setFocus(value);
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
-       scopeWidget->setPersistence(value);
-    });
+	connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
+		scopeWidget->setPersistence(value);
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
-       if(colors.count() > 0) {
-            scopeWidget->setPhosphorColor(colors.at(0).rgba());
-       }
-    });
+	connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
+		if(colors.count() > 0) {
+			scopeWidget->setPhosphorColor(colors.at(0).rgba());
+		}
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::multiColorPhosphorChanged, this, [scopeWidget](bool multi, const QColor& altColor){
-       scopeWidget->setMultiColor(multi, altColor);
-    });
+	connect(displaySettingsWidget, &DisplaySettingsWidget::multiColorPhosphorChanged, this, [scopeWidget](bool multi, const QColor& altColor){
+		scopeWidget->setMultiColor(multi, altColor);
+	});
 
-    connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
+	connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
-    // get a list of audio output devices
-    // todo: user selection from ComboBox
-    auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
-    qDebug().noquote() << "Audio Output Devices";
-    for(const QAudioDeviceInfo& device : devices) {
-        qDebug().noquote() << device.deviceName();
-    }
-
+	// get a list of audio output devices
+	// todo: user selection from ComboBox
+	auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
+	qDebug().noquote() << "Audio Output Devices";
+	for(const QAudioDeviceInfo& device : qAsConst(devices)) {
+		qDebug().noquote() << device.deviceName();
+	}
 }
 
 MainWindow::~MainWindow()
@@ -119,18 +121,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    auto mimeData = event->mimeData();
+	auto mimeData = event->mimeData();
 	if(mimeData->hasText()) {
-        QUrl url{mimeData->text()};
-        event->acceptProposedAction();
-    }
+		event->acceptProposedAction();
+	}
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    auto mimeData = event->mimeData();
+	auto mimeData = event->mimeData();
 	if(mimeData->hasText()) {
-        QUrl url{mimeData->text()};
+		QUrl url{mimeData->text()};
 		QString path = QDir::toNativeSeparators(url.path());
 
 #ifdef Q_OS_WIN
@@ -140,5 +141,5 @@ void MainWindow::dropEvent(QDropEvent *event)
 #endif
 
 		emit fileDrop(path);
-    }
+	}
 }
