@@ -136,9 +136,6 @@ private:
 	QTimer plotTimer;
 	QElapsedTimer elapsedTimer;
 
-	// midpoint of pixmap
-	double cx;
-	double cy;
 	int framesPerMillisecond{0};
 	double millisecondsPerFrame{0.0};
 	int64_t startFrame{0};
@@ -148,21 +145,25 @@ private:
 	bool fileLoaded{false};
 	bool paused{true};
 	int screenDrawCounter{0};
-	double brightness;
-	double focus;
-	int darkenAlpha;
+	bool constrainToSquare{true};
+	double brightness{66.0};
+	double focus{50.0};
+	double persistence{32.0};
 	int darkenNthFrame{1};
 	int darkenCooldownCounter{1};
-	int beamAlpha;
 	QRgb phosphorColor{0xff3eff6f};
 	QColor darkencolor{0, 0, 0, 0};
 	QColor backgroundColor{0, 0, 0, 0};
 	bool multiColor{false};
 	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
-	double persistence;
+
+	// midpoint of pixmap
+	double cx;
+	double cy;
+	int darkenAlpha;
+	int beamAlpha;
 	double beamWidth;
 	double beamIntensity;
-	bool constrainToSquare{true};
 
 	void calcCenter();
 	void render();
