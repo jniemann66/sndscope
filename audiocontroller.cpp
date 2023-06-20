@@ -10,19 +10,18 @@ AudioController::AudioController(QObject *parent) : QObject(parent)
 void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo)
 {
 	static const QMap<QAudioFormat::SampleType, QString> sampleTypeMap
-		{
-			{QAudioFormat::Unknown, "Unknown"},
-			{QAudioFormat::SignedInt, "Signed Int"},
-			{QAudioFormat::UnSignedInt, "Unsigned Int"},
-			{QAudioFormat::Float, "Floating Point"}
-		};
+	{
+		{QAudioFormat::Unknown, "Unknown"},
+		{QAudioFormat::SignedInt, "Signed Int"},
+		{QAudioFormat::UnSignedInt, "Unsigned Int"},
+		{QAudioFormat::Float, "Floating Point"}
+	};
 
 	if (!deviceInfo.isFormatSupported(format)) {
-		const QString msg = QStringLiteral("Audio Format Not Supported: %1Hz %2bit %3").arg(
-			QString::number(format.sampleRate()),
-			QString::number(format.sampleSize()),
-			sampleTypeMap.value(format.sampleType(), "Unknown")
-			);
+		const QString msg = QStringLiteral("Audio Format Not Supported: %1Hz %2bit %3")
+				.arg(QString::number(format.sampleRate()),
+					 QString::number(format.sampleSize()),
+					 sampleTypeMap.value(format.sampleType(), "Unknown"));
 		QMessageBox::warning(nullptr, "Audio Format Not Supported", msg);
 		return;
 	}
