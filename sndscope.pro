@@ -10,9 +10,14 @@ QT += core gui multimedia widgets
 CONFIG += c++11
 
 #import libsndfile
-unix {
+unix!macx {
     LIBS += -L/usr/lib/x86_64-linux-gnu/ -lsndfile
     INCLUDEPATH += /usr/include
+}
+
+macx {
+    LIBS *= -L/usr/local/lib -lsndfile
+    INCLUDEPATH *= /usr/local/include
 }
 
 win32 {

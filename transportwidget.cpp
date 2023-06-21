@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QTime>
+#include <QtGui>
 
 TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 {
@@ -23,19 +24,45 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 	slider = new QSlider(Qt::Horizontal);
 	rtsButton = new QPushButton;
 	playPauseButton = new QPushButton;
-	hh = new QLCDNumber(2);
-	mm = new QLCDNumber(2);
-	ss = new QLCDNumber(2);
-	ms = new QLCDNumber(3);
 
-	hh->setDecMode();
-	mm->setDecMode();
-	ss->setDecMode();
-	ms->setDecMode();
-	hh->setSegmentStyle(QLCDNumber::Filled);
-	mm->setSegmentStyle(QLCDNumber::Filled);
-	ss->setSegmentStyle(QLCDNumber::Filled);
-	ms->setSegmentStyle(QLCDNumber::Filled);
+
+    auto set7SegStyle = [this](QLCDNumber* l) {
+        auto p = l->palette();
+
+        p.setColor(QPalette::WindowText, QColor(0,255,255,255));
+        p.setColor(QPalette::Window, QColor(0,10,10,192));
+        p.setColor(QPalette::Dark, QColor(32,32,32));
+        p.setColor(QPalette::Light, QColor(128,128,128));
+
+
+//        l->setContentsMargins(5,5,5,5);
+        l->setAutoFillBackground(true);
+        l->setPalette(p);
+        l->setLineWidth(1);
+        l->setFrameShape(QFrame::Panel);
+        l->setFrameShadow(QFrame::Sunken);
+    };
+
+    hh = new QLCDNumber(2);
+    mm = new QLCDNumber(2);
+    ss = new QLCDNumber(2);
+    ms = new QLCDNumber(3);
+
+    set7SegStyle(hh);
+    set7SegStyle(mm);
+    set7SegStyle(ss);
+    set7SegStyle(ms);
+
+    hh->setDecMode();
+    mm->setDecMode();
+    ss->setDecMode();
+    ms->setDecMode();
+    hh->setSegmentStyle(QLCDNumber::Flat);
+    mm->setSegmentStyle(QLCDNumber::Flat);
+    ss->setSegmentStyle(QLCDNumber::Flat);
+    ms->setSegmentStyle(QLCDNumber::Flat);
+
+
 	setButtonsEnabled(false);
 
 	playPauseButton->setIcon(QIcon{":/icons/play-solid.png"});
@@ -52,6 +79,9 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 	buttonLayout->addWidget(ss);
 	buttonLayout->addWidget(new QLabel("."));
 	buttonLayout->addWidget(ms);
+
+
+
 
 	mainLayout->addLayout(sliderLayout);
 	mainLayout->addLayout(buttonLayout);

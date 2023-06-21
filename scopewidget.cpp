@@ -30,6 +30,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 	setConstrainToSquare(constrainToSquare);
 	pixmap.fill(Qt::black);
 	plotTimer.setInterval(plotInterval);
+
 	calcCenter();
 
 	connect(screenWidget, &PictureBox::pixmapResolutionChanged, this, [this](){
@@ -48,7 +49,10 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 		}
 	});
 
-	plotTimer.start();
+    plotTimer.start();
+    setBrightness(66.0);
+    setFocus(50.0);
+    setPersistence(32);
 
 	mainLayout->addLayout(screenLayout);
 	setLayout(mainLayout);

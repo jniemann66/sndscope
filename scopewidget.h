@@ -40,13 +40,15 @@ public:
 		resizeCooldown.setSingleShot(true);
 		resizeCooldown.setInterval(200);
 
-		connect(&resizeCooldown, &QTimer::timeout, this, [this]{
-			const int w = width();
-			const int h = height();
-			qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
-			*PictureBox::pixmap = PictureBox::pixmap->scaledToHeight(h);
-			emit pixmapResolutionChanged(PictureBox::pixmap->size());
-		});
+        connect(&resizeCooldown, &QTimer::timeout, this, [this]{
+            const int w = width();
+            if (this->pixmap->width() != w) {
+                const int h = height();
+                qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
+                *this->pixmap = this->pixmap->scaledToHeight(h);
+                emit pixmapResolutionChanged(PictureBox::pixmap->size());
+            }
+        });
 	}
 
 	// getters
