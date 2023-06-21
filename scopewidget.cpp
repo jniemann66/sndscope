@@ -146,7 +146,7 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
 	if(!colors.isEmpty()) {
-		phosphorColor = colors.at(0).rgb();
+		phosphorColor = colors.at(0);
 		if(colors.count() > 1) {
 			compositionMode = QPainter::CompositionMode_HardLight;
 			darkencolor = colors.at(1);
