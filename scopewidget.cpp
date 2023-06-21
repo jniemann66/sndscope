@@ -22,14 +22,15 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 	auto mainLayout = new QVBoxLayout;
 	screenLayout = new QHBoxLayout;
 
-	constexpr int virtualFPS = 100; // number of virtual frames per second
-	constexpr int screenFPS = 50;
+	constexpr int virtualFPS = 200; // number of virtual frames per second
+	constexpr int screenFPS = 100;
 	constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
 	constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
+	plotTimer.setInterval(plotInterval);
 
 	setConstrainToSquare(constrainToSquare);
-	pixmap.fill(Qt::black);
-	plotTimer.setInterval(plotInterval);
+
+	pixmap.fill(backgroundColor);
 
 	calcCenter();
 
@@ -49,13 +50,13 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 		}
 	});
 
-    plotTimer.start();
-    setBrightness(66.0);
-    setFocus(50.0);
-    setPersistence(32);
-
 	mainLayout->addLayout(screenLayout);
 	setLayout(mainLayout);
+
+	setBrightness(66.0);
+	setFocus(50.0);
+	setPersistence(32);
+	plotTimer.start();
 }
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
@@ -142,20 +143,17 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 	backgroundColor = value;
 }
 
-bool ScopeWidget::getMultiColor() const
+void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
-	return multiColor;
-}
-
-void ScopeWidget::setMultiColor(bool value, const QColor& altColor)
-{
-	multiColor = value;
-	if(multiColor) {
-		compositionMode = QPainter::CompositionMode_HardLight;
-		darkencolor = altColor;
-	} else {
-		compositionMode = QPainter::CompositionMode_SourceOver;
-		darkencolor = backgroundColor;
+	if(!colors.isEmpty()) {
+		phosphorColor = colors.at(0).rgb();
+		if(colors.count() > 1) {
+			compositionMode = QPainter::CompositionMode_HardLight;
+			darkencolor = colors.at(1);
+		} else {
+			compositionMode = QPainter::CompositionMode_SourceOver;
+			darkencolor = backgroundColor;
+		}
 	}
 }
 
@@ -171,6 +169,7 @@ void ScopeWidget::setPersistence(double value)
 	constexpr double decayTarget = 0.1;
 	// set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
 	constexpr int minDarkenAlpha = 32;
+	darkenAlpha = 0;
 	darkenNthFrame = 0;
 	do {
 		++darkenNthFrame;
@@ -178,17 +177,13 @@ void ScopeWidget::setPersistence(double value)
 		darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
 
 	} while (darkenAlpha < minDarkenAlpha);
+	darkencolor.setAlpha(darkenAlpha);
 	darkenCooldownCounter = darkenNthFrame;
 }
 
-QRgb ScopeWidget::getPhosphorColor() const
+QColor ScopeWidget::getPhosphorColor() const
 {
 	return phosphorColor;
-}
-
-void ScopeWidget::setPhosphorColor(const QRgb &value)
-{
-	phosphorColor = value;
 }
 
 double ScopeWidget::getFocus() const
@@ -218,6 +213,7 @@ void ScopeWidget::setBrightness(double value)
 void ScopeWidget::calcBeamAlpha()
 {
 	beamAlpha = qMin(1.27 * brightness * beamIntensity, 255.0);
+	phosphorColor.setAlpha(beamAlpha);
 }
 
 int64_t ScopeWidget::getTotalFrames() const
@@ -240,30 +236,57 @@ void ScopeWidget::render()
 
 	if(--darkenCooldownCounter == 0) {
 		// darken:
-		QColor d{darkencolor};
-		d.setAlpha(darkenAlpha);
-		painter.fillRect(pixmap.rect(), d);
+		painter.fillRect(pixmap.rect(), darkencolor);
 		darkenCooldownCounter = darkenNthFrame;
 	}
 
-	// prepare pen
-	QColor c{phosphorColor};
-	c.setAlpha(beamAlpha);
-	const QPen pen{c, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
-
 	// set pen
-	painter.setPen(pen);
 	painter.setRenderHint(QPainter::Antialiasing);
+	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+	painter.setPen(pen);
 
 	// draw
 	for(int64_t i = 0; i < 2 * framesRead; i+= 2 ) {
-		// get sample values for each channel
+
 		float ch0val = inputBuffer.at(i);
 		float ch1val = inputBuffer.at(i + 1);
-		// plot point
-		float x = (1.0 + ch0val) * cx;
-		float y = (1.0 - ch1val) * cy;
-		painter.drawPoint(QPointF{x,y});
+
+		QPointF pt;
+		switch(channelMode) {
+		case XY:
+		default:
+			pt = {(1.0 + ch0val) * cx, (1.0 - ch1val) * cy};
+			painter.drawPoint(pt);
+			break;
+		case MidSide:
+		{
+			constexpr double rsqrt2 = 0.707; // 1 / sqrt(2)
+			pt = {(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
+				  (1.0 - rsqrt2*(ch0val + ch1val)) * cy};
+			painter.drawPoint(pt);
+			break;
+		}
+		case Single:
+		{
+			constexpr double thresh = 100.0 / 32767;
+			static const double sweepAdvance = 0.02 * cx / framesPerMillisecond;
+			static bool triggered = false;
+			static double x = 0;
+			static QPointF lastPoint;
+
+			if(triggered || (triggered == (ch0val >= 0.0 && ch0val < thresh))) {
+				pt = {x , cy *(1.0 - ch0val)};
+				painter.drawLine(lastPoint, pt);
+				lastPoint = pt;
+				x += sweepAdvance;
+				if(x >= 2.0 * cx) {
+					triggered = false;
+					x = 0;
+					lastPoint = {x, cy};
+				}
+			}
+		}
+		}
 	}
 
 	const int bytesPerFrame = audioFormat.bytesPerFrame();
@@ -281,8 +304,19 @@ void ScopeWidget::wipeScreen()
 
 	// darken:
 	painter.fillRect(pixmap.rect(), d);
+	screenWidget->setPixmap(pixmap);
 
 	screenDrawCounter = 0;
+}
+
+ChannelMode ScopeWidget::getChannelMode() const
+{
+	return channelMode;
+}
+
+void ScopeWidget::setChannelMode(ChannelMode newChannelMode)
+{
+	channelMode = newChannelMode;
 }
 
 bool ScopeWidget::getConstrainToSquare() const

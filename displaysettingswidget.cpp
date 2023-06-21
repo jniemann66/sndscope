@@ -98,14 +98,8 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 			}
 
 			if(phosphorColors.count() > 0) {
+				emit phosphorColorChanged(phosphorColors);
 				setPersistence(phosphor.layers.at(0).persistence);
-				emit phosphorColorChanged({phosphorColors.at(0)});
-				emit persistenceChanged(phosphor.layers.at(0).persistence);
-				if(phosphorColors.count() > 1) {
-					emit multiColorPhosphorChanged(true, phosphorColors.at(1));
-				} else {
-					emit multiColorPhosphorChanged(false, QColor{0, 0, 0, 0});
-				}
 			}
 		}
 	});

@@ -7,7 +7,7 @@
 
 QT += core gui multimedia widgets
 
-CONFIG += c++11
+CONFIG += c++17
 
 #import libsndfile
 unix!macx {

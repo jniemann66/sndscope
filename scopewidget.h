@@ -29,6 +29,13 @@
 
 #include "audiocontroller.h"
 
+enum ChannelMode
+{
+	XY,
+	MidSide,
+	Single
+};
+
 class PictureBox : public QLabel
 {
 	Q_OBJECT
@@ -37,10 +44,10 @@ public:
 	{
 		setPixmap(*pixmap);
 		setScaledContents(true);
-		resizeCooldown.setSingleShot(true);
-		resizeCooldown.setInterval(200);
+		resizeCooldownTimer.setSingleShot(true);
+		resizeCooldownTimer.setInterval(200);
 
-        connect(&resizeCooldown, &QTimer::timeout, this, [this]{
+		connect(&resizeCooldownTimer, &QTimer::timeout, this, [this]{
             const int w = width();
             if (this->pixmap->width() != w) {
                 const int h = height();
@@ -73,12 +80,12 @@ protected:
 		}
 
 		if(event->size() != event->oldSize() && allowPixmapResolutionChange) {
-			resizeCooldown.start();
+			resizeCooldownTimer.start();
 		}
 	}
 
 private:
-	QTimer resizeCooldown;
+	QTimer resizeCooldownTimer;
 	QPixmap *pixmap{nullptr};
 	bool constrainToSquare{true};
 	bool allowPixmapResolutionChange{true};
@@ -93,25 +100,26 @@ public:
 	QPair<bool, QString> loadSoundFile(const QString &filename);
 
 	// getters
+	ChannelMode getChannelMode() const;
 	int getLengthMilliseconds() const;
 	bool getPaused() const;
 	int64_t getTotalFrames() const;
 	double getBrightness() const;
 	double getFocus() const;
-	QRgb getPhosphorColor() const;
+	QColor getPhosphorColor() const;
 	double getPersistence() const;
 	bool getMultiColor() const;
 	QColor getBackgroundColor() const;
 	bool getConstrainToSquare() const;
 
 	// setters
+	void setChannelMode(ChannelMode newChannelMode);
 	void setPaused(bool value);
 	void setTotalFrames(const int64_t &value);
 	void setBrightness(double value);
 	void setFocus(double value);
-	void setPhosphorColor(const QRgb &value);
 	void setPersistence(double value);
-	void setMultiColor(bool value, const QColor& altColor);
+	void setPhosporColors(const QVector<QColor> &colors);
 	void setBackgroundColor(const QColor &value);
 	void setConstrainToSquare(bool value);
 
@@ -138,6 +146,7 @@ private:
 	QTimer plotTimer;
 	QElapsedTimer elapsedTimer;
 
+	ChannelMode channelMode;//{XY};
 	int framesPerMillisecond{0};
 	double millisecondsPerFrame{0.0};
 	int64_t startFrame{0};
@@ -153,10 +162,9 @@ private:
 	double persistence{32.0};
 	int darkenNthFrame{1};
 	int darkenCooldownCounter{1};
-	QRgb phosphorColor{0xff3eff6f};
+	QColor phosphorColor{0x3e, 0xff, 0x6f, 0xff};
 	QColor darkencolor{0, 0, 0, 0};
-	QColor backgroundColor{0, 0, 0, 0};
-	bool multiColor{false};
+	QColor backgroundColor{0, 0, 0, 255};
 	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
 
 	// midpoint of pixmap

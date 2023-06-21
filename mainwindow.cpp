@@ -90,18 +90,12 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 		scopeWidget->setFocus(value);
 	});
 
+	connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](const QVector<QColor>& colors){
+		scopeWidget->setPhosporColors(colors);
+	});
+
 	connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
 		scopeWidget->setPersistence(value);
-	});
-
-	connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](QVector<QColor> colors){
-		if(colors.count() > 0) {
-			scopeWidget->setPhosphorColor(colors.at(0).rgba());
-		}
-	});
-
-	connect(displaySettingsWidget, &DisplaySettingsWidget::multiColorPhosphorChanged, this, [scopeWidget](bool multi, const QColor& altColor){
-		scopeWidget->setMultiColor(multi, altColor);
 	});
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
