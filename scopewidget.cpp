@@ -22,8 +22,8 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 	auto mainLayout = new QVBoxLayout;
 	screenLayout = new QHBoxLayout;
 
-	constexpr int virtualFPS = 200; // number of virtual frames per second
-	constexpr int screenFPS = 100;
+	constexpr int virtualFPS = 100; // number of virtual frames per second
+	constexpr int screenFPS = 50;
 	constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
 	constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
 	plotTimer.setInterval(plotInterval);
