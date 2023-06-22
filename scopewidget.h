@@ -146,7 +146,7 @@ private:
 	QTimer plotTimer;
 	QElapsedTimer elapsedTimer;
 
-	ChannelMode channelMode;//{XY};
+    ChannelMode channelMode{XY};
 	int framesPerMillisecond{0};
 	double millisecondsPerFrame{0.0};
 	int64_t startFrame{0};
