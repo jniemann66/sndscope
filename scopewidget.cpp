@@ -13,6 +13,8 @@
 #include <QPainter>
 #include <QEvent>
 #include <QDebug>
+#include <differentiator.h>
+
 #include <cmath>
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
@@ -53,9 +55,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
 	mainLayout->addLayout(screenLayout);
 	setLayout(mainLayout);
 
-	setBrightness(66.0);
-	setFocus(50.0);
-	setPersistence(32);
 	plotTimer.start();
 }
 
@@ -145,6 +144,7 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 
 void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
+	// qDebug() << __func__;
 	if(!colors.isEmpty()) {
 		phosphorColor = colors.at(0);
 		if(colors.count() > 1) {
@@ -162,21 +162,25 @@ double ScopeWidget::getPersistence() const
 	return persistence;
 }
 
-void ScopeWidget::setPersistence(double value)
+void ScopeWidget::setPersistence(double time_ms)
 {
-	persistence = value;
-	// define fraction of original brightness (10%)
-	constexpr double decayTarget = 0.1;
+	// qDebug() << QStringLiteral("setting persistence to %1").arg(time_ms);
+	persistence = time_ms;
+
+	// define fraction of original brightness
+	constexpr double decayTarget = 0.2;
+
 	// set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
 	constexpr int minDarkenAlpha = 32;
+
 	darkenAlpha = 0;
 	darkenNthFrame = 0;
 	do {
-		++darkenNthFrame;
-		double n = std::max(0.01, value / plotTimer.interval()) / darkenNthFrame; // number of frames to reach decayTarget (can't be zero)
+		++darkenNthFrame; // for really long persistence, darkening operation may need to occur less often than once per frame
+		double n = std::max(1.0, time_ms / plotTimer.interval()) / darkenNthFrame; // number of frames to reach decayTarget (can't be zero)
 		darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
-
 	} while (darkenAlpha < minDarkenAlpha);
+
 	darkencolor.setAlpha(darkenAlpha);
 	darkenCooldownCounter = darkenNthFrame;
 }
@@ -228,6 +232,8 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
+	static Differentiator<double> d;
+
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
 	const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
 
@@ -260,7 +266,7 @@ void ScopeWidget::render()
 			break;
 		case MidSide:
 		{
-			constexpr double rsqrt2 = 0.707; // 1 / sqrt(2)
+			constexpr double rsqrt2 = 0.707;
 			pt = {(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
 				  (1.0 - rsqrt2*(ch0val + ch1val)) * cy};
 			painter.drawPoint(pt);
@@ -268,21 +274,23 @@ void ScopeWidget::render()
 		}
 		case Single:
 		{
-			constexpr double thresh = 100.0 / 32767;
-			static const double sweepAdvance = 0.02 * cx / framesPerMillisecond;
+			constexpr double thresh = 0.01;
+			static const double sweepAdvance = 0.1 * cx / framesPerMillisecond;
 			static bool triggered = false;
-			static double x = 0;
-			static QPointF lastPoint;
+			static double x = 0.0;
+			static QPointF lastPoint{x, cy};
 
-			if(triggered || (triggered == (ch0val >= 0.0 && ch0val < thresh))) {
-				pt = {x , cy *(1.0 - ch0val)};
+			double slope = d.get(ch0val);
+			triggered = triggered || (std::abs(ch0val) < thresh && slope > 0);
+
+			if(triggered) {
+				pt = {x, cy * (1.0 - ch0val)};
 				painter.drawLine(lastPoint, pt);
 				lastPoint = pt;
 				x += sweepAdvance;
-				if(x >= 2.0 * cx) {
+				if(x >= 2.0 * cx) { // sweep completed
 					triggered = false;
-					x = 0;
-					lastPoint = {x, cy};
+					lastPoint = {x = 0.0, cy};
 				}
 			}
 		}

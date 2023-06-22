@@ -45,6 +45,7 @@ SOURCES += \
 
 HEADERS += \
     audiocontroller.h \
+    differentiator.h \
     displaysettingswidget.h \
     mainwindow.h \
     phosphor.h \

@@ -118,7 +118,7 @@ public:
 	void setTotalFrames(const int64_t &value);
 	void setBrightness(double value);
 	void setFocus(double value);
-	void setPersistence(double value);
+	void setPersistence(double time_ms);
 	void setPhosporColors(const QVector<QColor> &colors);
 	void setBackgroundColor(const QColor &value);
 	void setConstrainToSquare(bool value);
@@ -146,7 +146,7 @@ private:
 	QTimer plotTimer;
 	QElapsedTimer elapsedTimer;
 
-    ChannelMode channelMode{XY};
+	ChannelMode channelMode{XY};
 	int framesPerMillisecond{0};
 	double millisecondsPerFrame{0.0};
 	int64_t startFrame{0};

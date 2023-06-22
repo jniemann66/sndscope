@@ -107,6 +107,11 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	for(const QAudioDeviceInfo& device : qAsConst(devices)) {
 		qDebug().noquote() << device.deviceName();
 	}
+
+	scopeWidget->setBrightness(66.0);
+	scopeWidget->setFocus(40.0);
+	scopeWidget->setPersistence(48);
+
 }
 
 MainWindow::~MainWindow()
