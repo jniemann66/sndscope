@@ -15,6 +15,8 @@ AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 	volumeSliderLabel->setPixmap(QPixmap{":/icons/speaker1.png"}.scaled({24,24}));
 	volumeSlider = new QSlider;
 	volumeSlider->setRange(0, 100);
+	volumeSlider->setValue(100);
+	volumeSlider->setTickInterval(10);
 
 	auto outputDeviceLayout = new QVBoxLayout;
 	outputDeviceLayout->addWidget(deviceSelectorLabel);
