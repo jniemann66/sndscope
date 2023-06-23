@@ -36,60 +36,112 @@ enum ChannelMode
 	Single
 };
 
-class PictureBox : public QLabel
+// ScopeDisplay : this is the Oscilloscope's screen
+// it owns a QPixmap as an image buffer, which is accessed via getPixmap()
+
+class ScopeDisplay : public QWidget
 {
 	Q_OBJECT
 public:
-	PictureBox(QPixmap* pixmap, QWidget* parent = nullptr) : QLabel(parent), pixmap(pixmap)
-	{
-		setPixmap(*pixmap);
-		setScaledContents(true);
-		resizeCooldownTimer.setSingleShot(true);
-		resizeCooldownTimer.setInterval(200);
+    ScopeDisplay(QWidget* parent = nullptr) : QWidget(parent), pixmap(640, 640)
+    {
+        setAutoFillBackground(false);
+        resizeCooldownTimer.setSingleShot(true);
+        resizeCooldownTimer.setInterval(50);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
+        // actual resizing of pixmap is only done after waiting for resize events to settle-down
 		connect(&resizeCooldownTimer, &QTimer::timeout, this, [this]{
-            const int w = width();
-            if (this->pixmap->width() != w) {
+            if (pixmap.height() != height()) {
                 const int h = height();
+                const int w = constrainToSquare ? h : width();
                 qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
-                *this->pixmap = this->pixmap->scaledToHeight(h);
-                emit pixmapResolutionChanged(PictureBox::pixmap->size());
+                pixmap = pixmap.scaled(w, h);
+                emit pixmapResolutionChanged(pixmap.size());
             }
         });
 	}
 
 	// getters
-	bool getConstrainToSquare() const;
-	bool getAllowPixmapResolutionChange() const;
+    QPixmap* getPixmap()
+    {
+        return &pixmap;
+    }
+
+    bool getConstrainToSquare() const
+    {
+        return constrainToSquare;
+    }
+
+    bool getAllowPixmapResolutionChange() const
+    {
+        return allowPixmapResolutionChange;
+    }
 
 	// setters
-	void setConstrainToSquare(bool value);
-	void setAllowPixmapResolutionChange(bool value);
+    void setConstrainToSquare(bool value)
+    {
+        constrainToSquare = value;
+    }
+
+    void setAllowPixmapResolutionChange(bool value)
+    {
+        allowPixmapResolutionChange = value;
+    }
 
 signals:
 	void pixmapResolutionChanged(const QSizeF& size);
 
 protected:
-	void resizeEvent(QResizeEvent *event) override {
+
+
+
+    QSize sizeHint() const override
+    {
+        return pixmap.size();
+    }
+
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+        QPainter p(this);
+
+        if(size() == pixmap.size()) {
+            p.drawPixmap(0, 0, pixmap);
+        } else {
+            p.drawPixmap(0, 0, pixmap.scaled(size()));
+        }
+    }
+
+    void resizeEvent(QResizeEvent *event) override
+    {
+       // qDebug() << size();
 		if(constrainToSquare) {
 			auto h = event->size().height();
-			auto w = event->size().width();
-			if(w != h) {
-				setFixedWidth(h);
-			}
-		}
+            setFixedWidth(h);
+        }
 
-		if(event->size() != event->oldSize() && allowPixmapResolutionChange) {
+        if(constrainToSquare) {
+            setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        } else {
+            setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+        }
+        updateGeometry();
+
+
+        if(allowPixmapResolutionChange) {
 			resizeCooldownTimer.start();
 		}
 	}
 
 private:
 	QTimer resizeCooldownTimer;
-	QPixmap *pixmap{nullptr};
-	bool constrainToSquare{true};
+    QPixmap pixmap;
+    bool constrainToSquare{false};
 	bool allowPixmapResolutionChange{true};
 };
+
+// ScopeWidget : the heart of the Oscilloscope
 
 class ScopeWidget : public QWidget
 {
@@ -133,8 +185,11 @@ signals:
 
 protected:
 
+  //  void resizeEvent(QResizeEvent *event) {
+
+   // }
 private:
-	PictureBox* screenWidget{nullptr};
+    ScopeDisplay* scopeDisplay{nullptr};
 	AudioController *audioController{nullptr};
 	QIODevice* pushOut{nullptr};
 	QHBoxLayout *screenLayout{nullptr};
@@ -142,11 +197,11 @@ private:
 	std::unique_ptr<SndfileHandle> sndfile;
 	QVector<float> inputBuffer;
 	QAudioFormat audioFormat;
-	QPixmap pixmap;
 	QTimer plotTimer;
+    QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
 
-	ChannelMode channelMode{XY};
+    ChannelMode channelMode{XY};
 	int framesPerMillisecond{0};
 	double millisecondsPerFrame{0.0};
 	int64_t startFrame{0};
@@ -155,8 +210,7 @@ private:
 	int64_t totalFrames{0ll};
 	bool fileLoaded{false};
 	bool paused{true};
-	int screenDrawCounter{0};
-	bool constrainToSquare{true};
+    bool constrainToSquare{false};
 	double brightness{66.0};
 	double focus{50.0};
 	double persistence{32.0};
@@ -166,6 +220,7 @@ private:
 	QColor darkencolor{0, 0, 0, 0};
 	QColor backgroundColor{0, 0, 0, 255};
 	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
+    bool freshRender{false};
 
 	// midpoint of pixmap
 	double cx;

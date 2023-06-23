@@ -31,8 +31,6 @@ protected:
 private:
 	QMenu* fileMenu{nullptr};
 	QMenu* preferencesMenu{nullptr};
-
-
 };
 
 #endif // MAINWINDOW_H

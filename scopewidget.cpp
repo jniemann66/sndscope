@@ -17,45 +17,50 @@
 
 #include <cmath>
 
-ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent), pixmap(640, 640)
+ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
-	screenWidget = new PictureBox(&pixmap);
+    scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
 	auto mainLayout = new QVBoxLayout;
 	screenLayout = new QHBoxLayout;
 
-	constexpr int virtualFPS = 100; // number of virtual frames per second
+    constexpr int virtualFPS = 100; // number of virtual frames per second
 	constexpr int screenFPS = 50;
-	constexpr int v_to_s_Ratio = virtualFPS / screenFPS; // number of virtual frames per screen frame
 	constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
-	plotTimer.setInterval(plotInterval);
+    constexpr double screenUpdateInterval = 1000.0 / screenFPS;
 
-	setConstrainToSquare(constrainToSquare);
-
-	pixmap.fill(backgroundColor);
+    plotTimer.setInterval(plotInterval);
+    screenUpdateTimer.setInterval(screenUpdateInterval);
+    scopeDisplay->getPixmap()->fill(backgroundColor);
 
 	calcCenter();
-
-	connect(screenWidget, &PictureBox::pixmapResolutionChanged, this, [this](){
+    connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
 		calcCenter();
 	});
 
 	connect(&plotTimer, &QTimer::timeout, this, [this]{
 		if(!paused) {
 			render();
-			screenDrawCounter++;
-			if(screenDrawCounter == v_to_s_Ratio) {
-				screenWidget->setPixmap(pixmap);
-				screenDrawCounter = 0;
-			}
+            freshRender = true;
 			emit renderedFrame(currentFrame * millisecondsPerFrame);
 		}
 	});
 
+    connect(&screenUpdateTimer, &QTimer::timeout, this, [this] {
+        if(!paused) {
+            if(freshRender) {
+                scopeDisplay->update();
+                freshRender = false;
+            }
+        }
+    });
+
+    screenLayout->addWidget(scopeDisplay, 0, Qt::AlignHCenter);
 	mainLayout->addLayout(screenLayout);
 	setLayout(mainLayout);
 
 	plotTimer.start();
+    screenUpdateTimer.start();
 }
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
@@ -144,7 +149,6 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 
 void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
-	// qDebug() << __func__;
 	if(!colors.isEmpty()) {
 		phosphorColor = colors.at(0);
 		if(colors.count() > 1) {
@@ -237,12 +241,13 @@ void ScopeWidget::render()
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * framesPerMillisecond));
 	const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
 
-	QPainter painter(&pixmap);
+    auto pixmap = scopeDisplay->getPixmap();
+    QPainter painter(pixmap);
 	painter.setCompositionMode(compositionMode);
 
 	if(--darkenCooldownCounter == 0) {
-		// darken:
-		painter.fillRect(pixmap.rect(), darkencolor);
+        // darken:
+        painter.fillRect(pixmap->rect(), darkencolor);
 		darkenCooldownCounter = darkenNthFrame;
 	}
 
@@ -304,17 +309,16 @@ void ScopeWidget::render()
 
 void ScopeWidget::wipeScreen()
 {
-	QPainter painter(&pixmap);
+    auto pixmap = scopeDisplay->getPixmap();
+    QPainter painter(pixmap);
 	painter.setCompositionMode(compositionMode);
 
 	QColor d{darkencolor};
 	d.setAlpha(255);
 
-	// darken:
-	painter.fillRect(pixmap.rect(), d);
-	screenWidget->setPixmap(pixmap);
-
-	screenDrawCounter = 0;
+    // darken:
+    painter.fillRect(pixmap->rect(), d);
+    scopeDisplay->update();
 }
 
 ChannelMode ScopeWidget::getChannelMode() const
@@ -335,45 +339,14 @@ bool ScopeWidget::getConstrainToSquare() const
 void ScopeWidget::setConstrainToSquare(bool value)
 {
 	constrainToSquare = value;
-	screenWidget->setConstrainToSquare(value);
-
-	for(int i = 0; i < screenLayout->count(); i++) {
-		screenLayout->removeItem(screenLayout->itemAt(i));
-	}
-
-	if(constrainToSquare) {
-		screenLayout->addStretch();
-	}
-
-	screenLayout->addWidget(screenWidget);
-
-	if(constrainToSquare) {
-		screenLayout->addStretch();
-	}
+    scopeDisplay->setConstrainToSquare(value);
+//    scopeDisplay->adjustSize();
+//    qDebug() << scopeDisplay->sizePolicy();
 }
 
 void ScopeWidget::calcCenter()
 {
-	cx = pixmap.width() / 2;
-	cy = pixmap.height() / 2;
-}
-
-void PictureBox::setAllowPixmapResolutionChange(bool value)
-{
-	allowPixmapResolutionChange = value;
-}
-
-bool PictureBox::getAllowPixmapResolutionChange() const
-{
-	return allowPixmapResolutionChange;
-}
-
-bool PictureBox::getConstrainToSquare() const
-{
-	return constrainToSquare;
-}
-
-void PictureBox::setConstrainToSquare(bool value)
-{
-	constrainToSquare = value;
+    auto pixmap = scopeDisplay->getPixmap();
+    cx = pixmap->width() / 2;
+    cy = pixmap->height() / 2;
 }

@@ -42,6 +42,11 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	displaySettingsWidget->setFocus(scopeWidget->getFocus());
 	displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
 
+    // todo: read from settings file
+    bool squareDisplayOnly = true;
+    scopeWidget->setConstrainToSquare(squareDisplayOnly);
+    //
+
 	setWindowTitle("Drag & drop a wave file");
 	setAcceptDrops(true);
 
@@ -62,11 +67,11 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	preferencesMenu = menuBar()->addMenu("&Preferences");
 	QAction* squareDisplayOption = preferencesMenu->addAction("Square Display");
-	squareDisplayOption->setCheckable(true);
-	squareDisplayOption->setChecked(scopeWidget->getConstrainToSquare());
+    squareDisplayOption->setCheckable(true);
+    squareDisplayOption->setChecked(squareDisplayOnly);
 
-	connect(squareDisplayOption, &QAction::toggled, this, [scopeWidget](bool checked){
-		scopeWidget->setConstrainToSquare(checked);
+    connect(squareDisplayOption, &QAction::triggered, this, [scopeWidget](bool checked){
+        scopeWidget->setConstrainToSquare(checked);
 	});
 
 	connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
@@ -111,6 +116,8 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	scopeWidget->setBrightness(66.0);
 	scopeWidget->setFocus(40.0);
 	scopeWidget->setPersistence(48);
+
+
 
 }
 
