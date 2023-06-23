@@ -22,6 +22,7 @@ class AudioController : public QObject
 public:
 	explicit AudioController(QObject *parent = nullptr);
 	void initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo);
+	void setOutputVolume(qreal linearVolume);
 	QIODevice *start();
 
 signals:

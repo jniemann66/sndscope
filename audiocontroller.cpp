@@ -41,12 +41,21 @@ void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDe
 	//                                                QAudio::LinearVolumeScale,
 	//                                                    QAudio::LogarithmicVolumeScale);
 
+
+
 	audioOutput->setBufferSize(2 * format.sampleRate() * format.bytesPerFrame());
 
 	connect(audioOutput.get(), &QAudioOutput::stateChanged, this, [this]{
 		qDebug().noquote() << "Audio Status:" << audioOutput->state();
 	});
 
+}
+
+void AudioController::setOutputVolume(qreal linearVolume)
+{
+	if(audioOutput != nullptr) {
+		audioOutput->setVolume(linearVolume);
+	}
 }
 
 QIODevice* AudioController::start()

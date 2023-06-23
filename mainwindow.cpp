@@ -18,6 +18,7 @@
 #include <QMenuBar>
 #include <QFileDialog>
 
+#include "audiosettingswidget.h"
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
 
@@ -28,6 +29,8 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	auto transportWidget = new TransportWidget(transportDock);
 	auto displaySettingsDock = new QDockWidget("Display", this);
 	auto displaySettingsWidget = new DisplaySettingsWidget(displaySettingsDock);
+	auto audioSettingsDock = new QDockWidget("Audio Settings", this);
+	auto audioSettingsWidget = new AudioSettingsWidget(audioSettingsDock);
 
 	setCentralWidget(scopeWidget);
 	transportDock->setWidget(transportWidget);
@@ -38,9 +41,15 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
 
+	audioSettingsDock->setWidget(audioSettingsWidget);
+	audioSettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::RightDockWidgetArea, audioSettingsDock);
+
 	displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
 	displaySettingsWidget->setFocus(scopeWidget->getFocus());
 	displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
+
+
 
     // todo: read from settings file
     bool squareDisplayOnly = true;
@@ -105,20 +114,16 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
-	// get a list of audio output devices
-	// todo: user selection from ComboBox
-	auto devices = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput);
-	qDebug().noquote() << "Audio Output Devices";
-	for(const QAudioDeviceInfo& device : qAsConst(devices)) {
-		qDebug().noquote() << device.deviceName();
-	}
+
+	connect(audioSettingsWidget, &AudioSettingsWidget::outputDeviceSelected, this, [scopeWidget](const QAudioDeviceInfo& audioDeviceInfo){
+		scopeWidget->setOutputDeviceInfo(audioDeviceInfo);
+	});
+
+	connect(audioSettingsWidget, &AudioSettingsWidget::outputVolumeChanged, scopeWidget, &ScopeWidget::setAudioVolume);
 
 	scopeWidget->setBrightness(66.0);
 	scopeWidget->setFocus(40.0);
 	scopeWidget->setPersistence(48);
-
-
-
 }
 
 MainWindow::~MainWindow()

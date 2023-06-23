@@ -25,7 +25,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	screenLayout = new QHBoxLayout;
 
     constexpr int virtualFPS = 100; // number of virtual frames per second
-	constexpr int screenFPS = 50;
+	constexpr int screenFPS = 150;
 	constexpr double plotInterval = 1000.0 / virtualFPS; // interval (in ms) between virtual frames
     constexpr double screenUpdateInterval = 1000.0 / screenFPS;
 
@@ -61,6 +61,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 
 	plotTimer.start();
     screenUpdateTimer.start();
+	outputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
 }
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
@@ -84,8 +85,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 		audioFormat.setCodec("audio/pcm");
 		audioFormat.setByteOrder(QAudioFormat::LittleEndian);
 		audioFormat.setSampleType(QAudioFormat::Float);
-		auto device = QAudioDeviceInfo::defaultOutputDevice();
-		audioController->initializeAudio(audioFormat, device);
+		audioController->initializeAudio(audioFormat, outputDeviceInfo);
 	}
 
 	return {fileLoaded, sndfile->strError()};
@@ -318,7 +318,17 @@ void ScopeWidget::wipeScreen()
 
     // darken:
     painter.fillRect(pixmap->rect(), d);
-    scopeDisplay->update();
+	scopeDisplay->update();
+}
+
+QAudioDeviceInfo ScopeWidget::getOutputDeviceInfo() const
+{
+	return outputDeviceInfo;
+}
+
+void ScopeWidget::setOutputDeviceInfo(const QAudioDeviceInfo &newOutputDeviceInfo)
+{
+	outputDeviceInfo = newOutputDeviceInfo;
 }
 
 ChannelMode ScopeWidget::getChannelMode() const
@@ -349,4 +359,9 @@ void ScopeWidget::calcCenter()
     auto pixmap = scopeDisplay->getPixmap();
     cx = pixmap->width() / 2;
     cy = pixmap->height() / 2;
+}
+
+void ScopeWidget::setAudioVolume(qreal linearVolume)
+{
+	audioController->setOutputVolume(linearVolume);
 }

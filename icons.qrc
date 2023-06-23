@@ -4,5 +4,6 @@
         <file>icons/step-backward-solid.png</file>
         <file>icons/pause-solid.png</file>
         <file>icons/wipe-small.png</file>
+        <file>icons/speaker1.png</file>
     </qresource>
 </RCC>

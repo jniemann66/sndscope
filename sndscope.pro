@@ -36,6 +36,7 @@ win32 {
 
 SOURCES += \
     audiocontroller.cpp \
+    audiosettingswidget.cpp \
     displaysettingswidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -45,6 +46,7 @@ SOURCES += \
 
 HEADERS += \
     audiocontroller.h \
+    audiosettingswidget.h \
     differentiator.h \
     displaysettingswidget.h \
     mainwindow.h \

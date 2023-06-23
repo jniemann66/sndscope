@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QHBoxLayout>
+#include <QAudioDeviceInfo>
 
 #include <sndfile.hh>
 
@@ -175,10 +176,14 @@ public:
 	void setBackgroundColor(const QColor &value);
 	void setConstrainToSquare(bool value);
 
+	QAudioDeviceInfo getOutputDeviceInfo() const;
+	void setOutputDeviceInfo(const QAudioDeviceInfo &newOutputDeviceInfo);
+
 public slots:
 	void returnToStart();
 	void gotoPosition(int64_t milliSeconds);
 	void wipeScreen();
+	void setAudioVolume(qreal linearVolume);
 
 signals:
 	void renderedFrame(int positionMilliseconds);
@@ -197,9 +202,11 @@ private:
 	std::unique_ptr<SndfileHandle> sndfile;
 	QVector<float> inputBuffer;
 	QAudioFormat audioFormat;
+	QAudioDeviceInfo outputDeviceInfo;
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
+
 
     ChannelMode channelMode{XY};
 	int framesPerMillisecond{0};
@@ -237,5 +244,7 @@ private:
 signals:
 
 };
+
+
 
 #endif // SCOPEWIDGET_H
