@@ -4,7 +4,7 @@
 * terms of the GNU Lesser General Public License, version 2.1
 *
 * You should have received a copy of GNU Lesser General Public License v2.1
-* with this file. If not, please refer to: https://github.com/jniemann66/ReSampler
+* with this file. If not, please refer to: https://github.com/jniemann66/sndscope.git
 */
 
 #include "displaysettingswidget.h"
