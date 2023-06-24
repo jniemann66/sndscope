@@ -30,11 +30,11 @@
 
 #include "audiocontroller.h"
 
-enum ChannelMode
+enum PlotMode
 {
 	XY,
 	MidSide,
-	Single
+	Sweep
 };
 
 // ScopeDisplay : this is the Oscilloscope's screen
@@ -153,7 +153,7 @@ public:
 	QPair<bool, QString> loadSoundFile(const QString &filename);
 
 	// getters
-	ChannelMode getChannelMode() const;
+	PlotMode getChannelMode() const;
 	int getLengthMilliseconds() const;
 	bool getPaused() const;
 	int64_t getTotalFrames() const;
@@ -166,7 +166,7 @@ public:
 	bool getConstrainToSquare() const;
 
 	// setters
-	void setChannelMode(ChannelMode newChannelMode);
+	void setChannelMode(PlotMode newChannelMode);
 	void setPaused(bool value);
 	void setTotalFrames(const int64_t &value);
 	void setBrightness(double value);
@@ -177,7 +177,7 @@ public:
 	void setConstrainToSquare(bool value);
 
 	QAudioDeviceInfo getOutputDeviceInfo() const;
-	void setOutputDeviceInfo(const QAudioDeviceInfo &newOutputDeviceInfo);
+	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 
 public slots:
 	void returnToStart();
@@ -207,11 +207,11 @@ private:
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
+	QVector<QPointF> plotPoints;
 
-
-    ChannelMode channelMode{XY};
-	int framesPerMillisecond{0};
-	double millisecondsPerFrame{0.0};
+	PlotMode channelMode{XY};
+	int audioFramesPerMs{0};
+	double msPerAudioFrame{0.0};
 	int64_t startFrame{0};
 	int64_t currentFrame{0ll};
 	int64_t maxFramesToRead{0};

@@ -69,7 +69,3 @@ QAudioDeviceInfo AudioSettingsWidget::getSelectedAudioDevice() const
 {
 	return deviceSelector->currentData().value<QAudioDeviceInfo>();
 }
-
-//    qreal initialVolume = QAudio::convertVolume(audioOutput->volume(),
-//                                                QAudio::LinearVolumeScale,
-//                                                    QAudio::LogarithmicVolumeScale);
