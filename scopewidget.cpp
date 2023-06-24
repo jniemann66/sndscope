@@ -244,7 +244,7 @@ void ScopeWidget::render()
 {
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	static const bool drawLines = false;
+	static const bool drawLines = true;
 
 	static Differentiator<double> d;
 	static QPointF lastPoint{channelMode == Sweep ? 0 : cx, cy}; // start at left for Sweep Mode, center for others
@@ -326,7 +326,7 @@ void ScopeWidget::render()
 	} // ends loop over i
 
 	if(drawLines) {
-		painter.drawLines(plotPoints);
+		painter.drawLines(plotPoints); // note: I tried drawPolyline, but performance was terrible
 	} else {
 		painter.drawPoints(plotPoints);
 	}
