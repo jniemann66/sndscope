@@ -120,6 +120,7 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	connect(audioSettingsWidget, &AudioSettingsWidget::outputVolumeChanged, scopeWidget, &ScopeWidget::setAudioVolume);
+	connect(scopeWidget, &ScopeWidget::outputVolume, audioSettingsWidget, &AudioSettingsWidget::setVolume);
 
 	scopeWidget->setBrightness(66.0);
 	scopeWidget->setFocus(40.0);

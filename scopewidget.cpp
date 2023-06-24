@@ -55,6 +55,10 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
         }
     });
 
+	connect(audioController, &AudioController::outputVolume, this, [this](qreal linearVol){
+		emit outputVolume(linearVol);
+	});
+
     screenLayout->addWidget(scopeDisplay, 0, Qt::AlignHCenter);
 	mainLayout->addLayout(screenLayout);
 	setLayout(mainLayout);

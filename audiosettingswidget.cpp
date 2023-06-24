@@ -40,9 +40,6 @@ AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 	});
 
 	connect(volumeSlider, &QSlider::sliderMoved, this, [this](int position){
-		//    qreal initialVolume = QAudio::convertVolume(audioOutput->volume(),
-		//                                                QAudio::LinearVolumeScale,
-		//                                                    QAudio::LogarithmicVolumeScale);
 
 		emit outputVolumeChanged(QAudio::convertVolume (position / 100.0, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale));
 	});
@@ -58,6 +55,14 @@ void AudioSettingsWidget::setAvailableOutputDevices(const QList<QAudioDeviceInfo
 		deviceSelector->addItem(it->deviceName(), v);
 	}
 	deviceSelector->setCurrentText(QAudioDeviceInfo::defaultOutputDevice().deviceName());
+}
+
+void AudioSettingsWidget::setVolume(qreal linearVol)
+{
+	volumeSlider->setSliderPosition(100  * QAudio::convertVolume(linearVol,
+																 QAudio::LinearVolumeScale,
+																 QAudio::LogarithmicVolumeScale));
+
 }
 
 QAudioDeviceInfo AudioSettingsWidget::getSelectedAudioDevice() const

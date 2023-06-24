@@ -36,10 +36,8 @@ void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDe
 	}
 
 	audioOutput.reset(new QAudioOutput(deviceInfo, format));
+	emit deviceVolume(audioOutput->volume() / 2.0);
 
-	//    qreal initialVolume = QAudio::convertVolume(audioOutput->volume(),
-	//                                                QAudio::LinearVolumeScale,
-	//                                                    QAudio::LogarithmicVolumeScale);
 
 
 

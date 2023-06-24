@@ -13,6 +13,7 @@ class AudioSettingsWidget : public QWidget
 public:
 	explicit AudioSettingsWidget(QWidget *parent = nullptr);
 	void setAvailableOutputDevices(const QList<QAudioDeviceInfo> &deviceList);
+	void setVolume(qreal linearVol);
 	QAudioDeviceInfo getSelectedAudioDevice() const;
 
 signals:

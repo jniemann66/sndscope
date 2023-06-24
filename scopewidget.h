@@ -187,6 +187,7 @@ public slots:
 
 signals:
 	void renderedFrame(int positionMilliseconds);
+	void outputVolume(qreal linearVol);
 
 protected:
 

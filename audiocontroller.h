@@ -26,6 +26,7 @@ public:
 	QIODevice *start();
 
 signals:
+	void outputVolume(qreal linearVol);
 
 private:
 	std::unique_ptr<QAudioOutput> audioOutput;
