@@ -36,9 +36,7 @@ void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDe
 	}
 
 	audioOutput.reset(new QAudioOutput(deviceInfo, format));
-	emit deviceVolume(audioOutput->volume() / 2.0);
-
-
+	emit outputVolume(audioOutput->volume());
 
 
 	audioOutput->setBufferSize(2 * format.sampleRate() * format.bytesPerFrame());

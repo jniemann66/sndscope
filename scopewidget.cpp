@@ -332,7 +332,11 @@ QAudioDeviceInfo ScopeWidget::getOutputDeviceInfo() const
 
 void ScopeWidget::setOutputDeviceInfo(const QAudioDeviceInfo &newOutputDeviceInfo)
 {
+	bool changed = (outputDeviceInfo != newOutputDeviceInfo);
 	outputDeviceInfo = newOutputDeviceInfo;
+	if(changed && fileLoaded) {
+		audioController->initializeAudio(audioFormat, outputDeviceInfo);
+	}
 }
 
 ChannelMode ScopeWidget::getChannelMode() const
