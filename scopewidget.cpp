@@ -17,8 +17,8 @@
 
 #include <cmath>
 
-#define CALC_AVG_RENDER_TIME
-#ifdef CALC_AVG_RENDER_TIME
+#define SHOW_AVG_RENDER_TIME
+#ifdef SHOW_AVG_RENDER_TIME
 #include "functimer.h"
 #endif
 
@@ -80,6 +80,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 	if(fileLoaded) {
 
 		// set up rendering parameters, based on soundfile properties
+		inputChannels = sndfile->channels();
 		inputBuffer.resize(sndfile->channels() * sndfile->samplerate()); // 1s of storage
 		audioFramesPerMs = sndfile->samplerate() / 1000;
 		msPerAudioFrame = 1000.0 / sndfile->samplerate();
@@ -248,11 +249,11 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 void ScopeWidget::render()
 {
 
-#ifdef CALC_AVG_RENDER_TIME
-	static int64_t callCount = 1;
+#ifdef SHOW_AVG_RENDER_TIME
+	static int64_t callCount = 0;
 	static double total_renderTime = 0.0;
 	if(callCount % 100 == 0) {
-		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / 1000.0 / callCount, 0, 'f', 2);
+		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / 1000.0 / std::max(1ll, callCount), 0, 'f', 2);
 	}
 	callCount++;
 	FuncTimer funcTimer(&total_renderTime);
@@ -260,7 +261,7 @@ void ScopeWidget::render()
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	const bool drawLines = (false && channelMode == Sweep);
+	const bool drawLines = (plotMode == Sweep);
 
 	static Differentiator<double> d;
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
@@ -288,7 +289,7 @@ void ScopeWidget::render()
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
 
-	static const auto plot = [this](QPainter& painter) -> void {
+	static const auto plot = [this](bool drawLines, QPainter& painter) -> void {
 		if(drawLines) {
 			painter.drawPolyline(plotPoints);
 		} else {
@@ -300,12 +301,12 @@ void ScopeWidget::render()
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
 	// draw
-	for(int64_t i = firstFrameToPlot; i < 2 * framesRead; i+= 2 ) {
+	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
 
 		float ch0val = inputBuffer.at(i);
-		float ch1val = inputBuffer.at(i + 1);
+		float ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : ch0val);
 
-		switch(channelMode) {
+		switch(plotMode) {
 		case XY:
 		default:
 			plotPoints.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
@@ -327,7 +328,7 @@ void ScopeWidget::render()
 				if(x > 2.0 * cx) { // sweep completed
 					x = 0.0;
 					triggered = false;
-					plot(painter);
+					plot(drawLines, painter);
 				}
 			}
 		}
@@ -335,7 +336,7 @@ void ScopeWidget::render()
 		} // ends switch
 	} // ends loop over i
 
-	plot(painter);
+	plot(drawLines, painter);
 
 	const int bytesPerFrame = audioFormat.bytesPerFrame();
 	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
@@ -382,12 +383,12 @@ void ScopeWidget::setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo)
 
 PlotMode ScopeWidget::getChannelMode() const
 {
-	return channelMode;
+	return plotMode;
 }
 
 void ScopeWidget::setChannelMode(PlotMode newChannelMode)
 {
-	channelMode = newChannelMode;
+	plotMode = newChannelMode;
 }
 
 bool ScopeWidget::getConstrainToSquare() const

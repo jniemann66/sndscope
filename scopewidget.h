@@ -246,8 +246,9 @@ private:
 	QElapsedTimer elapsedTimer;
 	QVector<QPointF> plotPoints;
 
-	PlotMode channelMode{XY};
+	PlotMode plotMode{XY};
 	SweepParameters sweepParameters;
+	int inputChannels{0};
 	int audioFramesPerMs{0};
 	double msPerAudioFrame{0.0};
 	int64_t startFrame{0};
