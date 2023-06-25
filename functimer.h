@@ -7,15 +7,15 @@
 * with this file. If not, please refer to: https://github.com/jniemann66/ReSampler
 */
 
-#ifndef _RAIITIMER_H
-#define _RAIITIMER_H 1
+#ifndef _FUNCTIMER_H
+#define _FUNCTIMER_H 
 
 #include <iostream>
 #include <iomanip>
 #include <chrono>
 
-// class RaiiTimer : starts a high-resolution timer upon construction and prints elapsed time to stdout upon destruction
-// For convenience, a reference time value (in ms) for comparison may be provided using the parameter msComparison.
+// class FuncTimer : starts a high-resolution timer upon construction and
+// upon destruction, accumulates time spent alive into total_duration
 
 class FuncTimer {
 	double* const total_duration;
@@ -33,10 +33,10 @@ public:
 	{
 		endTimer = std::chrono::high_resolution_clock::now();
 		if(total_duration != nullptr) {
-			*total_duration += std::chrono::duration_cast<std::chrono::milliseconds>(endTimer - beginTimer).count();
+			*total_duration += std::chrono::duration_cast<std::chrono::microseconds>(endTimer - beginTimer).count();
 		}
 	}
 };
 
 
-#endif // _RAIITIMER_H
+#endif // _FUNCTIMER_H

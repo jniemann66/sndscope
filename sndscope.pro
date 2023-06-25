@@ -49,9 +49,9 @@ HEADERS += \
     audiosettingswidget.h \
     differentiator.h \
     displaysettingswidget.h \
+    functimer.h \
     mainwindow.h \
     phosphor.h \
-    raiitimer.h \
     scopewidget.h \
     transportwidget.h
 

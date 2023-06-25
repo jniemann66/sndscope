@@ -8,7 +8,6 @@
 */
 
 #include "scopewidget.h"
-#include "raiitimer.h"
 
 #include <QVBoxLayout>
 #include <QPainter>
@@ -19,6 +18,9 @@
 #include <cmath>
 
 #define CALC_AVG_RENDER_TIME
+#ifdef CALC_AVG_RENDER_TIME
+#include "functimer.h"
+#endif
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
@@ -250,7 +252,7 @@ void ScopeWidget::render()
 	static int64_t callCount = 1;
 	static double total_renderTime = 0.0;
 	if(callCount % 100 == 0) {
-		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / callCount, 0, 'f', 2);
+		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / 1000.0 / callCount, 0, 'f', 2);
 	}
 	callCount++;
 	FuncTimer funcTimer(&total_renderTime);
@@ -286,7 +288,7 @@ void ScopeWidget::render()
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
 
-	static const auto plot = [this](QPainter& painter, bool drawLines) -> void {
+	static const auto plot = [this](QPainter& painter) -> void {
 		if(drawLines) {
 			painter.drawPolyline(plotPoints);
 		} else {
@@ -325,7 +327,7 @@ void ScopeWidget::render()
 				if(x > 2.0 * cx) { // sweep completed
 					x = 0.0;
 					triggered = false;
-					plot(painter, drawLines);
+					plot(painter);
 				}
 			}
 		}
@@ -333,15 +335,15 @@ void ScopeWidget::render()
 		} // ends switch
 	} // ends loop over i
 
-	plot(painter, drawLines);
+	plot(painter);
 
 	const int bytesPerFrame = audioFormat.bytesPerFrame();
 	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
 	currentFrame += framesRead;
 
-	constexpr bool debugPlotBufferSize = false;
+	constexpr bool debugPlotBufferSize = true;
 	if constexpr(debugPlotBufferSize) {
-		static size_t maxSize = 0;
+		static decltype(plotPoints.size()) maxSize = 0ll;
 		if(plotPoints.size() > maxSize) {
 			maxSize = plotPoints.size();
 			qDebug() << "new size:" << maxSize;
