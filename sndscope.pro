@@ -51,6 +51,7 @@ HEADERS += \
     displaysettingswidget.h \
     mainwindow.h \
     phosphor.h \
+    raiitimer.h \
     scopewidget.h \
     transportwidget.h
 

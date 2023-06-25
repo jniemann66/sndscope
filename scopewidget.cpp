@@ -8,6 +8,7 @@
 */
 
 #include "scopewidget.h"
+#include "raiitimer.h"
 
 #include <QVBoxLayout>
 #include <QPainter>
@@ -16,6 +17,8 @@
 #include <differentiator.h>
 
 #include <cmath>
+
+#define CALC_AVG_RENDER_TIME
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
@@ -33,9 +36,9 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
     screenUpdateTimer.setInterval(screenUpdateInterval);
     scopeDisplay->getPixmap()->fill(backgroundColor);
 
-	calcCenter();
+	calcScaling();
     connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
-		calcCenter();
+		calcScaling();
 	});
 
 	connect(&plotTimer, &QTimer::timeout, this, [this]{
@@ -78,7 +81,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 		inputBuffer.resize(sndfile->channels() * sndfile->samplerate()); // 1s of storage
 		audioFramesPerMs = sndfile->samplerate() / 1000;
 		msPerAudioFrame = 1000.0 / sndfile->samplerate();
-		plotPoints.reserve(4 * plotTimer.interval() * audioFramesPerMs);
+		calcScaling();
 
 		maxFramesToRead = inputBuffer.size() / sndfile->channels();
 		totalFrames = sndfile->frames();
@@ -242,17 +245,25 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
+
+#ifdef CALC_AVG_RENDER_TIME
+	static int64_t callCount = 1;
+	static double total_renderTime = 0.0;
+	if(callCount % 100 == 0) {
+		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / callCount, 0, 'f', 2);
+	}
+	callCount++;
+	FuncTimer funcTimer(&total_renderTime);
+#endif
+
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	static const bool drawLines = true;
+	const bool drawLines = (false && channelMode == Sweep);
 
 	static Differentiator<double> d;
-	static QPointF lastPoint{channelMode == Sweep ? 0 : cx, cy}; // start at left for Sweep Mode, center for others
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
 	const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
-
-	plotPoints.clear();
 
     auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);
@@ -260,13 +271,14 @@ void ScopeWidget::render()
 
 	if(--darkenCooldownCounter == 0) {
         // darken:
+		painter.setBackgroundMode(Qt::OpaqueMode);
         painter.fillRect(pixmap->rect(), darkencolor);
 		darkenCooldownCounter = darkenNthFrame;
 	}
 
 	// set pen
 	painter.setRenderHint(QPainter::Antialiasing);
-	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
 	painter.setPen(pen);
 
 	if constexpr(constexpr bool debugExpectedFrames = false) {
@@ -274,6 +286,14 @@ void ScopeWidget::render()
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
 
+	static const auto plot = [this](QPainter& painter, bool drawLines) -> void {
+		if(drawLines) {
+			painter.drawPolyline(plotPoints);
+		} else {
+			painter.drawPoints(plotPoints);
+		}
+		plotPoints.clear();
+	};
 
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
@@ -283,53 +303,37 @@ void ScopeWidget::render()
 		float ch0val = inputBuffer.at(i);
 		float ch1val = inputBuffer.at(i + 1);
 
-		QPointF pt;
 		switch(channelMode) {
 		case XY:
 		default:
-			pt = {(1.0 + ch0val) * cx, (1.0 - ch1val) * cy};
+			plotPoints.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
 			break;
 		case MidSide:
-			pt = {(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
-				  (1.0 - rsqrt2*(ch0val + ch1val)) * cy};
+			plotPoints.append({(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
+							   (1.0 - rsqrt2*(ch0val + ch1val)) * cy});
 			break;
 		case Sweep:
 		{
-			constexpr double thresh = 0.01;
-				static const double sweepAdvance = 0.1 * cx / audioFramesPerMs;
 			static bool triggered = false;
 			static double x = 0.0;
 
-			double slope = d.get(ch0val);
-			triggered = triggered || (std::abs(ch0val) < thresh && slope > 0);
+			double slope = d.get(ch0val) * sweepParameters.slope;
+			triggered = triggered || (std::abs(ch0val) < sweepParameters.threshold && slope > 0.0);
 			if(triggered) {
-				pt = {x, cy * (1.0 - ch0val)};
-				x += sweepAdvance;
+				plotPoints.append({x, cy * (1.0 - ch0val)});
+				x += sweepParameters.sweepAdvance;
 				if(x > 2.0 * cx) { // sweep completed
+					x = 0.0;
 					triggered = false;
-					lastPoint = {x = 0.0, cy};
-					continue; // don't plot
+					plot(painter, drawLines);
 				}
 			}
 		}
 
 		} // ends switch
-
-		if(drawLines) {
-			plotPoints.append(lastPoint);
-			plotPoints.append(pt);
-			lastPoint = pt;
-		} else {
-			plotPoints.append(pt);
-		}
-
 	} // ends loop over i
 
-	if(drawLines) {
-		painter.drawLines(plotPoints); // note: I tried drawPolyline, but performance was terrible
-	} else {
-		painter.drawPoints(plotPoints);
-	}
+	plot(painter, drawLines);
 
 	const int bytesPerFrame = audioFormat.bytesPerFrame();
 	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
@@ -397,15 +401,22 @@ void ScopeWidget::setConstrainToSquare(bool value)
 //    qDebug() << scopeDisplay->sizePolicy();
 }
 
-void ScopeWidget::calcCenter()
+void ScopeWidget::calcScaling()
 {
     auto pixmap = scopeDisplay->getPixmap();
-    cx = pixmap->width() / 2;
+	int w = pixmap->width();
+	cx = w / 2;
     cy = pixmap->height() / 2;
-	plotPoints.reserve(4 * cx);
+	plotPoints.reserve(4 * plotTimer.interval() * audioFramesPerMs);
+	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 }
 
 void ScopeWidget::setAudioVolume(qreal linearVolume)
 {
 	audioController->setOutputVolume(linearVolume);
 }
+
+
+
+
+
