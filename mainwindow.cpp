@@ -101,7 +101,6 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
-		qDebug() << "focus" << value;
 		scopeWidget->setFocus(value);
 	});
 

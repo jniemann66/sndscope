@@ -154,7 +154,6 @@ protected:
 
     void resizeEvent(QResizeEvent *event) override
     {
-       // qDebug() << size();
 		if(constrainToSquare) {
 			auto h = event->size().height();
             setFixedWidth(h);
@@ -247,7 +246,7 @@ private:
 	QElapsedTimer elapsedTimer;
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{Sweep};
+	PlotMode plotMode{XY};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};
