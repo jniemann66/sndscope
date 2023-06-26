@@ -42,14 +42,14 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 	brightnessControl->setWrapping(false);
 	focusControl->setNotchesVisible(true);
 	focusControl->setNotchTarget(100);
-	focusControl->setValue(200);
 	persistenceControl->setNotchesVisible(true);
 	persistenceControl->setNotchTarget(100);
 	brightnessControl->setWrapping(false);
 	focusControl->setWrapping(false);
 	persistenceControl->setWrapping(false);
-	clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
-	clearScreenButton->setIconSize({48, 48});
+//	clearScreenButton->setIcon(QIcon{":/icons/wipe-small.png"});
+	clearScreenButton->setText("Clear Screen");
+//	clearScreenButton->setIconSize({48, 48});
 	clearScreenButton->setToolTip("Wipe Screen");
 
 	// organize layouts
