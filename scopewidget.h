@@ -131,9 +131,6 @@ signals:
 	void pixmapResolutionChanged(const QSizeF& size);
 
 protected:
-
-
-
     QSize sizeHint() const override
     {
         return pixmap.size();
@@ -246,7 +243,7 @@ private:
 	QElapsedTimer elapsedTimer;
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{XY};
+	PlotMode plotMode{MidSide};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};

@@ -297,6 +297,7 @@ void ScopeWidget::render()
 
     auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);
+	painter.beginNativePainting();
 	painter.setCompositionMode(compositionMode);
 	painter.setRenderHint(QPainter::TextAntialiasing, false);
 
@@ -383,6 +384,8 @@ void ScopeWidget::render()
 			qDebug() << "new size:" << maxSize;
 		}
 	}
+
+	painter.endNativePainting();
 
 }
 
