@@ -18,13 +18,13 @@
 // upon destruction, accumulates time spent alive into total_duration
 
 class FuncTimer {
-	double* const total_duration;
+	double* const duration;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> beginTimer;
 	std::chrono::time_point<std::chrono::high_resolution_clock> endTimer;
 public:
 
-	explicit FuncTimer(double* total_duration) : total_duration(total_duration)
+	explicit FuncTimer(double* total_duration) : duration(total_duration)
 	{
 		beginTimer = std::chrono::high_resolution_clock::now();
 	}
@@ -32,8 +32,8 @@ public:
 	~FuncTimer()
 	{
 		endTimer = std::chrono::high_resolution_clock::now();
-		if(total_duration != nullptr) {
-			*total_duration += std::chrono::duration_cast<std::chrono::microseconds>(endTimer - beginTimer).count();
+		if(duration != nullptr) {
+			*duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimer - beginTimer).count();
 		}
 	}
 };

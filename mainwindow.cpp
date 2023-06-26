@@ -101,11 +101,13 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::focusChanged, this, [scopeWidget](double value){
+		qDebug() << "focus" << value;
 		scopeWidget->setFocus(value);
 	});
 
-	connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget](const QVector<QColor>& colors){
+	connect(displaySettingsWidget, &DisplaySettingsWidget::phosphorColorChanged, this, [scopeWidget, displaySettingsWidget](const QVector<QColor>& colors){
 		scopeWidget->setPhosporColors(colors);
+		scopeWidget->setFocus(displaySettingsWidget->getFocus());
 	});
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::persistenceChanged, this, [scopeWidget](int value){
@@ -126,8 +128,8 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	connect(audioSettingsWidget, &AudioSettingsWidget::outputVolumeChanged, scopeWidget, &ScopeWidget::setAudioVolume);
 	connect(scopeWidget, &ScopeWidget::outputVolume, audioSettingsWidget, &AudioSettingsWidget::setVolume);
 
-	scopeWidget->setBrightness(66.0);
-	scopeWidget->setFocus(40.0);
+	scopeWidget->setBrightness(80.0);
+	scopeWidget->setFocus(80.0);
 	scopeWidget->setPersistence(48);
 }
 

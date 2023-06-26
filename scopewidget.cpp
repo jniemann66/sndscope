@@ -16,6 +16,8 @@
 #include <differentiator.h>
 
 #include <cmath>
+#include <queue>
+#include <algorithm>
 
 #define SHOW_AVG_RENDER_TIME
 #ifdef SHOW_AVG_RENDER_TIME
@@ -213,8 +215,9 @@ double ScopeWidget::getFocus() const
 
 void ScopeWidget::setFocus(double value)
 {
+	constexpr double maxBeamWidth = 12;
 	focus = value;
-	beamWidth = qMax(0.5, value * 0.01 * 8);
+	beamWidth = qMax(0.5, (1.0 - (focus * 0.01)) * maxBeamWidth);
 	beamIntensity = 8.0 / (beamWidth * beamWidth);
 	calcBeamAlpha();
 }
@@ -248,20 +251,44 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
+	constexpr size_t historyLength = 5;
+	static int64_t callCount = 0;
+	static double renderTime = 0.0;
+	static double total_renderTime = 0.0;
+
+	total_renderTime += renderTime;
+	callCount++;
+
+	static std::deque<double> renderHistory;
+	renderHistory.push_back(renderTime);
+	if(renderHistory.size() > historyLength) {
+		renderHistory.pop_front();
+	}
+
+	const double mov_avg_renderTime = std::accumulate(renderHistory.cbegin(), renderHistory.cend(), 0.0) / historyLength;
+	const bool panicMode {mov_avg_renderTime > plotTimer.interval()};
+
 
 #ifdef SHOW_AVG_RENDER_TIME
-	static int64_t callCount = 0;
-	static double total_renderTime = 0.0;
-	if(callCount % 100 == 0) {
-		qDebug() << QStringLiteral("Average Render Time: %1 ms").arg(total_renderTime / 1000.0 / std::max(1ll, callCount), 0, 'f', 2);
+	if(panicMode) {
+		qDebug() << QStringLiteral("Panic: recent avg (%1ms) > plot-interval (%2ms)")
+					.arg(mov_avg_renderTime, 0, 'f', 2)
+					.arg(plotTimer.interval());
 	}
-	callCount++;
-	FuncTimer funcTimer(&total_renderTime);
+
+	if(callCount % 100 == 0) {
+		qDebug() << QStringLiteral("Avg render time: Overall=%1ms Recent(last %2)=%3ms")
+					.arg(total_renderTime / std::max(1ll, callCount), 0, 'f', 2)
+					.arg(historyLength)
+					.arg(mov_avg_renderTime, 0, 'f', 2);
+	}
 #endif
+
+	FuncTimer funcTimer(&renderTime);
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	const bool drawLines = (plotMode == Sweep);
+	const bool drawLines = (plotMode == Sweep && !panicMode);
 
 	static Differentiator<double> d;
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
@@ -271,32 +298,27 @@ void ScopeWidget::render()
     auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);
 	painter.setCompositionMode(compositionMode);
+	painter.setRenderHint(QPainter::TextAntialiasing, false);
 
 	if(--darkenCooldownCounter == 0) {
         // darken:
 		painter.setBackgroundMode(Qt::OpaqueMode);
+		painter.setRenderHint(QPainter::Antialiasing, false);
         painter.fillRect(pixmap->rect(), darkencolor);
 		darkenCooldownCounter = darkenNthFrame;
 	}
 
 	// set pen
-	painter.setRenderHint(QPainter::Antialiasing);
-	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
+	painter.setRenderHint(QPainter::Antialiasing, !panicMode);
+	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine,
+				panicMode ? Qt::SquareCap : Qt::RoundCap,
+				Qt::BevelJoin};
 	painter.setPen(pen);
 
 	if constexpr(constexpr bool debugExpectedFrames = false) {
 		if(framesRead > expectedFrames)
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
-
-	static const auto plot = [this](bool drawLines, QPainter& painter) -> void {
-		if(drawLines) {
-			painter.drawPolyline(plotPoints);
-		} else {
-			painter.drawPoints(plotPoints);
-		}
-		plotPoints.clear();
-	};
 
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
@@ -309,26 +331,32 @@ void ScopeWidget::render()
 		switch(plotMode) {
 		case XY:
 		default:
-			plotPoints.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
+			plotBuffer.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
 			break;
 		case MidSide:
-			plotPoints.append({(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
+			plotBuffer.append({(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
 							   (1.0 - rsqrt2*(ch0val + ch1val)) * cy});
 			break;
 		case Sweep:
 		{
 			static bool triggered = false;
 			static double x = 0.0;
+			static QPointF lastPoint{0.0, cy};
 
 			double slope = d.get(ch0val) * sweepParameters.slope;
 			triggered = triggered || (std::abs(ch0val) < sweepParameters.threshold && slope > 0.0);
 			if(triggered) {
-				plotPoints.append({x, cy * (1.0 - ch0val)});
+				QPointF pt{x, cy * (1.0 - ch0val)};
+				if(drawLines)  {
+					plotBuffer.append(lastPoint);
+				}
+				lastPoint = pt;
+				plotBuffer.append(pt);
 				x += sweepParameters.sweepAdvance;
 				if(x > 2.0 * cx) { // sweep completed
 					x = 0.0;
 					triggered = false;
-					plot(drawLines, painter);
+					lastPoint = {x, cy};
 				}
 			}
 		}
@@ -336,7 +364,12 @@ void ScopeWidget::render()
 		} // ends switch
 	} // ends loop over i
 
-	plot(drawLines, painter);
+	if(drawLines) {
+		painter.drawLines(plotBuffer);
+	} else {
+		painter.drawPoints(plotBuffer);
+	}
+	plotBuffer.clear();
 
 	const int bytesPerFrame = audioFormat.bytesPerFrame();
 	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
@@ -344,9 +377,9 @@ void ScopeWidget::render()
 
 	constexpr bool debugPlotBufferSize = true;
 	if constexpr(debugPlotBufferSize) {
-		static decltype(plotPoints.size()) maxSize = 0ll;
-		if(plotPoints.size() > maxSize) {
-			maxSize = plotPoints.size();
+		static decltype(plotBuffer.size()) maxSize = 0ll;
+		if(plotBuffer.size() > maxSize) {
+			maxSize = plotBuffer.size();
 			qDebug() << "new size:" << maxSize;
 		}
 	}
@@ -410,7 +443,7 @@ void ScopeWidget::calcScaling()
 	int w = pixmap->width();
 	cx = w / 2;
     cy = pixmap->height() / 2;
-	plotPoints.reserve(4 * plotTimer.interval() * audioFramesPerMs);
+	plotBuffer.reserve(4 * plotTimer.interval() * audioFramesPerMs);
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 }
 

@@ -42,6 +42,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 	brightnessControl->setWrapping(false);
 	focusControl->setNotchesVisible(true);
 	focusControl->setNotchTarget(100);
+	focusControl->setValue(200);
 	persistenceControl->setNotchesVisible(true);
 	persistenceControl->setNotchTarget(100);
 	brightnessControl->setWrapping(false);
@@ -75,16 +76,16 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-	connect(brightnessControl, &QSlider::valueChanged, this, [this](int value){
-		emit brightnessChanged(value * 0.1);
+	connect(brightnessControl, &QSlider::valueChanged, this, [this](){
+		emit brightnessChanged(getBrightness());
 	});
 
-	connect(focusControl, &QSlider::valueChanged, this, [this](int value){
-		emit focusChanged((focusControl->maximum() - value) * 0.1);
+	connect(focusControl, &QSlider::valueChanged, this, [this](){
+		emit focusChanged(getFocus());
 	});
 
-	connect(persistenceControl, &QDial::valueChanged, this, [this](int value){
-		emit persistenceChanged(value);
+	connect(persistenceControl, &QDial::valueChanged, this, [this](){
+		emit persistenceChanged(getPersistence());
 	});
 
 	connect(phosphorSelectControl, &QComboBox::currentTextChanged, this, [this](const QString& name){
@@ -141,7 +142,7 @@ double DisplaySettingsWidget::getFocus() const
 
 void DisplaySettingsWidget::setFocus(double value)
 {
-	focusControl->setValue((1.0 - value * 0.01) * focusControl->maximum());
+	focusControl->setValue(value * 0.01 * focusControl->maximum());
 }
 
 int DisplaySettingsWidget::getPersistence() const

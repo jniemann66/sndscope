@@ -142,7 +142,8 @@ protected:
     void paintEvent(QPaintEvent *event) override
     {
         Q_UNUSED(event)
-        QPainter p(this);
+		QPainter p(this);
+		p.setRenderHint(QPainter::TextAntialiasing, false);
 
         if(size() == pixmap.size()) {
             p.drawPixmap(0, 0, pixmap);
@@ -244,9 +245,9 @@ private:
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
-	QVector<QPointF> plotPoints;
+	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{XY};
+	PlotMode plotMode{Sweep};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};
@@ -258,8 +259,8 @@ private:
 	bool fileLoaded{false};
 	bool paused{true};
     bool constrainToSquare{false};
-	double brightness{66.0};
-	double focus{50.0};
+	double brightness{80.0};
+	double focus{80.0};
 	double persistence{32.0};
 	int darkenNthFrame{1};
 	int darkenCooldownCounter{1};
