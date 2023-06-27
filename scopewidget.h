@@ -28,6 +28,7 @@
 
 #include <sndfile.hh>
 
+#include "sweepparameters.h"
 #include "audiocontroller.h"
 
 enum PlotMode
@@ -35,43 +36,6 @@ enum PlotMode
 	XY,
 	MidSide,
 	Sweep
-};
-
-struct SweepParameters
-{
-	friend class ScopeWidget;
-	double threshold{0.01};
-	double slope{1.0};
-
-public:
-	double getDuration_ms() const
-	{
-		return duration_ms;
-	}
-
-	void setDuration_ms(double newDuration_ms)
-	{
-		duration_ms = newDuration_ms;
-		calcSweepAdvance();
-	}
-
-private:
-	double duration_ms{10.0};
-	int width_pixels{640};
-	double inputFrames_per_ms{44.1};
-	double sweepAdvance; // pixels per input frame
-
-	void setWidthFrameRate(int width_pixels, double inputFrames_per_ms)
-	{
-		this->width_pixels = width_pixels;
-		this->inputFrames_per_ms = inputFrames_per_ms;
-		calcSweepAdvance();
-	}
-
-	void calcSweepAdvance()
-	{
-		sweepAdvance = width_pixels / inputFrames_per_ms / duration_ms;
-	}
 };
 
 // ScopeDisplay : this is the Oscilloscope's screen
@@ -198,6 +162,8 @@ public:
 	bool getMultiColor() const;
 	QColor getBackgroundColor() const;
 	bool getConstrainToSquare() const;
+	SweepParameters getSweepParameters() const;
+	QAudioDeviceInfo getOutputDeviceInfo() const;
 
 	// setters
 	void setChannelMode(PlotMode newChannelMode);
@@ -209,8 +175,6 @@ public:
 	void setPhosporColors(const QVector<QColor> &colors);
 	void setBackgroundColor(const QColor &value);
 	void setConstrainToSquare(bool value);
-
-	QAudioDeviceInfo getOutputDeviceInfo() const;
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 
 public slots:
@@ -218,8 +182,10 @@ public slots:
 	void gotoPosition(int64_t milliSeconds);
 	void wipeScreen();
 	void setAudioVolume(qreal linearVolume);
+	void setSweepParameters(const SweepParameters &newSweepParameters);
 
 signals:
+	void loadedFile();
 	void renderedFrame(int positionMilliseconds);
 	void outputVolume(qreal linearVol);
 
@@ -243,7 +209,7 @@ private:
 	QElapsedTimer elapsedTimer;
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{XY};
+	PlotMode plotMode{Sweep};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};

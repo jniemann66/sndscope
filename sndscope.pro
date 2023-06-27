@@ -48,6 +48,7 @@ SOURCES += \
     mainwindow.cpp \
     phosphor.cpp \
     scopewidget.cpp \
+    sweepsettingswidget.cpp \
     transportwidget.cpp
 
 HEADERS += \
@@ -59,6 +60,8 @@ HEADERS += \
     mainwindow.h \
     phosphor.h \
     scopewidget.h \
+    sweepparameters.h \
+    sweepsettingswidget.h \
     transportwidget.h
 
 TRANSLATIONS += \

@@ -100,6 +100,8 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 		audioFormat.setByteOrder(QAudioFormat::LittleEndian);
 		audioFormat.setSampleType(QAudioFormat::Float);
 		audioController->initializeAudio(audioFormat, outputDeviceInfo);
+
+		emit loadedFile();
 	}
 
 	return {fileLoaded, sndfile->strError()};
@@ -455,6 +457,16 @@ void ScopeWidget::calcScaling()
 void ScopeWidget::setAudioVolume(qreal linearVolume)
 {
 	audioController->setOutputVolume(linearVolume);
+}
+
+void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
+{
+	sweepParameters.setDuration_ms(newSweepParameters.duration_ms);
+}
+
+SweepParameters ScopeWidget::getSweepParameters() const
+{
+	return sweepParameters;
 }
 
 

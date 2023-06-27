@@ -21,6 +21,7 @@
 #include "audiosettingswidget.h"
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
+#include "sweepsettingswidget.h"
 
 MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 {
@@ -31,6 +32,8 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	auto displaySettingsWidget = new DisplaySettingsWidget(displaySettingsDock);
 	auto audioSettingsDock = new QDockWidget("Audio Settings", this);
 	auto audioSettingsWidget = new AudioSettingsWidget(audioSettingsDock);
+	auto sweepSettingsDock = new QDockWidget("Sweep Settings", this);
+	auto sweepSettingsWidget = new SweepSettingsWidget(sweepSettingsDock);
 
 	setCentralWidget(scopeWidget);
 	transportDock->setWidget(transportWidget);
@@ -40,6 +43,10 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	displaySettingsDock->setWidget(displaySettingsWidget);
 	displaySettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::RightDockWidgetArea, displaySettingsDock);
+
+	sweepSettingsDock->setWidget(sweepSettingsWidget);
+	sweepSettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::RightDockWidgetArea, sweepSettingsDock);
 
 	audioSettingsDock->setWidget(audioSettingsWidget);
 	audioSettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -84,6 +91,11 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
+
+	connect(scopeWidget, &ScopeWidget::loadedFile, this, [sweepSettingsWidget, scopeWidget]{
+		sweepSettingsWidget->setSweepParameters(scopeWidget->getSweepParameters());
+	});
+
 	connect(transportWidget, &TransportWidget::playPauseToggled, scopeWidget, &ScopeWidget::setPaused);
 	connect(transportWidget, &TransportWidget::returnToStartClicked, scopeWidget, &ScopeWidget::returnToStart);
 	connect(transportWidget, &TransportWidget::positionChangeRequested, scopeWidget, &ScopeWidget::gotoPosition);
@@ -127,9 +139,14 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	connect(audioSettingsWidget, &AudioSettingsWidget::outputVolumeChanged, scopeWidget, &ScopeWidget::setAudioVolume);
 	connect(scopeWidget, &ScopeWidget::outputVolume, audioSettingsWidget, &AudioSettingsWidget::setVolume);
 
+	connect(sweepSettingsWidget, &SweepSettingsWidget::sweepParametersChanged, scopeWidget, &ScopeWidget::setSweepParameters);
+
 	scopeWidget->setBrightness(80.0);
 	scopeWidget->setFocus(80.0);
 	scopeWidget->setPersistence(48);
+
+	sweepSettingsWidget->setSweepParameters(scopeWidget->getSweepParameters());
+
 }
 
 MainWindow::~MainWindow()
