@@ -18,7 +18,7 @@ class Differentiator
 
 private:
 	std::vector<FloatType> history;
-	std::vector<FloatType> coeffs{
+	const std::vector<FloatType> coeffs{
 		0.0209,
 		0.0,
 		-0.1128,
@@ -31,15 +31,14 @@ private:
 		0.0,
 		-0.0209
 	};
-	size_t differentiatorLength{coeffs.size()};
-	size_t differentiatorDelay{differentiatorLength / 2};
+	const size_t differentiatorLength{coeffs.size()};
+	const size_t differentiatorDelay{(differentiatorLength - 1)  / 2};
 	size_t differentiatorIndex{differentiatorLength - 1};
 
 public:
 	Differentiator()
 	{
 		history.resize(differentiatorLength, 0.0);
-		differentiatorDelay = differentiatorLength / 2;
 	}
 
 	FloatType get(const FloatType& input)

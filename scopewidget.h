@@ -243,7 +243,7 @@ private:
 	QElapsedTimer elapsedTimer;
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{MidSide};
+	PlotMode plotMode{XY};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};

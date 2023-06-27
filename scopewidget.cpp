@@ -252,22 +252,24 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 void ScopeWidget::render()
 {
 	constexpr size_t historyLength = 5;
+
+	static std::deque<double> renderHistory(historyLength, 0.0);
+	static double mov_avg_renderTime = 0.0;
 	static int64_t callCount = 0;
 	static double renderTime = 0.0;
 	static double total_renderTime = 0.0;
 
+	// collect data for overall average
 	total_renderTime += renderTime;
 	callCount++;
 
-	static std::deque<double> renderHistory;
-	renderHistory.push_back(renderTime);
-	if(renderHistory.size() > historyLength) {
-		renderHistory.pop_front();
-	}
+	// calculate moving-average
+	renderHistory.push_back(renderTime / historyLength);
+	mov_avg_renderTime += renderHistory.back();
+	mov_avg_renderTime -= renderHistory.front();
+	renderHistory.pop_front();
 
-	const double mov_avg_renderTime = std::accumulate(renderHistory.cbegin(), renderHistory.cend(), 0.0) / historyLength;
 	const bool panicMode {mov_avg_renderTime > plotTimer.interval()};
-
 
 #ifdef SHOW_AVG_RENDER_TIME
 	if(panicMode) {
