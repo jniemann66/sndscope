@@ -67,6 +67,12 @@ public:
 		return dP;
 	}
 
+	size_t getDelay() const
+	{
+		return differentiatorDelay;
+	}
 };
+
+
 
 #endif // DIFFERENTIATOR_H

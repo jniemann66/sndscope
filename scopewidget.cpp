@@ -253,7 +253,7 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
-	constexpr size_t historyLength = 5;
+	constexpr size_t historyLength = 10;
 
 	static std::deque<double> renderHistory(historyLength, 0.0);
 	static double mov_avg_renderTime = 0.0;
@@ -292,7 +292,7 @@ void ScopeWidget::render()
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	const bool drawLines = (plotMode == Sweep && !panicMode);
+	const bool drawLines = (plotMode == Sweep && !panicMode && (sweepParameters.getSamplesPerSweep() > 25));
 
 	static Differentiator<double> d;
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
@@ -333,8 +333,6 @@ void ScopeWidget::render()
 		double ch0val = inputBuffer.at(i);
 		double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : ch0val);
 
-		double triggerInput = ch0val;
-
 		switch(plotMode) {
 		case XY:
 		default:
@@ -348,12 +346,17 @@ void ScopeWidget::render()
 		{
 			static bool triggered = false;
 			static double x = 0.0;
-			static QPointF lastPoint{0.0, cy};
+			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
+			static std::deque<double> delay(d.getDelay(), 0.0);
 
-			double slope = d.get(triggerInput) * sweepParameters.slope;
-			triggered = triggered || (sweepParameters.triggerMin <= triggerInput && triggerInput <= sweepParameters.triggerMax && slope > 0.0);
+			delay.push_back(ch0val);
+			double delayed = delay.front();
+			delay.pop_front();
+
+			double slope = d.get(ch0val) * sweepParameters.slope;
+			triggered = triggered || (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
 			if(triggered) {
-				QPointF pt{x, cy * (1.0 - ch0val)};
+				QPointF pt{x, cy * (1.0 - delayed)};
 				if(drawLines)  {
 					plotBuffer.append(lastPoint);
 				}
