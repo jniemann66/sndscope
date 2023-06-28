@@ -4,7 +4,8 @@
 struct SweepParameters
 {
 	friend class ScopeWidget;
-	double threshold{0.01};
+	double triggerTolerance{0.01};
+	double triggerLevel{0.0};
 	double slope{1.0};
 
 public:
@@ -40,6 +41,8 @@ private:
 	int width_pixels{640};
 	double inputFrames_per_ms{44.1};
 	double sweepAdvance; // pixels per input frame
+	double triggerMin{triggerLevel - triggerTolerance};
+	double triggerMax{triggerLevel + triggerTolerance};
 
 	void setWidthFrameRate(int width_pixels, double inputFrames_per_ms)
 	{

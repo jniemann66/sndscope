@@ -18,11 +18,15 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 
 	auto triggerLabel = new QLabel("Trigger");
 	triggerLevel = new QSlider;
-	triggerLevel->setRange(-100, 100);
+	triggerLevel->setRange(-32768, 32767);
 	triggerLevel->setValue(0);
-	auto slopeDialLabel = new QLabel("Slope");
+
+	auto slopeDialLabel = new QLabel("Slope: /");
 	slopeDial = new QDial;
-	slopeDial->setRange(0, 1);
+	slopeDial->setRange(-2, 2);
+	slopeDial->setPageStep(1);
+	slopeDial->setSingleStep(1);
+	slopeDial->setSliderPosition(1);
 
 	auto mainLayout = new QHBoxLayout;
 	auto sweepSpeedLayout = new QVBoxLayout;
@@ -35,6 +39,7 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 
 	triggerLayout->addWidget(triggerLabel);
 	triggerLayout->addWidget(triggerLevel);
+	triggerLayout->addStretch();
 	triggerLayout->addWidget(slopeDialLabel);
 	triggerLayout->addWidget(slopeDial);
 	triggerLayout->addStretch();
@@ -51,6 +56,44 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 		setSweepParametersText();
 		emit sweepParametersChanged(sweepParameters);
 	});
+
+	auto setSlopeLabel = [slopeDialLabel](int s) {
+		if(s < 0) {
+			slopeDialLabel->setText("Slope: \\");
+		} else {
+			slopeDialLabel->setText("Slope: /");
+		}
+	};
+
+	connect(slopeDial, &QDial::actionTriggered, this, [this]{
+		auto v = slopeDial->sliderPosition() < 0 ? -1 : 1;
+		slopeDial->setSliderPosition(v);
+	});
+
+	connect(slopeDial, &QDial::sliderMoved, this, [this]{
+		auto v = slopeDial->sliderPosition() < 0 ? -1 : 1;
+		slopeDial->setSliderPosition(v);
+	});
+
+	connect(slopeDial, &QDial::valueChanged, this, [this, setSlopeLabel](int v){
+		sweepParameters.slope = (v < 0 ? -1.0 : 1.0);
+		setSlopeLabel(v);
+		emit sweepParametersChanged(sweepParameters);
+	});
+
+	connect(triggerLevel, &QSlider::valueChanged, this, [this](int value){
+		sweepParameters.triggerLevel = value / (-1.0 * triggerLevel->minimum());
+		emit sweepParametersChanged(sweepParameters);
+	});
+
+	connect(triggerLevel, &QSlider::sliderPressed, this, [this]{
+		emit triggerLevelPressed(true);
+	});
+
+	connect(triggerLevel, &QSlider::sliderReleased, this, [this]{
+		emit triggerLevelPressed(false);
+	});
+
 }
 
 void SweepSettingsWidget::initSweepRateMap()

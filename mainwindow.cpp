@@ -141,6 +141,11 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	connect(sweepSettingsWidget, &SweepSettingsWidget::sweepParametersChanged, scopeWidget, &ScopeWidget::setSweepParameters);
 
+	connect(sweepSettingsWidget, &SweepSettingsWidget::triggerLevelPressed, this, [scopeWidget](bool isPressed){
+		scopeWidget->setShowTrigger(isPressed);
+	});
+
+
 	scopeWidget->setBrightness(80.0);
 	scopeWidget->setFocus(80.0);
 	scopeWidget->setPersistence(48);

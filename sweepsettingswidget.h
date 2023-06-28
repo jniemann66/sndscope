@@ -24,6 +24,7 @@ public:
 
 signals:
 	void sweepParametersChanged(const SweepParameters& sweepParameters);
+	void triggerLevelPressed(bool isPressed);
 
 private:
 	QMap<int, double> sweepRateMap;

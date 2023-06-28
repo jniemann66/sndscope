@@ -164,6 +164,7 @@ public:
 	bool getConstrainToSquare() const;
 	SweepParameters getSweepParameters() const;
 	QAudioDeviceInfo getOutputDeviceInfo() const;
+	bool getShowTrigger() const;
 
 	// setters
 	void setChannelMode(PlotMode newChannelMode);
@@ -176,6 +177,7 @@ public:
 	void setBackgroundColor(const QColor &value);
 	void setConstrainToSquare(bool value);
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
+	void setShowTrigger(bool val);
 
 public slots:
 	void returnToStart();
@@ -210,6 +212,7 @@ private:
 	QVector<QPointF> plotBuffer;
 
 	PlotMode plotMode{Sweep};
+	bool showTrigger{false};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
 	int audioFramesPerMs{0};
@@ -244,6 +247,7 @@ private:
 	void render();
 	void calcBeamAlpha();
 
+	void renderTrigger(QPainter *painter);
 signals:
 
 };

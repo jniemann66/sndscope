@@ -330,8 +330,10 @@ void ScopeWidget::render()
 	// draw
 	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
 
-		float ch0val = inputBuffer.at(i);
-		float ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : ch0val);
+		double ch0val = inputBuffer.at(i);
+		double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : ch0val);
+
+		double triggerInput = ch0val;
 
 		switch(plotMode) {
 		case XY:
@@ -348,8 +350,8 @@ void ScopeWidget::render()
 			static double x = 0.0;
 			static QPointF lastPoint{0.0, cy};
 
-			double slope = d.get(ch0val) * sweepParameters.slope;
-			triggered = triggered || (std::abs(ch0val) < sweepParameters.threshold && slope > 0.0);
+			double slope = d.get(triggerInput) * sweepParameters.slope;
+			triggered = triggered || (sweepParameters.triggerMin <= triggerInput && triggerInput <= sweepParameters.triggerMax && slope > 0.0);
 			if(triggered) {
 				QPointF pt{x, cy * (1.0 - ch0val)};
 				if(drawLines)  {
@@ -389,8 +391,22 @@ void ScopeWidget::render()
 		}
 	}
 
+	if(showTrigger) {
+		renderTrigger(&painter);
+	}
+
 	painter.endNativePainting();
 
+}
+
+void ScopeWidget::renderTrigger(QPainter* painter)
+{
+	painter->setRenderHint(QPainter::Antialiasing, false);
+	painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+	const QPen pen{QColor{128, 32, 32, 192}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
+	painter->setPen(pen);
+	double y = cy * (1.0 - sweepParameters.triggerLevel);
+	painter->drawLine(QPointF{0, y}, QPointF{cx * 2, y});
 }
 
 void ScopeWidget::wipeScreen()
@@ -461,7 +477,46 @@ void ScopeWidget::setAudioVolume(qreal linearVolume)
 
 void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 {
-	sweepParameters.setDuration_ms(newSweepParameters.duration_ms);
+	double newDuration = newSweepParameters.duration_ms;
+	if(sweepParameters.duration_ms != newDuration) {
+		sweepParameters.setDuration_ms(newDuration);
+	}
+
+	double newTriggerLevel = newSweepParameters.triggerLevel;
+	if(sweepParameters.triggerLevel != newTriggerLevel) {
+		sweepParameters.triggerLevel = newTriggerLevel;
+		sweepParameters.triggerMin  = newTriggerLevel - sweepParameters.triggerTolerance;
+		sweepParameters.triggerMax  = newTriggerLevel + sweepParameters.triggerTolerance;
+		if(paused) {
+			setShowTrigger(showTrigger);
+		}
+	}
+
+	sweepParameters.slope = newSweepParameters.slope;
+}
+
+bool ScopeWidget::getShowTrigger() const
+{
+	return showTrigger;
+}
+
+void ScopeWidget::setShowTrigger(bool val)
+{
+	showTrigger = (plotMode == Sweep) && val;
+	if(paused) {
+
+		auto pixmap = scopeDisplay->getPixmap();
+		QPainter painter(pixmap);
+		painter.beginNativePainting();
+		painter.setRenderHint(QPainter::Antialiasing, false);
+		painter.fillRect(pixmap->rect(), Qt::black);
+
+		if(showTrigger) {
+			renderTrigger(&painter);
+		}
+		painter.endNativePainting();
+		scopeDisplay->update();
+	}
 }
 
 SweepParameters ScopeWidget::getSweepParameters() const
