@@ -128,12 +128,12 @@ void SweepSettingsWidget::setSweepParametersText()
 	double d = sweepParameters.getDuration();
 	sweepSpeedEdit->setText(QStringLiteral(
 								"%4 Hz <br/>"
-								"%1s / sweep<br/> "
-										   "%2s / div<br/>"
+                                "%1 / sweep<br/> "
+                                           "%2 / div<br/>"
 										   "%3 smpl / div<br/>"
-										   )
-							.arg(d)
-							.arg(d / 5)
+                                           )
+                                .arg(SweepParameters::formatTimeDuration(d))
+                                .arg(SweepParameters::formatTimeDuration(d / 5))
 							.arg(sweepParameters.getSamplesPerSweep() / 5)
 							.arg(1.0 / sweepParameters.getDuration())
 							);
