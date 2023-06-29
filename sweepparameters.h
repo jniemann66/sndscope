@@ -1,6 +1,8 @@
 #ifndef SWEEPPARAMETERS_H
 #define SWEEPPARAMETERS_H
 
+#include <QDebug>
+
 struct SweepParameters
 {
 	friend class ScopeWidget;
@@ -22,6 +24,7 @@ public:
 	void setDuration(double newDuration_s)
 	{
 		duration_ms = 1000.0 * newDuration_s;
+        qDebug() << formatTimeDuration(newDuration_s);
 		calcSweepAdvance();
 	}
 
@@ -35,6 +38,29 @@ public:
 	{
 		return duration_ms * inputFrames_per_ms;
 	}
+
+    static QString formatTimeDuration(double duration_s)
+    {
+       // constexpr int m = 999;
+        static QMap<int, QString> multiplierToPrefixMap
+        {
+            {-12, "ps"},
+            {-9, "ns"},
+            {-6, "us"},
+            {-3, "ms"},
+            {0, "s"},
+            {3, "ks"},
+            {6, "Ms"},
+            {9, "Gs"}
+        };
+
+        int p = 3 * std::floor(std::log10(std::abs(duration_s)) / 3.0);
+        return QStringLiteral("%1%2")
+            .arg(static_cast<double>(duration_s / std::pow(10, p)), 0, 'f', 0)
+            .arg(multiplierToPrefixMap.value(p));
+
+    }
+
 
 private:
 	double duration_ms{10.0};

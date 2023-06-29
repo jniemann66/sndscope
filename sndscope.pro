@@ -54,10 +54,12 @@ SOURCES += \
 HEADERS += \
     audiocontroller.h \
     audiosettingswidget.h \
+    delayline.h \
     differentiator.h \
     displaysettingswidget.h \
     functimer.h \
     mainwindow.h \
+    movingaverage.h \
     phosphor.h \
     scopewidget.h \
     sweepparameters.h \

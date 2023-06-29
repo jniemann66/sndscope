@@ -8,16 +8,16 @@
 */
 
 #include "scopewidget.h"
+#include "delayline.h"
+#include "differentiator.h"
+#include "movingaverage.h"
 
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QEvent>
 #include <QDebug>
-#include <differentiator.h>
 
 #include <cmath>
-#include <queue>
-#include <algorithm>
 
 #define SHOW_AVG_RENDER_TIME
 #ifdef SHOW_AVG_RENDER_TIME
@@ -253,10 +253,8 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 
 void ScopeWidget::render()
 {
-	constexpr size_t historyLength = 10;
-
-	static std::deque<double> renderHistory(historyLength, 0.0);
-	static double mov_avg_renderTime = 0.0;
+    constexpr size_t historyLength = 10;
+    static MovingAverage<double, historyLength> movingAverage;
 	static int64_t callCount = 0;
 	static double renderTime = 0.0;
 	static double total_renderTime = 0.0;
@@ -265,12 +263,7 @@ void ScopeWidget::render()
 	total_renderTime += renderTime;
 	callCount++;
 
-	// calculate moving-average
-	renderHistory.push_back(renderTime / historyLength);
-	mov_avg_renderTime += renderHistory.back();
-	mov_avg_renderTime -= renderHistory.front();
-	renderHistory.pop_front();
-
+    const double mov_avg_renderTime = movingAverage.get(renderTime);
 	const bool panicMode {mov_avg_renderTime > plotTimer.interval()};
 
 #ifdef SHOW_AVG_RENDER_TIME
@@ -294,7 +287,6 @@ void ScopeWidget::render()
 	constexpr double rsqrt2 = 0.707;
 	const bool drawLines = (plotMode == Sweep && !panicMode && (sweepParameters.getSamplesPerSweep() > 25));
 
-	static Differentiator<double> d;
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
 	const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
@@ -320,7 +312,8 @@ void ScopeWidget::render()
 				Qt::BevelJoin};
 	painter.setPen(pen);
 
-	if constexpr(constexpr bool debugExpectedFrames = false) {
+    constexpr bool debugExpectedFrames = false;
+    if constexpr(debugExpectedFrames) {
 		if(framesRead > expectedFrames)
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
@@ -328,10 +321,11 @@ void ScopeWidget::render()
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
 	// draw
+    const double w = 2.0 * cx;
 	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
 
 		double ch0val = inputBuffer.at(i);
-		double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : ch0val);
+        double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : 0.0);
 
 		switch(plotMode) {
 		case XY:
@@ -339,21 +333,20 @@ void ScopeWidget::render()
 			plotBuffer.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
 			break;
 		case MidSide:
-			plotBuffer.append({(1.0 + rsqrt2*(ch0val - ch1val)) * cx,
-							   (1.0 - rsqrt2*(ch0val + ch1val)) * cy});
+            plotBuffer.append({(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
+                               (1.0 - rsqrt2 * (ch0val + ch1val)) * cy});
 			break;
 		case Sweep:
 		{
+            static Differentiator<double> d;
+            static DelayLine<double, d.delayTime> delayLine;
 			static bool triggered = false;
 			static double x = 0.0;
-			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
-			static std::deque<double> delay(d.getDelay(), 0.0);
+            static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
 
-			delay.push_back(ch0val);
-			double delayed = delay.front();
-			delay.pop_front();
+            double slope = d.get(ch0val) * sweepParameters.slope;
+            double delayed = delayLine.get(ch0val);
 
-			double slope = d.get(ch0val) * sweepParameters.slope;
 			triggered = triggered || (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
 			if(triggered) {
 				QPointF pt{x, cy * (1.0 - delayed)};
@@ -363,10 +356,10 @@ void ScopeWidget::render()
 				lastPoint = pt;
 				plotBuffer.append(pt);
 				x += sweepParameters.sweepAdvance;
-				if(x > 2.0 * cx) { // sweep completed
+                if(x > w) { // sweep completed
 					x = 0.0;
 					triggered = false;
-					lastPoint = {x, cy};
+                    lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
 				}
 			}
 		}
@@ -385,7 +378,7 @@ void ScopeWidget::render()
 	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
 	currentFrame += framesRead;
 
-	constexpr bool debugPlotBufferSize = true;
+    constexpr bool debugPlotBufferSize = false;
 	if constexpr(debugPlotBufferSize) {
 		static decltype(plotBuffer.size()) maxSize = 0ll;
 		if(plotBuffer.size() > maxSize) {
