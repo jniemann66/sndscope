@@ -402,7 +402,7 @@ void ScopeWidget::renderTrigger(QPainter* painter)
 {
 	painter->setRenderHint(QPainter::Antialiasing, false);
 	painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-	const QPen pen{QColor{128, 32, 32, 192}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
+	const QPen pen{QColor{128, 32, 32, 192}, 1.5, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
 	const QBrush brush{QColor{64, 16, 16, 112}};
 	painter->setBrush(brush);
 	painter->setPen(pen);
