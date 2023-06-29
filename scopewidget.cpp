@@ -347,7 +347,10 @@ void ScopeWidget::render()
             double slope = d.get(ch0val) * sweepParameters.slope;
             double delayed = delayLine.get(ch0val);
 
-			triggered = triggered || (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
+			triggered = triggered
+						|| !sweepParameters.triggerEnabled // when trigger disabled -> Always Triggered
+						|| (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
+
 			if(triggered) {
 				QPointF pt{x, cy * (1.0 - delayed)};
 				if(drawLines)  {
@@ -400,8 +403,14 @@ void ScopeWidget::renderTrigger(QPainter* painter)
 	painter->setRenderHint(QPainter::Antialiasing, false);
 	painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
 	const QPen pen{QColor{128, 32, 32, 192}, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
+	const QBrush brush{QColor{64, 16, 16, 112}};
+	painter->setBrush(brush);
 	painter->setPen(pen);
+	double yMax = cy * (1.0 - sweepParameters.triggerMax);
 	double y = cy * (1.0 - sweepParameters.triggerLevel);
+	double yMin = cy * (1.0 - sweepParameters.triggerMin);
+	QRectF rect{QPointF{0, yMax}, QPointF{cx * 2, yMin}};
+	painter->drawRect(rect);
 	painter->drawLine(QPointF{0, y}, QPointF{cx * 2, y});
 }
 
@@ -478,9 +487,11 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 		sweepParameters.setDuration_ms(newDuration);
 	}
 
-	double newTriggerLevel = newSweepParameters.triggerLevel;
-	if(sweepParameters.triggerLevel != newTriggerLevel) {
+	const double &newTriggerLevel = newSweepParameters.triggerLevel;
+	const double &newTriggerTolerance = newSweepParameters.triggerTolerance;
+	if(sweepParameters.triggerLevel != newTriggerLevel || sweepParameters.triggerTolerance != newTriggerTolerance) {
 		sweepParameters.triggerLevel = newTriggerLevel;
+		sweepParameters.triggerTolerance = newTriggerTolerance;
 		sweepParameters.triggerMin  = newTriggerLevel - sweepParameters.triggerTolerance;
 		sweepParameters.triggerMax  = newTriggerLevel + sweepParameters.triggerTolerance;
 		if(paused) {
@@ -489,6 +500,7 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 	}
 
 	sweepParameters.slope = newSweepParameters.slope;
+	sweepParameters.triggerEnabled = newSweepParameters.triggerEnabled;
 }
 
 bool ScopeWidget::getShowTrigger() const

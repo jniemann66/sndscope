@@ -2,6 +2,7 @@
 #define SWEEPPARAMETERS_H
 
 #include <QDebug>
+#include <cmath>
 
 struct SweepParameters
 {
@@ -9,6 +10,7 @@ struct SweepParameters
 	double triggerTolerance{0.01};
 	double triggerLevel{0.0};
 	double slope{1.0};
+	bool triggerEnabled{true};
 
 public:
 	double getDuration_ms() const
@@ -24,7 +26,6 @@ public:
 	void setDuration(double newDuration_s)
 	{
 		duration_ms = 1000.0 * newDuration_s;
-        qDebug() << formatTimeDuration(newDuration_s);
 		calcSweepAdvance();
 	}
 
@@ -39,27 +40,46 @@ public:
 		return duration_ms * inputFrames_per_ms;
 	}
 
-    static QString formatTimeDuration(double duration_s)
-    {
-       // constexpr int m = 999;
-        static QMap<int, QString> multiplierToPrefixMap
-        {
-            {-12, "ps"},
-            {-9, "ns"},
-            {-6, "us"},
-            {-3, "ms"},
-            {0, "s"},
-            {3, "ks"},
-            {6, "Ms"},
-            {9, "Gs"}
-        };
+	static QString formatMeasurementUnits(double duration_s, const QString& units, int precision = 2)
+	{
+		// constexpr int m = 999;
+		static QMap<int, QString> prefixMap
+		{
+			{-30, "q"},
+			{-27, "r"},
+			{-24, "y"},
+			{-21, "z"},
+			{-18, "a"},
+			{-15, "f"},
+			{-12, "p"},
+			{-9, "n"},
+			{-6, "μ"},
+			{-3, "m"},
+			{0, ""},
+			{3, "k"},
+			{6, "M"},
+			{9, "G"},
+			{12, "T"},
+			{15, "P"},
+			{18, "E"},
+			{21, "Z"},
+			{24, "Y"},
+			{27, "R"},
+			{30, "Q"},
 
-        int p = 3 * std::floor(std::log10(std::abs(duration_s)) / 3.0);
-        return QStringLiteral("%1%2")
-            .arg(static_cast<double>(duration_s / std::pow(10, p)), 0, 'f', 0)
-            .arg(multiplierToPrefixMap.value(p));
+		};
 
-    }
+		double m = 0.0;
+		int p = 0;
+		if(std::fpclassify(duration_s) != FP_ZERO) {
+			p = 3 * std::floor(std::log10(std::abs(duration_s)) / 3.0);
+			m =  static_cast<double>(duration_s / std::pow(10, p));
+		}
+
+		return QStringLiteral("%1 %2%3")
+				.arg(m, 0, 'f', precision)
+				.arg(prefixMap.value(p), units);
+	}
 
 
 private:

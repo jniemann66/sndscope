@@ -8,6 +8,8 @@
 #include <QSlider>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QCheckBox>
+#include <QLabel>
 #include <QMap>
 #include <QPushButton>
 
@@ -30,8 +32,11 @@ private:
 	QMap<int, double> sweepRateMap;
 
 	QSlider *sweepDial{nullptr};
-	QTextEdit *sweepSpeedEdit{nullptr};
+	QLabel *sweepInfo{nullptr};
 	QSlider *triggerLevel{nullptr};
+	QSlider *triggerTolerance{nullptr};
+	QCheckBox *triggerEnabled{nullptr};
+	QCheckBox *triggerResetButton{nullptr};
 	QDial *slopeDial{nullptr};
 
 	void initSweepRateMap();
