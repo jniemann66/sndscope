@@ -10,7 +10,10 @@ struct SweepParameters
 	double triggerTolerance{0.01};
 	double triggerLevel{0.0};
 	double slope{1.0};
+	bool sweepUnused{false};
 	bool triggerEnabled{true};
+	int horizontalDivisions;
+	int verticalDivisions;
 
 public:
 	double getDuration_ms() const

@@ -40,6 +40,11 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
     screenUpdateTimer.setInterval(screenUpdateInterval);
     scopeDisplay->getPixmap()->fill(backgroundColor);
 
+	const auto divs = scopeDisplay->getDivisions();
+	sweepParameters.horizontalDivisions = divs.first;
+	sweepParameters.verticalDivisions = divs.second;
+	sweepParameters.sweepUnused = {plotMode != Sweep};
+
 	calcScaling();
     connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
 		calcScaling();
@@ -450,27 +455,20 @@ PlotMode ScopeWidget::getChannelMode() const
 void ScopeWidget::setChannelMode(PlotMode newChannelMode)
 {
 	plotMode = newChannelMode;
-}
-
-bool ScopeWidget::getConstrainToSquare() const
-{
-	return constrainToSquare;
-}
-
-void ScopeWidget::setConstrainToSquare(bool value)
-{
-	constrainToSquare = value;
-    scopeDisplay->setConstrainToSquare(value);
-//    scopeDisplay->adjustSize();
-//    qDebug() << scopeDisplay->sizePolicy();
+	sweepParameters.sweepUnused = {plotMode != Sweep};
 }
 
 void ScopeWidget::calcScaling()
 {
     auto pixmap = scopeDisplay->getPixmap();
-	int w = pixmap->width();
+	w = pixmap->width();
+	h = pixmap->height();
 	cx = w / 2;
     cy = pixmap->height() / 2;
+	const auto a = scopeDisplay->getAspectRatio();
+	divx = w / a.first;
+	divy = h / a.second;
+
 	plotBuffer.reserve(4 * plotTimer.interval() * audioFramesPerMs);
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 }
@@ -531,6 +529,14 @@ SweepParameters ScopeWidget::getSweepParameters() const
 {
 	return sweepParameters;
 }
+
+
+
+
+
+
+
+
 
 
 

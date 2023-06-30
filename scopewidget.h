@@ -45,7 +45,7 @@ class ScopeDisplay : public QWidget
 {
 	Q_OBJECT
 public:
-    ScopeDisplay(QWidget* parent = nullptr) : QWidget(parent), pixmap(640, 640)
+	ScopeDisplay(QWidget* parent = nullptr) : QWidget(parent), pixmap(800, 640)
     {
         setAutoFillBackground(false);
         resizeCooldownTimer.setSingleShot(true);
@@ -56,9 +56,10 @@ public:
 		connect(&resizeCooldownTimer, &QTimer::timeout, this, [this]{
             if (pixmap.height() != height()) {
                 const int h = height();
-                const int w = constrainToSquare ? h : width();
+				const int w = aspectRatio.first * h / aspectRatio.second;
                 qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
                 pixmap = pixmap.scaled(w, h);
+				calcGraticule();
                 emit pixmapResolutionChanged(pixmap.size());
             }
         });
@@ -70,26 +71,38 @@ public:
         return &pixmap;
     }
 
-    bool getConstrainToSquare() const
-    {
-        return constrainToSquare;
-    }
-
     bool getAllowPixmapResolutionChange() const
     {
         return allowPixmapResolutionChange;
     }
 
+	QPair<int, int> getAspectRatio() const
+	{
+		return aspectRatio;
+	}
+
+	QPair<int, int> getDivisions() const
+	{
+		return divisions;
+	}
+
 	// setters
-    void setConstrainToSquare(bool value)
-    {
-        constrainToSquare = value;
-    }
 
     void setAllowPixmapResolutionChange(bool value)
     {
         allowPixmapResolutionChange = value;
     }
+
+
+	void setAspectRatio(const QPair<int, int> &newAspectRatio)
+	{
+		aspectRatio = newAspectRatio;
+	}
+
+	void setDivisions(const QPair<int, int> &newDivisions)
+	{
+		divisions = newDivisions;
+	}
 
 signals:
 	void pixmapResolutionChanged(const QSizeF& size);
@@ -111,33 +124,86 @@ protected:
         } else {
             p.drawPixmap(0, 0, pixmap.scaled(size()));
         }
+
+		QPen graticulePen(graticuleColor, 1.5);
+		p.setPen(graticulePen);
+		p.drawLines(graticuleLines);
     }
 
     void resizeEvent(QResizeEvent *event) override
     {
-		if(constrainToSquare) {
-			auto h = event->size().height();
-            setFixedWidth(h);
-        }
+		const int h = event->size().height();
+		const int w = aspectRatio.first * h / aspectRatio.second;
+		setFixedWidth(w);
 
-        if(constrainToSquare) {
-            setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        } else {
-            setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        }
-        updateGeometry();
+		setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+		updateGeometry();
 
-
-        if(allowPixmapResolutionChange) {
+		if(allowPixmapResolutionChange) {
 			resizeCooldownTimer.start();
+		}
+
+		calcGraticule();
+	}
+
+	void calcGraticule()
+	{
+		const double w = width();
+		const double h = height();
+		const double cx = 0.5 * w;
+		const double cy = 0.5 * h;
+
+		const double divx = w / divisions.first;
+		const double divy = h / divisions.second;
+
+		graticuleLines.clear();
+		double gx = 0.0;
+		double gy = 0.0;
+
+		constexpr double tl = 4.0;
+		const double txd = 0.2 * divx;
+		const double tyd = 0.2 * divy;
+
+		const double ty0 = cy - tl;
+		const double ty1 = cy + tl;
+
+		const double tx0 = cx - tl;
+		const double tx1 = cx + tl;
+
+		for(int i = 0; i < divisions.first; i++) {
+			graticuleLines.append(QPointF{gx, 0});
+			graticuleLines.append(QPointF{gx, h});
+			double tx = gx + txd;
+			for(int j = 1; j <= 4; j++) {
+				graticuleLines.append(QPointF{tx, ty0});
+				graticuleLines.append(QPointF{tx, ty1});
+				tx += txd;
+			}
+			gx += divx;
+		}
+
+		for(int i = 0; i < divisions.second; i++) {
+			graticuleLines.append(QPointF{0, gy});
+			graticuleLines.append(QPointF{w, gy});
+			double ty = gy + tyd;
+			for(int j = 1; j <= 4; j++) {
+				graticuleLines.append(QPointF{tx0, ty});
+				graticuleLines.append(QPointF{tx1, ty});
+				ty += tyd;
+			}
+			gy += divy;
 		}
 	}
 
 private:
+	QColor graticuleColor{112, 112, 112, 160};
+	QPair<int, int> divisions{10, 8};
+	QPair<int, int> aspectRatio{5, 4};
 	QTimer resizeCooldownTimer;
     QPixmap pixmap;
-    bool constrainToSquare{false};
 	bool allowPixmapResolutionChange{true};
+	QVector<QPointF> graticuleLines;
+
 };
 
 // ScopeWidget : the heart of the Oscilloscope
@@ -161,7 +227,6 @@ public:
 	double getPersistence() const;
 	bool getMultiColor() const;
 	QColor getBackgroundColor() const;
-	bool getConstrainToSquare() const;
 	SweepParameters getSweepParameters() const;
 	QAudioDeviceInfo getOutputDeviceInfo() const;
 	bool getShowTrigger() const;
@@ -175,7 +240,6 @@ public:
 	void setPersistence(double time_ms);
 	void setPhosporColors(const QVector<QColor> &colors);
 	void setBackgroundColor(const QColor &value);
-	void setConstrainToSquare(bool value);
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 	void setShowTrigger(bool val);
 
@@ -193,9 +257,6 @@ signals:
 
 protected:
 
-  //  void resizeEvent(QResizeEvent *event) {
-
-   // }
 private:
     ScopeDisplay* scopeDisplay{nullptr};
 	AudioController *audioController{nullptr};
@@ -209,9 +270,10 @@ private:
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
+
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{Sweep};
+	PlotMode plotMode{XY};
 	bool showTrigger{false};
 	SweepParameters sweepParameters;
 	int inputChannels{0};
@@ -223,7 +285,6 @@ private:
 	int64_t totalFrames{0ll};
 	bool fileLoaded{false};
 	bool paused{true};
-    bool constrainToSquare{false};
 	double brightness{80.0};
 	double focus{80.0};
 	double persistence{32.0};
@@ -238,6 +299,11 @@ private:
 	// midpoint of pixmap
 	double cx;
 	double cy;
+	double w;
+	double h;
+	double divx;
+	double divy;
+
 	int darkenAlpha;
 	int beamAlpha;
 	double beamWidth;

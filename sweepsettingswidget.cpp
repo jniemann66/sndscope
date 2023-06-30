@@ -168,9 +168,6 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 		setSlopeLabel(v);
 		emit sweepParametersChanged(sweepParameters);
 	});
-
-
-
 }
 
 void SweepSettingsWidget::initSweepRateMap()
@@ -197,6 +194,9 @@ void SweepSettingsWidget::setSweepParameters(const SweepParameters &newSweepPara
 			break;
 		}
 	}
+
+	triggerEnabled->setChecked(!sweepParameters.sweepUnused);
+
 	setSweepParametersText();
 }
 
@@ -211,7 +211,7 @@ void SweepSettingsWidget::setSweepParametersText()
 								)
 							.arg(SweepParameters::formatMeasurementUnits(1.0 / sweepParameters.getDuration(), "Hz", 0),
 								 SweepParameters::formatMeasurementUnits(d, "s", 0),
-								 SweepParameters::formatMeasurementUnits(d / 5, "s", 2))
-							.arg(sweepParameters.getSamplesPerSweep() / 5)
+								 SweepParameters::formatMeasurementUnits(d / std::max<double>(1.0, sweepParameters.horizontalDivisions), "s", 2))
+							.arg(sweepParameters.getSamplesPerSweep() / std::max<double>(1.0, sweepParameters.horizontalDivisions))
 							);
 }

@@ -43,7 +43,6 @@ signals:
 
 protected:
 
-
 private:
 	QDial* brightnessControl{nullptr};
 	QDial* focusControl{nullptr};

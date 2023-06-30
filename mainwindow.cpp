@@ -56,13 +56,6 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	displaySettingsWidget->setFocus(scopeWidget->getFocus());
 	displaySettingsWidget->setPersistence(scopeWidget->getPersistence());
 
-
-
-    // todo: read from settings file
-    bool squareDisplayOnly = true;
-    scopeWidget->setConstrainToSquare(squareDisplayOnly);
-    //
-
 	setWindowTitle("Drag & drop a wave file");
 	setAcceptDrops(true);
 
@@ -82,13 +75,6 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	preferencesMenu = menuBar()->addMenu("&Preferences");
-	QAction* squareDisplayOption = preferencesMenu->addAction("Square Display");
-    squareDisplayOption->setCheckable(true);
-    squareDisplayOption->setChecked(squareDisplayOnly);
-
-    connect(squareDisplayOption, &QAction::triggered, this, [scopeWidget](bool checked){
-        scopeWidget->setConstrainToSquare(checked);
-	});
 
 	connect(scopeWidget, &ScopeWidget::renderedFrame, transportWidget, &TransportWidget::setPosition);
 
@@ -127,7 +113,6 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
-
 	connect(audioSettingsWidget, &AudioSettingsWidget::outputDeviceSelected, this, [scopeWidget, transportWidget](const QAudioDeviceInfo& audioDeviceInfo){
 
 		scopeWidget->setOutputDevice(audioDeviceInfo);
@@ -144,7 +129,6 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	connect(sweepSettingsWidget, &SweepSettingsWidget::triggerLevelPressed, this, [scopeWidget](bool isPressed){
 		scopeWidget->setShowTrigger(isPressed);
 	});
-
 
 	scopeWidget->setBrightness(80.0);
 	scopeWidget->setFocus(80.0);
