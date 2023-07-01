@@ -125,6 +125,7 @@ protected:
             p.drawPixmap(0, 0, pixmap.scaled(size()));
         }
 
+		p.setRenderHint(QPainter::Antialiasing, true);
 		QPen graticulePen(graticuleColor, 1.5);
 		p.setPen(graticulePen);
 		p.drawLines(graticuleLines);
@@ -148,8 +149,8 @@ protected:
 
 	void calcGraticule()
 	{
-		const double w = width();
-		const double h = height();
+		const double w = width() - 0.5;
+		const double h = height() - 0.5;
 		const double cx = 0.5 * w;
 		const double cy = 0.5 * h;
 
@@ -157,8 +158,8 @@ protected:
 		const double divy = h / divisions.second;
 
 		graticuleLines.clear();
-		double gx = 0.0;
-		double gy = 0.0;
+		double gx = 0.5;
+		double gy = 0.5;
 
 		constexpr double tl = 4.0;
 		const double txd = 0.2 * divx;
@@ -170,7 +171,7 @@ protected:
 		const double tx0 = cx - tl;
 		const double tx1 = cx + tl;
 
-		for(int i = 0; i < divisions.first; i++) {
+		for(int i = 0; i <= divisions.first; i++) {
 			graticuleLines.append(QPointF{gx, 0});
 			graticuleLines.append(QPointF{gx, h});
 			double tx = gx + txd;
@@ -182,7 +183,7 @@ protected:
 			gx += divx;
 		}
 
-		for(int i = 0; i < divisions.second; i++) {
+		for(int i = 0; i <= divisions.second; i++) {
 			graticuleLines.append(QPointF{0, gy});
 			graticuleLines.append(QPointF{w, gy});
 			double ty = gy + tyd;
