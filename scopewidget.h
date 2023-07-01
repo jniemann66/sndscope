@@ -244,6 +244,7 @@ public:
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 	void setShowTrigger(bool val);
 
+	void plotTest();
 public slots:
 	void returnToStart();
 	void gotoPosition(int64_t milliSeconds);
@@ -272,6 +273,7 @@ private:
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
 
+	QVector<QPointF> testPlot;
 	QVector<QPointF> plotBuffer;
 
 	PlotMode plotMode{XY};
@@ -312,9 +314,11 @@ private:
 
 	void calcScaling();
 	void render();
+	void renderTest();
 	void calcBeamAlpha();
 
 	void renderTrigger(QPainter *painter);
+	void makeTestPlot();
 signals:
 
 };
