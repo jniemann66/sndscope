@@ -47,6 +47,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     phosphor.cpp \
+    plotmode.cpp \
+    plotmodewidget.cpp \
     scopewidget.cpp \
     sweepsettingswidget.cpp \
     transportwidget.cpp
@@ -61,6 +63,8 @@ HEADERS += \
     mainwindow.h \
     movingaverage.h \
     phosphor.h \
+    plotmode.h \
+    plotmodewidget.h \
     scopewidget.h \
     sweepparameters.h \
     sweepsettingswidget.h \

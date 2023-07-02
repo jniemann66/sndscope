@@ -22,6 +22,7 @@
 #include "transportwidget.h"
 #include "displaysettingswidget.h"
 #include "sweepsettingswidget.h"
+#include "plotmodewidget.h"
 
 MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 {
@@ -34,6 +35,8 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	auto audioSettingsWidget = new AudioSettingsWidget(audioSettingsDock);
 	auto sweepSettingsDock = new QDockWidget("Sweep Settings", this);
 	auto sweepSettingsWidget = new SweepSettingsWidget(sweepSettingsDock);
+	auto plotmodeDock = new QDockWidget("Plot Mode", this);
+	auto plotmodeWidget = new PlotmodeWidget(plotmodeDock);
 
 	setCentralWidget(scopeWidget);
 	transportDock->setWidget(transportWidget);
@@ -51,6 +54,10 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	audioSettingsDock->setWidget(audioSettingsWidget);
 	audioSettingsDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 	addDockWidget(Qt::RightDockWidgetArea, audioSettingsDock);
+
+	plotmodeDock->setWidget(plotmodeWidget);
+	plotmodeDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	addDockWidget(Qt::LeftDockWidgetArea, plotmodeDock);
 
 	displaySettingsWidget->setBrightness(scopeWidget->getBrightness());
 	displaySettingsWidget->setFocus(scopeWidget->getFocus());
@@ -130,11 +137,19 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 		scopeWidget->setShowTrigger(isPressed);
 	});
 
+	connect(plotmodeWidget, &PlotmodeWidget::plotmodeChanged, scopeWidget, &ScopeWidget::setPlotmode);
+	connect(plotmodeWidget, &PlotmodeWidget::plotmodeChanged, this, [sweepSettingsWidget](Plotmode plotmode){
+		sweepSettingsWidget->setEnabled(plotmode == Sweep);
+	});
+
 	scopeWidget->setBrightness(80.0);
 	scopeWidget->setFocus(80.0);
 	scopeWidget->setPersistence(48);
 
 	sweepSettingsWidget->setSweepParameters(scopeWidget->getSweepParameters());
+	Plotmode plotmode = scopeWidget->getPlotmode();
+	plotmodeWidget->setPlotmode(plotmode);
+	sweepSettingsWidget->setEnabled(plotmode == Sweep);
 
 }
 

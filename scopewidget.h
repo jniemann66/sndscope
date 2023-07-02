@@ -28,15 +28,9 @@
 
 #include <sndfile.hh>
 
+#include "plotmode.h"
 #include "sweepparameters.h"
 #include "audiocontroller.h"
-
-enum PlotMode
-{
-	XY,
-	MidSide,
-	Sweep
-};
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
@@ -218,7 +212,7 @@ public:
 	QPair<bool, QString> loadSoundFile(const QString &filename);
 
 	// getters
-	PlotMode getChannelMode() const;
+	Plotmode getPlotmode() const;
 	int getLengthMilliseconds() const;
 	bool getPaused() const;
 	int64_t getTotalFrames() const;
@@ -233,7 +227,6 @@ public:
 	bool getShowTrigger() const;
 
 	// setters
-	void setChannelMode(PlotMode newChannelMode);
 	void setPaused(bool value);
 	void setTotalFrames(const int64_t &value);
 	void setBrightness(double value);
@@ -251,6 +244,7 @@ public slots:
 	void wipeScreen();
 	void setAudioVolume(qreal linearVolume);
 	void setSweepParameters(const SweepParameters &newSweepParameters);
+	void setPlotmode(Plotmode newPlotmode);
 
 signals:
 	void loadedFile();
@@ -276,7 +270,7 @@ private:
 	QVector<QPointF> testPlot;
 	QVector<QPointF> plotBuffer;
 
-	PlotMode plotMode{XY};
+	Plotmode plotMode{XY};
 	bool showTrigger{false};
 	SweepParameters sweepParameters;
 	int inputChannels{0};

@@ -195,7 +195,7 @@ void SweepSettingsWidget::setSweepParameters(const SweepParameters &newSweepPara
 		}
 	}
 
-	triggerEnabled->setChecked(!sweepParameters.sweepUnused);
+	//triggerEnabled->setChecked(!sweepParameters.sweepUnused);
 
 	setSweepParametersText();
 }

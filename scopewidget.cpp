@@ -508,15 +508,19 @@ void ScopeWidget::setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo)
 	}
 }
 
-PlotMode ScopeWidget::getChannelMode() const
+Plotmode ScopeWidget::getPlotmode() const
 {
 	return plotMode;
 }
 
-void ScopeWidget::setChannelMode(PlotMode newChannelMode)
+void ScopeWidget::setPlotmode(Plotmode newPlotmode)
 {
-	plotMode = newChannelMode;
-	sweepParameters.sweepUnused = {plotMode != Sweep};
+	plotMode = newPlotmode;
+	if(plotMode == Sweep) {
+		//
+	} else {
+		sweepParameters.sweepUnused = true;
+	}
 }
 
 void ScopeWidget::calcScaling()
