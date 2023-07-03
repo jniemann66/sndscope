@@ -68,7 +68,9 @@ HEADERS += \
     scopewidget.h \
     sweepparameters.h \
     sweepsettingswidget.h \
-    transportwidget.h
+    transportwidget.h \
+    interpolator.h
+
 
 TRANSLATIONS += \
     sndscope_en_AU.ts

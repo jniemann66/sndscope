@@ -10,14 +10,16 @@
 #ifndef INTERPOLATOR_H
 #define INTERPOLATOR_H
 
-#include <array>
-#include <QVector>
+#include <vector>
 
-template <typename FloatType>
+#include <QDebug>
+
+template <typename InputType, typename OutputType, int L>
 class Interpolator
 {
 private:
-	static constexpr FloatType coeffs[] {
+
+	static constexpr OutputType coeffs2[] {
 		-0.00087560000,
 		-0.0011643619,
 		0.0010874736,
@@ -41,53 +43,184 @@ private:
 		-0.00087560000
 	};
 
-    static constexpr size_t length{sizeof(coeffs) / sizeof(FloatType)};
-    std::array<FloatType, length> history;
-    size_t index{length - 1};
+	// todo: design filters for other L - factors
+	static constexpr OutputType coeffs4[] {
+		-0.00087560000,
+		-0.0011643619,
+		0.0010874736,
+		0.0022780589,
+		-0.0035814886,
+		-0.0036865168,
+		0.0068853690,
+		0.027796547,
+		-0.11749555,
+		0.22353046,
+		0.72835886,
+		0.22353046,
+		-0.11749555,
+		0.027796547,
+		0.0068853690,
+		-0.0036865168,
+		-0.0035814886,
+		0.0022780589,
+		0.0010874736,
+		-0.0011643619,
+		-0.00087560000
+	};
+
+
+	// FIR Filter
+	size_t fir_length;
+	std::vector<OutputType> fir_coeffs;
+	std::vector<OutputType> history0;
+	std::vector<OutputType> history1;
+
+	size_t index;
+	size_t n;
 
 public:
-    static constexpr size_t delayTime{(length - 1)  / 2};
 	Interpolator()
     {
-        history.fill(0.0);
-	}
-
-	QVector<FloatType> blockGet(const QVector<FloatType>& input, size_t length)
-	{
-
-		QVector<FloatType> output;
-		output.reserve(2 * input.length());
-		for (size_t i = 0; i < length; i++) {
-			output.append(get(input));
-			output.append(get(0.0));
+		switch(L) {
+		case 2:
+			setCoefficients(coeffs2);
+			break;
+		case 4:
+			setCoefficients(coeffs4);
+			break;
+		default:
+			// caller must supply own coefficients (by calling setCoefficients( ...)
+			break;
 		}
-		return output;
 	}
 
-	FloatType get(const FloatType& input)
+	// set coeffs from native array
+	template<size_t Array_Length>
+	void setCoefficients(const OutputType (&array)[Array_Length])
 	{
-		// place input into history
-        history[index] = input;
+		setCoefficients(array, Array_Length);
+	}
 
-		// perform the convolution
-		FloatType dP{0.0}; // differentiator result
-        size_t p = index;
-        for(size_t j = 0 ; j < length; j++) {
-            dP += coeffs[j] * history.at(p);
-            if(++p == length) {
-                p = 0; // wrap
+	// set coeffs from pointer + count
+	void setCoefficients(const OutputType* firCoeffs, size_t count)
+	{
+		fir_length = count;
+
+		fir_coeffs.clear();
+		for(size_t i = 0; i < count; i++) {
+			fir_coeffs.push_back(firCoeffs[i]);
+		}
+
+		n = 1 + fir_length / L;
+
+		// add padding
+		size_t r = n * L - fir_length;
+		for(size_t i = 0; i < r; i++) {
+			fir_coeffs.push_back(0.0);
+		}
+
+		history0.resize(fir_length, 0.0);
+		history1.resize(fir_length, 0.0);
+		index = fir_length - 1;
+	}
+
+	void upsampleMono(OutputType* output, const InputType* input, size_t sampleCount)
+	{
+		for(size_t s = 0; s < sampleCount; s++) {
+			processMono(output, *input++);
+			output += L;
+		}
+	}
+
+	void upsampleStereo(OutputType* output0, OutputType* output1, const InputType* interleaved, size_t sampleCount)
+	{
+		for(size_t s = 0; s < sampleCount; s ++) {
+			processStereo(output0, output1, *interleaved, *(interleaved + 1));
+			interleaved += 2;
+			output0 += L;
+			output1 += L;
+		}
+	}
+
+	inline void processMono(OutputType* output, InputType input)
+	{
+		history0[index] = static_cast<OutputType>(input);
+		size_t p = index;
+
+		if constexpr(L == 2) {
+			output[0] = output[1] = 0.0;
+		} else {
+			for(int k = 0; k < L; k++) {
+				output[k] = 0;
 			}
 		}
 
-		// update the current index
-		if(index == 0) {
-			index = length - 1; // wrap
-		} else {
-			index--;
+		for(size_t j = 0; j < n * L; j+= L) {
+			if constexpr(L == 2) {
+				output[0] += fir_coeffs[j] * history0[p];
+				output[1] += fir_coeffs[j+1] * history0[p];
+			} else {
+				for(size_t k = 0; k < L; k++) {
+					output[k] += fir_coeffs[j+k] * history0[p];
+				}
+			}
+
+			if(++p == fir_length) {
+				p = 0;
+			}
 		}
 
-        return dP;
-    }
+		if(index-- == 0) {
+			index = fir_length - 1;
+		}
+	}
+
+	inline void processStereo(OutputType* output0, OutputType* output1, InputType input0, InputType input1)
+	{
+		history0[index] = static_cast<OutputType>(input0);
+		history1[index] = static_cast<OutputType>(input1);
+
+		size_t p = index;
+
+		if constexpr(L == 2) {
+			output0[0] = output0[1] = 0.0;
+			output1[0] = output1[1] = 0.0;
+
+		} else {
+			for(int k = 0; k < L; k++) {
+				output0[k] = 0;
+				output1[k] = 0;
+			}
+		}
+
+		for(size_t j = 0; j < n * L; j+= L) {
+			if constexpr(L == 2) {
+				output0[0] += fir_coeffs[j] * history0[p];
+				output0[1] += fir_coeffs[j+1] * history0[p];
+				output1[0] += fir_coeffs[j] * history1[p];
+				output1[1] += fir_coeffs[j+1] * history1[p];
+			} else {
+				for(size_t k = 0; k < L; k++) {
+					output0[k] += fir_coeffs[j+k] * history0[p];
+					output1[k] += fir_coeffs[j+k] * history1[p];
+				}
+			}
+
+			if(++p == fir_length) {
+				p = 0;
+			}
+		}
+
+		if(index-- == 0) {
+			index = fir_length - 1;
+		}
+	}
+
+	size_t delayTime() const
+	{
+		return (fir_length - 1)  / 2;
+	};
+
 };
 
 #endif // INTERPOLATOR_H

@@ -327,11 +327,11 @@ void ScopeWidget::render()
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
 	// draw
-    const double w = 2.0 * cx;
+	const double w = 2.0 * cx;
 	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
 
 		double ch0val = inputBuffer.at(i);
-        double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : 0.0);
+		double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : 0.0);
 
 		switch(plotMode) {
 		case XY:
