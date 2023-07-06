@@ -10,6 +10,7 @@
 #include "scopewidget.h"
 #include "delayline.h"
 #include "differentiator.h"
+#include "interpolator.h"
 #include "movingaverage.h"
 
 #include <QVBoxLayout>
@@ -43,7 +44,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	const auto divs = scopeDisplay->getDivisions();
 	sweepParameters.horizontalDivisions = divs.first;
 	sweepParameters.verticalDivisions = divs.second;
-	sweepParameters.sweepUnused = {plotMode != Sweep};
+	sweepParameters.sweepUnused = {plotMode != Sweep && plotMode != SweepUpsampled};
 
 	calcScaling();
     connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
@@ -291,7 +292,7 @@ void ScopeWidget::render()
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	const bool drawLines = (plotMode == Sweep && !panicMode && (sweepParameters.getSamplesPerSweep() > 25));
+	const bool drawLines = ( (plotMode == Sweep || plotMode == SweepUpsampled)  && !panicMode && (sweepParameters.getSamplesPerSweep() > 25));
 
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
@@ -326,6 +327,7 @@ void ScopeWidget::render()
 
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
 
+
 	// draw
 	const double w = 2.0 * cx;
 	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
@@ -344,14 +346,14 @@ void ScopeWidget::render()
 			break;
 		case Sweep:
 		{
-            static Differentiator<double> d;
-            static DelayLine<double, d.delayTime> delayLine;
+			static Differentiator<double> d;
+			static DelayLine<double, d.delayTime> delayLine;
 			static bool triggered = false;
 			static double x = 0.0;
-            static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
-
-            double slope = d.get(ch0val) * sweepParameters.slope;
-            double delayed = delayLine.get(ch0val);
+			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
+			const double &source = ch0val;
+			double slope = d.get(source) * sweepParameters.slope;
+			double delayed = delayLine.get(source);
 
 			triggered = triggered
 						|| !sweepParameters.triggerEnabled // when trigger disabled -> Always Triggered
@@ -365,10 +367,49 @@ void ScopeWidget::render()
 				lastPoint = pt;
 				plotBuffer.append(pt);
 				x += sweepParameters.sweepAdvance;
-                if(x > w) { // sweep completed
+				if(x > w) { // sweep completed
 					x = 0.0;
 					triggered = false;
-                    lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
+					lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
+				}
+			}
+		}
+			break;
+
+		case SweepUpsampled:
+		{
+			constexpr int upsampleFactor = 4;
+			static Interpolator<float, double, upsampleFactor> upsampler;
+			static Differentiator<double> d;
+			static DelayLine<double, d.delayTime> delayLine;
+			static bool triggered = false;
+			static double x = 0.0;
+			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
+			const double &source = ch0val;
+
+			double upsampled[upsampleFactor];
+			upsampler.processMono(upsampled, source);
+			for(int u = 0; u < upsampleFactor; u++) {
+				double slope = d.get(upsampled[u]) * sweepParameters.slope;
+				double delayed = delayLine.get(upsampled[u]);
+
+				triggered = triggered
+							|| !sweepParameters.triggerEnabled // when trigger disabled -> Always Triggered
+							|| (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
+
+				if(triggered) {
+					QPointF pt{x, cy * (1.0 - delayed)};
+					if(drawLines)  {
+						plotBuffer.append(lastPoint);
+					}
+					lastPoint = pt;
+					plotBuffer.append(pt);
+					x += sweepParameters.sweepAdvanceInterpolated;
+					if(x > w) { // sweep completed
+						x = 0.0;
+						triggered = false;
+						lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
+					}
 				}
 			}
 		}
@@ -516,7 +557,7 @@ Plotmode ScopeWidget::getPlotmode() const
 void ScopeWidget::setPlotmode(Plotmode newPlotmode)
 {
 	plotMode = newPlotmode;
-	if(plotMode == Sweep) {
+	if(plotMode == Sweep || plotMode == SweepUpsampled) {
 		//
 	} else {
 		sweepParameters.sweepUnused = true;
@@ -574,7 +615,7 @@ bool ScopeWidget::getShowTrigger() const
 
 void ScopeWidget::setShowTrigger(bool val)
 {
-	showTrigger = (plotMode == Sweep) && val;
+	showTrigger = (plotMode == Sweep || plotMode == SweepUpsampled) && val;
 	if(paused) {
 
 		auto pixmap = scopeDisplay->getPixmap();

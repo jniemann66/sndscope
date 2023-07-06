@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	connect(plotmodeWidget, &PlotmodeWidget::plotmodeChanged, scopeWidget, &ScopeWidget::setPlotmode);
 	connect(plotmodeWidget, &PlotmodeWidget::plotmodeChanged, this, [sweepSettingsWidget](Plotmode plotmode){
-		sweepSettingsWidget->setEnabled(plotmode == Sweep);
+		sweepSettingsWidget->setEnabled(plotmode == Sweep || plotmode == SweepUpsampled);
 	});
 
 	scopeWidget->setBrightness(80.0);
@@ -149,7 +149,7 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	sweepSettingsWidget->setSweepParameters(scopeWidget->getSweepParameters());
 	Plotmode plotmode = scopeWidget->getPlotmode();
 	plotmodeWidget->setPlotmode(plotmode);
-	sweepSettingsWidget->setEnabled(plotmode == Sweep);
+	sweepSettingsWidget->setEnabled(plotmode == Sweep || plotmode == SweepUpsampled);
 
 }
 

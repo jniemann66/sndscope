@@ -90,6 +90,7 @@ private:
 	int width_pixels{640};
 	double inputFrames_per_ms{44.1};
 	double sweepAdvance; // pixels per input frame
+	double sweepAdvanceInterpolated;
 	double triggerMin{triggerLevel - triggerTolerance};
 	double triggerMax{triggerLevel + triggerTolerance};
 
@@ -103,6 +104,7 @@ private:
 	void calcSweepAdvance()
 	{
 		sweepAdvance = width_pixels / inputFrames_per_ms / duration_ms;
+		sweepAdvanceInterpolated = sweepAdvance / 4;
 	}
 };
 

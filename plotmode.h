@@ -8,7 +8,8 @@ enum Plotmode
 {
 	XY,
 	MidSide,
-	Sweep
+	Sweep,
+	SweepUpsampled
 };
 
 
