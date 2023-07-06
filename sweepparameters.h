@@ -38,10 +38,14 @@ public:
 		calcSweepAdvance();
 	}
 
+	void setConnectDots(bool newConnectDots);
+
 	double getSamplesPerSweep() const
 	{
 		return duration_ms * inputFrames_per_ms;
 	}
+
+	bool getConnectDots() const;
 
 	static QString formatMeasurementUnits(double duration_s, const QString& units, int precision = 2)
 	{
@@ -85,6 +89,7 @@ public:
 	}
 
 
+
 private:
 	double duration_ms{10.0};
 	int width_pixels{640};
@@ -93,6 +98,7 @@ private:
 	double sweepAdvanceInterpolated;
 	double triggerMin{triggerLevel - triggerTolerance};
 	double triggerMax{triggerLevel + triggerTolerance};
+	bool connectDots{true};
 
 	void setWidthFrameRate(int width_pixels, double inputFrames_per_ms)
 	{
@@ -107,5 +113,15 @@ private:
 		sweepAdvanceInterpolated = sweepAdvance / 4;
 	}
 };
+
+inline bool SweepParameters::getConnectDots() const
+{
+	return connectDots;
+}
+
+inline void SweepParameters::setConnectDots(bool newConnectDots)
+{
+	connectDots = newConnectDots;
+}
 
 #endif // SWEEPPARAMETERS_H

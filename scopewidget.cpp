@@ -292,7 +292,11 @@ void ScopeWidget::render()
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
-	const bool drawLines = ( (plotMode == Sweep || plotMode == SweepUpsampled)  && !panicMode && (sweepParameters.getSamplesPerSweep() > 25));
+	const bool drawLines =  ( sweepParameters.connectDots &&
+							  (plotMode == Sweep || plotMode == SweepUpsampled)  &&
+							  !panicMode &&
+							  (sweepParameters.getSamplesPerSweep() > 25)
+							  );
 
 	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
 	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
@@ -606,6 +610,7 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 
 	sweepParameters.slope = newSweepParameters.slope;
 	sweepParameters.triggerEnabled = newSweepParameters.triggerEnabled;
+	sweepParameters.connectDots = newSweepParameters.connectDots;
 }
 
 bool ScopeWidget::getShowTrigger() const

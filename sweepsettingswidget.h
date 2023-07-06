@@ -37,6 +37,7 @@ private:
 	QSlider *triggerTolerance{nullptr};
 	QCheckBox *triggerEnabled{nullptr};
 	QCheckBox *triggerResetButton{nullptr};
+	QCheckBox *connectDots{nullptr};
 	QDial *slopeDial{nullptr};
 
 	void initSweepRateMap();

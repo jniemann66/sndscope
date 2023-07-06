@@ -33,6 +33,9 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 	triggerEnabled->setChecked(true);
 	triggerResetButton = new QCheckBox("Reset");
 
+	connectDots = new QCheckBox("Connect Dots");
+	connectDots->setChecked(true);
+
 	auto slopeDialLabel = new QLabel("Slope: /");
 	slopeDial = new QDial;
 	slopeDial->setRange(-2, 2);
@@ -41,19 +44,27 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 	slopeDial->setSliderPosition(1);
 
 	auto mainLayout = new QVBoxLayout;
-	auto sweepLayout = new QHBoxLayout;
+	auto sweepLayout = new QVBoxLayout;
 	auto sweepSpeedLayout = new QVBoxLayout;
+	auto sweepInfoLayout = new QHBoxLayout;
 	auto triggerLevelLayout = new QVBoxLayout;
 	auto triggerToleranceLayout = new QVBoxLayout;
 	auto triggerResetLayout = new QVBoxLayout;
+	auto connectDotsLayout = new QVBoxLayout;
 	auto triggerSlopeLayout = new QVBoxLayout;
 	auto triggerLayout = new QHBoxLayout;
 
+	connectDotsLayout->addWidget(connectDots);
+	connectDotsLayout->addStretch();
+
 	sweepSpeedLayout->addWidget(sweepDialLabel);
 	sweepSpeedLayout->addWidget(sweepDial);
-	sweepSpeedLayout->addWidget(sweepInfo);
+
+	sweepInfoLayout->addWidget(sweepInfo);
+	sweepInfoLayout->addLayout(connectDotsLayout);
 
 	sweepLayout->addLayout(sweepSpeedLayout);
+	sweepLayout->addLayout(sweepInfoLayout);
 
 	triggerLevelLayout->addWidget(triggerLevelLabel);
 	triggerLevelLayout->addWidget(triggerLevel);
@@ -90,6 +101,12 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 
 	connect(sweepDial, &QSlider::actionTriggered, this, [this]{
 		sweepParameters.setDuration(sweepRateMap.value(std::max(0, sweepDial->value())));
+		setSweepParametersText();
+		emit sweepParametersChanged(sweepParameters);
+	});
+
+	connect(connectDots, &QCheckBox::stateChanged, this, [this]{
+		sweepParameters.setConnectDots(connectDots->isChecked());
 		setSweepParametersText();
 		emit sweepParametersChanged(sweepParameters);
 	});
