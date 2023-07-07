@@ -10,6 +10,14 @@
 #ifndef INTERPOLATOR_H
 #define INTERPOLATOR_H
 
+
+//#define INTERPOLATOR_TIME_FUNC
+
+#ifdef INTERPOLATOR_TIME_FUNC
+#include "movingaverage.h"
+#include "functimer.h"
+#endif
+
 #include <vector>
 
 #include <QDebug>
@@ -18,7 +26,6 @@ template <typename InputType, typename OutputType, int L>
 class Interpolator
 {
 private:
-
 	static constexpr OutputType coeffs2[] {
 		-0.00087560000,
 		-0.0011643619,
@@ -181,6 +188,8 @@ public:
 
 	void upsampleMono(OutputType* output, const InputType* input, size_t sampleCount)
 	{
+
+
 		for(size_t s = 0; s < sampleCount; s++) {
 			processMono(output, *input++);
 			output += L;
@@ -199,6 +208,24 @@ public:
 
 	inline void processMono(OutputType* output, InputType input)
 	{
+
+#ifdef INTERPOLATOR_TIME_FUNC
+		static double renderTime = 0.0;
+		FuncTimerQ funcTimer(&renderTime);
+		constexpr size_t historyLength = 100;
+		static MovingAverage<double, historyLength> movingAverage;
+		static int64_t callCount = 0;
+
+		const double mov_avg_renderTime = movingAverage.get(renderTime);
+
+		constexpr int64_t every = 10000;
+		if(++callCount % every == 0) {
+			qDebug() << QStringLiteral("Avg Upsample time(last %1)=%2ns")
+						.arg(historyLength)
+						.arg(mov_avg_renderTime, 0, 'f', 2);
+		}
+#endif
+
 		history0[index] = static_cast<OutputType>(input);
 		size_t p = index;
 

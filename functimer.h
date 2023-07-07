@@ -14,28 +14,51 @@
 #include <iomanip>
 #include <chrono>
 
+#include <QElapsedTimer>
+
 // class FuncTimer : starts a high-resolution timer upon construction and
 // upon destruction, accumulates time spent alive into total_duration
 
-class FuncTimer {
+template<typename D>
+class FuncTimer
+{
 	double* const duration;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> beginTimer;
 	std::chrono::time_point<std::chrono::high_resolution_clock> endTimer;
 public:
 
-	explicit FuncTimer(double* total_duration) : duration(total_duration)
+	explicit FuncTimer(double* d) : duration(d)
 	{
 		beginTimer = std::chrono::high_resolution_clock::now();
+		beginTimer = std::chrono::system_clock::now();
 	}
 
 	~FuncTimer()
 	{
 		endTimer = std::chrono::high_resolution_clock::now();
 		if(duration != nullptr) {
-			*duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimer - beginTimer).count();
+			*duration = std::chrono::duration_cast<D>(endTimer - beginTimer).count();
 		}
 	}
+};
+
+// Qt version
+class FuncTimerQ
+{
+	QElapsedTimer timer;
+	double* const duration;
+public:
+	explicit FuncTimerQ(double* d) : duration(d)
+	{
+		timer.start();
+	}
+
+	~FuncTimerQ()
+	{
+		*duration = timer.nsecsElapsed();
+	}
+
 };
 
 

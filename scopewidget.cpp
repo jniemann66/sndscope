@@ -288,7 +288,7 @@ void ScopeWidget::render()
 	}
 #endif
 
-	FuncTimer funcTimer(&renderTime);
+	FuncTimer<std::chrono::milliseconds> funcTimer(&renderTime);
 
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
@@ -446,9 +446,7 @@ void ScopeWidget::render()
 	}
 
 	painter.endNativePainting();
-
 }
-
 
 void ScopeWidget::plotTest()
 {
@@ -457,7 +455,7 @@ void ScopeWidget::plotTest()
 	static int64_t callCount = 0;
 	static double renderTime = 0.0;
 
-	FuncTimer funcTimer(&renderTime);
+	FuncTimer<std::chrono::milliseconds> funcTimer(&renderTime);
 
 	// collect data for overall average
 	callCount++;
@@ -491,11 +489,8 @@ void ScopeWidget::plotTest()
 	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
 	painter.setPen(pen);
 
-
 	painter.drawPoints(testPlot.data(), testPlot.size());
 	painter.endNativePainting();
-
-
 }
 
 void ScopeWidget::makeTestPlot()

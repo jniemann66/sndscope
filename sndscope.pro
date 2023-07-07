@@ -12,7 +12,7 @@ CONFIG += c++17
 # force -O3
 # QMAKE_CXXFLAGS_RELEASE -= -O2
 # QMAKE_CXXFLAGS_RELEASE += -O3
-# QMAKE_LFLAGS_RELEASE -= -O1
+# QMAKE_CXXFLAGS_RELEASE += -mavx2
 # --
 
 #import libsndfile
