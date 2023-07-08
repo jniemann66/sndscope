@@ -392,7 +392,7 @@ void ScopeWidget::render()
 			const double &source = ch0val;
 
 			double upsampled[upsampleFactor];
-			upsampler.processMono(upsampled, source);
+			upsampler.upsampleSingleMono(upsampled, source);
 			for(int u = 0; u < upsampleFactor; u++) {
 				double slope = d.get(upsampled[u]) * sweepParameters.slope;
 				double delayed = delayLine.get(upsampled[u]);

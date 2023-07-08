@@ -51,8 +51,7 @@ private:
 	};
 
 	// todo: design filters for other L - factors
-	static constexpr OutputType coeffs4[] {
-		//Coeffs:73
+	static constexpr OutputType coeffs4[] { // Coeffs: 73
 		9.962570624126234e-06,
 		3.957986016501213e-05,
 		7.897128934649362e-05,
@@ -128,13 +127,11 @@ private:
 		9.962570624126234e-06
 	};
 
-
 	// FIR Filter
 	size_t fir_length;
 	std::vector<OutputType> fir_coeffs;
 	std::vector<OutputType> history0;
 	std::vector<OutputType> history1;
-
 
 	size_t index;
 	size_t n;
@@ -186,27 +183,25 @@ public:
 		index = fir_length - 1;
 	}
 
-	void upsampleMono(OutputType* output, const InputType* input, size_t sampleCount)
+	void upsampleBlockMono(OutputType* output, const InputType* input, size_t sampleCount)
 	{
-
-
 		for(size_t s = 0; s < sampleCount; s++) {
-			processMono(output, *input++);
+			upsampleSingleMono(output, *input++);
 			output += L;
 		}
 	}
 
-	void upsampleStereo(OutputType* output0, OutputType* output1, const InputType* interleaved, size_t sampleCount)
+	void upsampleBlockStereo(OutputType* output0, OutputType* output1, const InputType* interleaved, size_t sampleCount)
 	{
 		for(size_t s = 0; s < sampleCount; s ++) {
-			processStereo(output0, output1, *interleaved, *(interleaved + 1));
+			upsampleSingleStereo(output0, output1, *interleaved, *(interleaved + 1));
 			interleaved += 2;
 			output0 += L;
 			output1 += L;
 		}
 	}
 
-	inline void processMono(OutputType* output, InputType input)
+	inline void upsampleSingleMono(OutputType* output, InputType input)
 	{
 
 #ifdef INTERPOLATOR_TIME_FUNC
@@ -257,7 +252,7 @@ public:
 		}
 	}
 
-	inline void processStereo(OutputType* output0, OutputType* output1, InputType input0, InputType input1)
+	inline void upsampleSingleStereo(OutputType* output0, OutputType* output1, InputType input0, InputType input1)
 	{
 		history0[index] = static_cast<OutputType>(input0);
 		history1[index] = static_cast<OutputType>(input1);
@@ -302,7 +297,6 @@ public:
 	{
 		return (fir_length - 1)  / 2;
 	};
-
 };
 
 #endif // INTERPOLATOR_H
