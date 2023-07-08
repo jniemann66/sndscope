@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include <QComboBox>
+#include <QCheckBox>
 
 #include "plotmode.h"
 
@@ -23,9 +24,11 @@ public:
 
 signals:
 	void plotmodeChanged(Plotmode plotmode);
+	void upsamplingChanged(bool enableUpsampling);
 
 private:
 	QComboBox *plotmodeSelector{nullptr};
+	QCheckBox *upsamplingCheckbox{nullptr};
 
 };
 

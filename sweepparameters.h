@@ -47,6 +47,8 @@ public:
 
 	bool getConnectDots() const;
 
+	double getUpsampleFactor() const;
+
 	static QString formatMeasurementUnits(double duration_s, const QString& units, int precision = 2)
 	{
 		// constexpr int m = 999;
@@ -90,10 +92,13 @@ public:
 
 
 
+	void setUpsampleFactor(double newUpsampleFactor);
+
 private:
 	double duration_ms{10.0};
 	int width_pixels{640};
 	double inputFrames_per_ms{44.1};
+	double upsampleFactor{1.0};
 	double sweepAdvance; // pixels per input frame
 	double sweepAdvanceInterpolated;
 	double triggerMin{triggerLevel - triggerTolerance};
@@ -109,14 +114,24 @@ private:
 
 	void calcSweepAdvance()
 	{
-		sweepAdvance = width_pixels / inputFrames_per_ms / duration_ms;
-		sweepAdvanceInterpolated = sweepAdvance / 4;
+		sweepAdvance = width_pixels / inputFrames_per_ms / duration_ms / upsampleFactor;
 	}
 };
 
 inline bool SweepParameters::getConnectDots() const
 {
 	return connectDots;
+}
+
+inline double SweepParameters::getUpsampleFactor() const
+{
+	return upsampleFactor;
+}
+
+inline void SweepParameters::setUpsampleFactor(double newUpsampleFactor)
+{
+	upsampleFactor = newUpsampleFactor;
+	calcSweepAdvance();
 }
 
 inline void SweepParameters::setConnectDots(bool newConnectDots)

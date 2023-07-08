@@ -8,11 +8,8 @@ enum Plotmode
 {
 	XY,
 	MidSide,
-	Sweep,
-	SweepUpsampled
+	Sweep
 };
-
-
 
 struct PlotmodeDefinition
 {

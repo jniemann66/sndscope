@@ -31,6 +31,7 @@
 #include "plotmode.h"
 #include "sweepparameters.h"
 #include "audiocontroller.h"
+#include "interpolator.h"
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
@@ -207,6 +208,8 @@ class ScopeWidget : public QWidget
 {
 	Q_OBJECT
 
+	static constexpr int upsampleFactor = 4;
+
 public:
 	explicit ScopeWidget(QWidget *parent = nullptr);
 	QPair<bool, QString> loadSoundFile(const QString &filename);
@@ -236,8 +239,10 @@ public:
 	void setBackgroundColor(const QColor &value);
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 	void setShowTrigger(bool val);
-
 	void plotTest();
+
+	bool getUpsampling() const;
+
 public slots:
 	void returnToStart();
 	void gotoPosition(int64_t milliSeconds);
@@ -245,6 +250,7 @@ public slots:
 	void setAudioVolume(qreal linearVolume);
 	void setSweepParameters(const SweepParameters &newSweepParameters);
 	void setPlotmode(Plotmode newPlotmode);
+	void setUpsampling(bool val);
 
 signals:
 	void loadedFile();
@@ -258,30 +264,46 @@ private:
 	AudioController *audioController{nullptr};
 	QIODevice* pushOut{nullptr};
 	QHBoxLayout *screenLayout{nullptr};
-
 	std::unique_ptr<SndfileHandle> sndfile;
-	QVector<float> inputBuffer;
 	QAudioFormat audioFormat;
 	QAudioDeviceInfo outputDeviceInfo;
+	Interpolator<float, float, upsampleFactor> upsampler;
+
+	// audio buffers
+	QVector<float> rawinputBuffer; // interleaved
+	QVector<QVector<float>> inputBuffers; // de-interleaved
+
+	// timing
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
 
+	// plot buffers
 	QVector<QPointF> testPlot;
 	QVector<QPointF> plotBuffer;
 
 	Plotmode plotMode{XY};
 	bool showTrigger{false};
 	SweepParameters sweepParameters;
-	int inputChannels{0};
+
+	bool upsampling{false};
+	int numInputChannels{0};
 	int audioFramesPerMs{0};
 	double msPerAudioFrame{0.0};
-	int64_t startFrame{0};
-	int64_t currentFrame{0ll};
-	int64_t maxFramesToRead{0};
-	int64_t totalFrames{0ll};
+
+	// audio frame accounting
+	int64_t startFrame{0ll}; // start position for playback
+	int64_t currentFrame{0ll}; // start position of next read
+	int64_t framesRead{0ll}; // number of audioframes last read from file
+	int64_t framesAvailable{011}; // number of audioframes currently stored in input buffers; after upsampling
+	int64_t expectedFrames{0ll}; // number of audioframes expected per plotTimer timeout
+	int64_t maxFramesToRead{0ll}; // limit of how many audioframes can fit in buffer
+	int64_t totalFrames{0ll}; // total number of audioframes in sound file
+
 	bool fileLoaded{false};
 	bool paused{true};
+
+	// crt properties
 	double brightness{80.0};
 	double focus{80.0};
 	double persistence{32.0};
@@ -291,9 +313,14 @@ private:
 	QColor darkencolor{0, 0, 0, 0};
 	QColor backgroundColor{0, 0, 0, 255};
 	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
+	int darkenAlpha;
+	int beamAlpha;
+	double beamWidth;
+	double beamIntensity;
+
     bool freshRender{false};
 
-	// midpoint of pixmap
+	// plot dimensions
 	double cx;
 	double cy;
 	double w;
@@ -301,16 +328,12 @@ private:
 	double divx;
 	double divy;
 
-	int darkenAlpha;
-	int beamAlpha;
-	double beamWidth;
-	double beamIntensity;
-
+	// private functions
 	void calcScaling();
+	void readInput();
 	void render();
 	void renderTest();
 	void calcBeamAlpha();
-
 	void renderTrigger(QPainter *painter);
 	void makeTestPlot();
 signals:

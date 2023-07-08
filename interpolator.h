@@ -11,7 +11,7 @@
 #define INTERPOLATOR_H
 
 
-//#define INTERPOLATOR_TIME_FUNC
+#define INTERPOLATOR_TIME_FUNC
 
 #ifdef INTERPOLATOR_TIME_FUNC
 #include "movingaverage.h"
@@ -140,6 +140,8 @@ public:
 	Interpolator()
     {
 		switch(L) {
+		case 1:
+			break;
 		case 2:
 			setCoefficients(coeffs2);
 			break;
@@ -180,6 +182,13 @@ public:
 
 		history0.resize(fir_length, 0.0);
 		history1.resize(fir_length, 0.0);
+		index = fir_length - 1;
+	}
+
+	void reset()
+	{
+		std::fill(history0.begin(), history0.end(), 0.0);
+		std::fill(history1.begin(), history1.end(), 0.0);
 		index = fir_length - 1;
 	}
 
@@ -224,22 +233,11 @@ public:
 		history0[index] = static_cast<OutputType>(input);
 		size_t p = index;
 
-		if constexpr(L == 2) {
-			output[0] = output[1] = 0.0;
-		} else {
-			for(int k = 0; k < L; k++) {
-				output[k] = 0;
-			}
-		}
+		memset(output, 0.0, L * sizeof(OutputType));
 
 		for(size_t j = 0; j < n * L; j+= L) {
-			if constexpr(L == 2) {
-				output[0] += fir_coeffs[j] * history0[p];
-				output[1] += fir_coeffs[j+1] * history0[p];
-			} else {
-				for(size_t k = 0; k < L; k++) {
-					output[k] += fir_coeffs[j+k] * history0[p];
-				}
+			for(size_t k = 0; k < L; k++) {
+				output[k] += fir_coeffs[j+k] * history0[p];
 			}
 
 			if(++p == fir_length) {
@@ -259,28 +257,13 @@ public:
 
 		size_t p = index;
 
-		if constexpr(L == 2) {
-			output0[0] = output0[1] = 0.0;
-			output1[0] = output1[1] = 0.0;
-
-		} else {
-			for(int k = 0; k < L; k++) {
-				output0[k] = 0;
-				output1[k] = 0;
-			}
-		}
+		memset(output0, 0.0, L * sizeof(OutputType));
+		memset(output1, 0.0, L * sizeof(OutputType));
 
 		for(size_t j = 0; j < n * L; j+= L) {
-			if constexpr(L == 2) {
-				output0[0] += fir_coeffs[j] * history0[p];
-				output0[1] += fir_coeffs[j+1] * history0[p];
-				output1[0] += fir_coeffs[j] * history1[p];
-				output1[1] += fir_coeffs[j+1] * history1[p];
-			} else {
-				for(size_t k = 0; k < L; k++) {
-					output0[k] += fir_coeffs[j+k] * history0[p];
-					output1[k] += fir_coeffs[j+k] * history1[p];
-				}
+			for(size_t k = 0; k < L; k++) {
+				output0[k] += fir_coeffs[j+k] * history0[p];
+				output1[k] += fir_coeffs[j+k] * history1[p];
 			}
 
 			if(++p == fir_length) {

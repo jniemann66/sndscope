@@ -10,7 +10,6 @@
 #include "scopewidget.h"
 #include "delayline.h"
 #include "differentiator.h"
-#include "interpolator.h"
 #include "movingaverage.h"
 
 #include <QVBoxLayout>
@@ -44,7 +43,9 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	const auto divs = scopeDisplay->getDivisions();
 	sweepParameters.horizontalDivisions = divs.first;
 	sweepParameters.verticalDivisions = divs.second;
-	sweepParameters.sweepUnused = {plotMode != Sweep && plotMode != SweepUpsampled};
+	sweepParameters.sweepUnused = {plotMode != Sweep};
+
+	setUpsampling(getUpsampling());
 
 	calcScaling();
     connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
@@ -53,10 +54,15 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 
 	connect(&plotTimer, &QTimer::timeout, this, [this]{
 		if(!paused) {
-			//plotTest();
+
+		//plotTest();
+			readInput();
+
+			// send audio to output
+			pushOut->write(reinterpret_cast<char*>(rawinputBuffer.data()), framesRead * audioFormat.bytesPerFrame());
+
+			// plot it
 			render();
-            freshRender = true;
-			emit renderedFrame(currentFrame * msPerAudioFrame);
 		}
 	});
 
@@ -89,13 +95,25 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 	if(fileLoaded) {
 
 		// set up rendering parameters, based on soundfile properties
-		inputChannels = sndfile->channels();
-		inputBuffer.resize(sndfile->channels() * sndfile->samplerate()); // 1s of storage
+		numInputChannels = sndfile->channels();
+
+		// initialize raw (interleaved) input buffer
+		rawinputBuffer.resize(numInputChannels * sndfile->samplerate()); // 1s of storage
+
+		// initialize channel input buffers
+		inputBuffers.resize(numInputChannels);
+		for(int ch = 0; ch < numInputChannels; ch++) {
+			size_t chbufSize = sndfile->samplerate() * upsampleFactor; // allow for upsampling
+			inputBuffers[ch].resize(chbufSize);
+		}
+
 		audioFramesPerMs = sndfile->samplerate() / 1000;
+		expectedFrames = plotTimer.interval() * audioFramesPerMs;
 		msPerAudioFrame = 1000.0 / sndfile->samplerate();
 		calcScaling();
 
-		maxFramesToRead = inputBuffer.size() / sndfile->channels();
+		maxFramesToRead = rawinputBuffer.size() / sndfile->channels();
+
 		totalFrames = sndfile->frames();
 		returnToStart();
 
@@ -258,6 +276,40 @@ void ScopeWidget::setTotalFrames(const int64_t &value)
 	totalFrames = value;
 }
 
+void ScopeWidget::readInput()
+{
+	// estimate how far ahead to read
+	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
+
+	// read from file
+	framesRead = sndfile->readf(rawinputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
+	currentFrame += framesRead;
+
+	constexpr bool debugExpectedFrames = false;
+	if constexpr(debugExpectedFrames) {
+		if(framesRead > expectedFrames)
+			qDebug() << "expected" << expectedFrames << "got" << framesRead;
+	}
+
+	// de-interleave
+	if(upsampling && numInputChannels <= 2) {
+		if(numInputChannels == 1) {
+			upsampler.upsampleBlockMono(inputBuffers[0].data(), rawinputBuffer.constData(), framesRead);
+			framesAvailable = framesRead * upsampleFactor;
+		} else if(numInputChannels == 2) {
+			upsampler.upsampleBlockStereo(inputBuffers[0].data(), inputBuffers[1].data(), rawinputBuffer.constData(), framesRead);
+			framesAvailable = framesRead * upsampleFactor;
+		}
+	} else {
+		for(int64_t f = 0ll; f < framesRead; f++) {
+			for(int ch = 0; ch < numInputChannels; ch++) {
+				inputBuffers[ch][f] = rawinputBuffer[f * numInputChannels + ch];
+			}
+		}
+		framesAvailable = framesRead;
+	}
+}
+
 void ScopeWidget::render()
 {
     constexpr size_t historyLength = 10;
@@ -293,14 +345,11 @@ void ScopeWidget::render()
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
 	const bool drawLines =  ( sweepParameters.connectDots &&
-							  (plotMode == Sweep || plotMode == SweepUpsampled)  &&
+							  plotMode == Sweep  &&
 							  !panicMode &&
 							  (sweepParameters.getSamplesPerSweep() > 25)
 							  );
 
-	const int64_t expectedFrames = plotTimer.interval() * audioFramesPerMs;
-	const int64_t toFrame = qMin(totalFrames - 1, startFrame + static_cast<int64_t>(elapsedTimer.elapsed() * audioFramesPerMs));
-	const int64_t framesRead = sndfile->readf(inputBuffer.data(), qMin(maxFramesToRead, toFrame - currentFrame));
 
     auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);
@@ -323,21 +372,15 @@ void ScopeWidget::render()
 				Qt::BevelJoin};
 	painter.setPen(pen);
 
-    constexpr bool debugExpectedFrames = false;
-    if constexpr(debugExpectedFrames) {
-		if(framesRead > expectedFrames)
-			qDebug() << "expected" << expectedFrames << "got" << framesRead;
-	}
-
-	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesRead - expectedFrames * 2);
-
+	int64_t expected = expectedFrames * (upsampling ? upsampleFactor : 1);
+	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesAvailable - 2 * expected);
 
 	// draw
 	const double w = 2.0 * cx;
-	for(int64_t i = firstFrameToPlot; i < inputChannels * framesRead; i+= inputChannels) {
+	for(int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
 
-		double ch0val = inputBuffer.at(i);
-		double ch1val = (inputChannels > 1 ? inputBuffer.at(i + 1) : 0.0);
+		double ch0val = inputBuffers[0][i];
+		double ch1val = (numInputChannels > 1 ? inputBuffers[1][i] : 0.0);
 
 		switch(plotMode) {
 		case XY:
@@ -380,44 +423,6 @@ void ScopeWidget::render()
 		}
 			break;
 
-		case SweepUpsampled:
-		{
-			constexpr int upsampleFactor = 4;
-			static Interpolator<float, double, upsampleFactor> upsampler;
-			static Differentiator<double> d;
-			static DelayLine<double, d.delayTime> delayLine;
-			static bool triggered = false;
-			static double x = 0.0;
-			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
-			const double &source = ch0val;
-
-			double upsampled[upsampleFactor];
-			upsampler.upsampleSingleMono(upsampled, source);
-			for(int u = 0; u < upsampleFactor; u++) {
-				double slope = d.get(upsampled[u]) * sweepParameters.slope;
-				double delayed = delayLine.get(upsampled[u]);
-
-				triggered = triggered
-							|| !sweepParameters.triggerEnabled // when trigger disabled -> Always Triggered
-							|| (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
-
-				if(triggered) {
-					QPointF pt{x, cy * (1.0 - delayed)};
-					if(drawLines)  {
-						plotBuffer.append(lastPoint);
-					}
-					lastPoint = pt;
-					plotBuffer.append(pt);
-					x += sweepParameters.sweepAdvanceInterpolated;
-					if(x > w) { // sweep completed
-						x = 0.0;
-						triggered = false;
-						lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
-					}
-				}
-			}
-		}
-
 		} // ends switch
 	} // ends loop over i
 
@@ -427,10 +432,6 @@ void ScopeWidget::render()
 		painter.drawPoints(plotBuffer);
 	}
 	plotBuffer.clear();
-
-	const int bytesPerFrame = audioFormat.bytesPerFrame();
-	pushOut->write(reinterpret_cast<char*>(inputBuffer.data()), framesRead * bytesPerFrame);
-	currentFrame += framesRead;
 
     constexpr bool debugPlotBufferSize = false;
 	if constexpr(debugPlotBufferSize) {
@@ -446,6 +447,8 @@ void ScopeWidget::render()
 	}
 
 	painter.endNativePainting();
+	freshRender = true;
+	emit renderedFrame(currentFrame * msPerAudioFrame);
 }
 
 void ScopeWidget::plotTest()
@@ -556,10 +559,24 @@ Plotmode ScopeWidget::getPlotmode() const
 void ScopeWidget::setPlotmode(Plotmode newPlotmode)
 {
 	plotMode = newPlotmode;
-	if(plotMode == Sweep || plotMode == SweepUpsampled) {
+	if(plotMode == Sweep) {
 		//
 	} else {
 		sweepParameters.sweepUnused = true;
+	}
+}
+
+bool ScopeWidget::getUpsampling() const
+{
+	return upsampling;
+}
+
+void ScopeWidget::setUpsampling(bool val)
+{
+	upsampling = val;
+	sweepParameters.setUpsampleFactor(upsampling ? static_cast<double>(upsampleFactor) : 1.0);
+	if(upsampling) {
+		upsampler.reset();
 	}
 }
 
@@ -578,6 +595,8 @@ void ScopeWidget::calcScaling()
 	// makeTestPlot();
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 }
+
+
 
 void ScopeWidget::setAudioVolume(qreal linearVolume)
 {
@@ -615,7 +634,7 @@ bool ScopeWidget::getShowTrigger() const
 
 void ScopeWidget::setShowTrigger(bool val)
 {
-	showTrigger = (plotMode == Sweep || plotMode == SweepUpsampled) && val;
+	showTrigger = (plotMode == Sweep) && val;
 	if(paused) {
 
 		auto pixmap = scopeDisplay->getPixmap();
