@@ -45,6 +45,8 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	sweepParameters.verticalDivisions = divs.second;
 	sweepParameters.sweepUnused = {plotMode != Sweep};
 
+	//upsampler.setCoefficients(Interpolator<float, float, upsampleFactor>::minPhase4_coefficients);
+
 	setUpsampling(getUpsampling());
 
 	calcScaling();
@@ -78,6 +80,8 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	connect(audioController, &AudioController::outputVolume, this, [this](qreal linearVol){
 		emit outputVolume(linearVol);
 	});
+
+
 
     screenLayout->addWidget(scopeDisplay, 0, Qt::AlignHCenter);
 	mainLayout->addLayout(screenLayout);
