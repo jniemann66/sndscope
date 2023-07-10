@@ -31,7 +31,7 @@ public:
 	explicit FuncTimer(double* d) : duration(d)
 	{
 		beginTimer = std::chrono::high_resolution_clock::now();
-		beginTimer = std::chrono::system_clock::now();
+//		beginTimer = std::chrono::system_clock::now();
 	}
 
 	~FuncTimer()
