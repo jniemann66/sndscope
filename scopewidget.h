@@ -31,7 +31,7 @@
 #include "plotmode.h"
 #include "sweepparameters.h"
 #include "audiocontroller.h"
-#include "interpolator.h"
+#include "upsampler.h"
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
@@ -267,7 +267,7 @@ private:
 	std::unique_ptr<SndfileHandle> sndfile;
 	QAudioFormat audioFormat;
 	QAudioDeviceInfo outputDeviceInfo;
-	Interpolator<float, float, upsampleFactor> upsampler;
+	UpSampler<float, float, upsampleFactor> upsampler;
 
 	// audio buffers
 	QVector<float> rawinputBuffer; // interleaved

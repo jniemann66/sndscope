@@ -12,6 +12,7 @@
 #include "differentiator.h"
 #include "movingaverage.h"
 
+
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QEvent>
@@ -19,9 +20,11 @@
 
 #include <cmath>
 
-#define SHOW_AVG_RENDER_TIME
-#ifdef SHOW_AVG_RENDER_TIME
+#define TIME_RENDER_FUNC
+#ifdef TIME_RENDER_FUNC
 #include "functimer.h"
+// #define SHOW_AVG_RENDER_TIME
+#define SHOW_PANIC
 #endif
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
@@ -45,7 +48,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	sweepParameters.verticalDivisions = divs.second;
 	sweepParameters.sweepUnused = {plotMode != Sweep};
 
-	//upsampler.setCoefficients(Interpolator<float, float, upsampleFactor>::minPhase4_coefficients);
+	//upsampler.setCoefficients(Interpolator<float, float, upsampleFactor>::small_minphase4);
 
 	setUpsampling(getUpsampling());
 
@@ -316,26 +319,32 @@ void ScopeWidget::readInput()
 
 void ScopeWidget::render()
 {
+	bool panicMode = false;
+
+#ifdef TIME_RENDER_FUNC
     constexpr size_t historyLength = 10;
     static MovingAverage<double, historyLength> movingAverage;
-	static int64_t callCount = 0;
 	static double renderTime = 0.0;
-	static double total_renderTime = 0.0;
+
+	[[maybe_unused]] static int64_t callCount = 0;
+	[[maybe_unused]] static double total_renderTime = 0.0;
 
 	// collect data for overall average
 	total_renderTime += renderTime;
 	callCount++;
 
     const double mov_avg_renderTime = movingAverage.get(renderTime);
-	const bool panicMode {mov_avg_renderTime > plotTimer.interval()};
+	panicMode = (mov_avg_renderTime > plotTimer.interval());
 
-#ifdef SHOW_AVG_RENDER_TIME
+#ifdef SHOW_PANIC
 	if(panicMode) {
 		qDebug() << QStringLiteral("Panic: recent avg (%1ms) > plot-interval (%2ms)")
 					.arg(mov_avg_renderTime, 0, 'f', 2)
 					.arg(plotTimer.interval());
 	}
+#endif
 
+#ifdef SHOW_AVG_RENDER_TIME
 	if(callCount % 100 == 0) {
 		qDebug() << QStringLiteral("Avg render time: Overall=%1ms Recent(last %2)=%3ms")
 					.arg(total_renderTime / std::max(1ll, callCount), 0, 'f', 2)
@@ -346,6 +355,8 @@ void ScopeWidget::render()
 
 	FuncTimer<std::chrono::milliseconds> funcTimer(&renderTime);
 
+#endif // TIME_RENDER_FUNC
+
 	constexpr bool catchAllFrames = false;
 	constexpr double rsqrt2 = 0.707;
 	const bool drawLines =  ( sweepParameters.connectDots &&
@@ -353,7 +364,6 @@ void ScopeWidget::render()
 							  !panicMode &&
 							  (sweepParameters.getSamplesPerSweep() > 25)
 							  );
-
 
     auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);

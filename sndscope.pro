@@ -10,9 +10,9 @@ QT += core gui multimedia widgets
 CONFIG += c++17
 
 # force -O3
- QMAKE_CXXFLAGS_RELEASE -= -O2
- QMAKE_CXXFLAGS_RELEASE += -O3
- QMAKE_CXXFLAGS_RELEASE += -mavx2
+# QMAKE_CXXFLAGS_RELEASE -= -O2
+# QMAKE_CXXFLAGS_RELEASE += -O3
+# QMAKE_CXXFLAGS_RELEASE += -mavx2
 # --
 
 #import libsndfile
@@ -38,7 +38,6 @@ win32 {
     dlls.files = $$files($${LIBSNDFILEPATH}/bin/sndfile.dll)
     dlls.path = $$OUT_PWD
 }
-
 
 SOURCES += \
     audiocontroller.cpp \
@@ -69,8 +68,7 @@ HEADERS += \
     sweepparameters.h \
     sweepsettingswidget.h \
     transportwidget.h \
-    interpolator.h
-
+    upsampler.h
 
 TRANSLATIONS += \
     sndscope_en_AU.ts
