@@ -358,7 +358,6 @@ void ScopeWidget::render()
 #endif // TIME_RENDER_FUNC
 
 	constexpr bool catchAllFrames = false;
-	constexpr double rsqrt2 = 0.707;
 	const bool drawLines =  ( sweepParameters.connectDots &&
 							  plotMode == Sweep  &&
 							  !panicMode &&
@@ -390,11 +389,12 @@ void ScopeWidget::render()
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesAvailable - 2 * expected);
 
 	// draw
-	const double w = 2.0 * cx;
 	for(int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
 
-		double ch0val = inputBuffers[0][i];
-		double ch1val = (numInputChannels > 1 ? inputBuffers[1][i] : 0.0);
+		// types converted here : audio data is float, graphics is qreal (aka double)
+		double ch0val = static_cast<double>(inputBuffers[0][i]);
+		double ch1val = (numInputChannels > 1 ? static_cast<double>(inputBuffers[1][i]) : 0.0);
+		// ---
 
 		switch(plotMode) {
 		case XY:
@@ -402,15 +402,18 @@ void ScopeWidget::render()
 			plotBuffer.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
 			break;
 		case MidSide:
-            plotBuffer.append({(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
-                               (1.0 - rsqrt2 * (ch0val + ch1val)) * cy});
+		{
+			constexpr double rsqrt2 = 0.707;
+			plotBuffer.append({(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
+							   (1.0 - rsqrt2 * (ch0val + ch1val)) * cy});
+		}
 			break;
 		case Sweep:
 		{
 			static Differentiator<double> d;
 			static DelayLine<double, d.delayTime> delayLine;
 			static bool triggered = false;
-			static double x = 0.0;
+			static qreal x = 0.0;
 			static QPointF lastPoint{0.0, cy * (1.0 - sweepParameters.triggerLevel)};
 			const double &source = ch0val;
 			double slope = d.get(source) * sweepParameters.slope;

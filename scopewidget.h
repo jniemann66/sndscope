@@ -304,9 +304,11 @@ private:
 	bool paused{true};
 
 	// crt properties
-	double brightness{80.0};
-	double focus{80.0};
-	double persistence{32.0};
+	qreal brightness{80.0};
+	qreal focus{80.0};
+	qreal persistence{32.0};
+	qreal beamWidth;
+	qreal beamIntensity;
 	int darkenNthFrame{1};
 	int darkenCooldownCounter{1};
 	QColor phosphorColor{0x3e, 0xff, 0x6f, 0xff};
@@ -315,18 +317,15 @@ private:
 	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
 	int darkenAlpha;
 	int beamAlpha;
-	double beamWidth;
-	double beamIntensity;
-
     bool freshRender{false};
 
 	// plot dimensions
-	double cx;
-	double cy;
-	double w;
-	double h;
-	double divx;
-	double divy;
+	qreal cx;
+	qreal cy;
+	qreal w;
+	qreal h;
+	qreal divx;
+	qreal divy;
 
 	// private functions
 	void calcScaling();

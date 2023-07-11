@@ -99,8 +99,7 @@ private:
 	int width_pixels{640};
 	double inputFrames_per_ms{44.1};
 	double upsampleFactor{1.0};
-	double sweepAdvance; // pixels per input frame
-	double sweepAdvanceInterpolated;
+	qreal sweepAdvance; // pixels per input frame
 	double triggerMin{triggerLevel - triggerTolerance};
 	double triggerMax{triggerLevel + triggerTolerance};
 	bool connectDots{true};
