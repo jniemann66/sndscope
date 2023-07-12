@@ -9,10 +9,7 @@
 
 #include "scopewidget.h"
 
-
-
 #include <QVBoxLayout>
-//#include <QPainter>
 #include <QEvent>
 #include <QDebug>
 
@@ -321,65 +318,6 @@ void ScopeWidget::readInput()
 	}
 }
 
-
-
-//void ScopeWidget::plotTest()
-//{
-//	constexpr size_t historyLength = 10;
-//	static MovingAverage<double, historyLength> movingAverage;
-//	static int64_t callCount = 0;
-//	static double renderTime = 0.0;
-
-//	FuncTimer<std::chrono::milliseconds> funcTimer(&renderTime);
-
-//	// collect data for overall average
-//	callCount++;
-
-//	const double mov_avg_renderTime = movingAverage.get(renderTime);
-
-//	const double mov_avg_time_per_point = 1000.0 * mov_avg_renderTime / testPlot.size();
-
-//	if(callCount % 100 == 0) {
-//		qDebug() << QStringLiteral("Mov Avg=%1ms (%2 μS per plot point)")
-//					.arg(mov_avg_renderTime, 0, 'f', 2)
-//					.arg(mov_avg_time_per_point, 0, 'f', 2);
-//	}
-
-//	auto pixmap = scopeDisplay->getPixmap();
-//	QPainter painter(pixmap);
-//	painter.beginNativePainting();
-//	painter.setCompositionMode(compositionMode);
-//	painter.setRenderHint(QPainter::TextAntialiasing, false);
-
-//	if(--darkenCooldownCounter == 0) {
-//		// darken:
-//		painter.setBackgroundMode(Qt::OpaqueMode);
-//		painter.setRenderHint(QPainter::Antialiasing, false);
-//		painter.fillRect(pixmap->rect(), darkencolor);
-//		darkenCooldownCounter = darkenNthFrame;
-//	}
-
-//	// set pen
-//	painter.setRenderHint(QPainter::Antialiasing, true);
-//	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine, Qt::RoundCap, Qt::BevelJoin};
-//	painter.setPen(pen);
-
-//	painter.drawPoints(testPlot.data(), testPlot.size());
-//	painter.endNativePainting();
-//}
-
-//void ScopeWidget::makeTestPlot()
-//{
-//	testPlot.clear();
-
-//	const double d = (2 * M_PI) / w;
-//	for(int x = 0; x < w; x++) {
-//		testPlot.append(QPointF{static_cast<qreal>(x) , cy - cy* sin(x * d)});
-//	}
-//}
-
-
-
 void ScopeWidget::wipeScreen()
 {
     auto pixmap = scopeDisplay->getPixmap();
@@ -475,7 +413,6 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 bool ScopeWidget::getShowTrigger() const
 {
 	return showTrigger;
-
 }
 
 void ScopeWidget::setShowTrigger(bool val)
@@ -504,15 +441,6 @@ SweepParameters ScopeWidget::getSweepParameters() const
 {
 	return sweepParameters;
 }
-
-
-
-
-
-
-
-
-
 
 
 

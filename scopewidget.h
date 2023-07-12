@@ -100,6 +100,15 @@ public:
 		divisions = newDivisions;
 	}
 
+	bool getShowGraticule() const
+	{
+		return showGraticule;
+	}
+	void setShowGraticule(bool newShowGraticule)
+	{
+		showGraticule = newShowGraticule;
+	}
+
 signals:
 	void pixmapResolutionChanged(const QSizeF& size);
 
@@ -121,10 +130,12 @@ protected:
             p.drawPixmap(0, 0, pixmap.scaled(size()));
         }
 
-		p.setRenderHint(QPainter::Antialiasing, true);
-		QPen graticulePen(graticuleColor, 1.5);
-		p.setPen(graticulePen);
-		p.drawLines(graticuleLines);
+		if(showGraticule) {
+			p.setRenderHint(QPainter::Antialiasing, true);
+			QPen graticulePen(graticuleColor, 1.5);
+			p.setPen(graticulePen);
+			p.drawLines(graticuleLines);
+		}
     }
 
     void resizeEvent(QResizeEvent *event) override
@@ -200,7 +211,7 @@ private:
     QPixmap pixmap;
 	bool allowPixmapResolutionChange{true};
 	QVector<QPointF> graticuleLines;
-
+	bool showGraticule{true};
 };
 
 // ScopeWidget : the heart of the Oscilloscope
@@ -314,17 +325,12 @@ private:
 	qreal cy;
 	qreal w;
 	qreal h;
-	qreal divx;
-	qreal divy;
 
 	// private functions
-
 	void readInput();
 	void calcBeamAlpha();
 	void drawTrigger(QPainter *painter);
 	void makeTestPlot();
 };
-
-
 
 #endif // SCOPEWIDGET_H
