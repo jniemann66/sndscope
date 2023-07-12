@@ -11,9 +11,9 @@
 
 void Phosphor::fromJson(const QJsonObject &o)
 {
-	const name = o.value("name").toString();
+	name = o.value("name").toString();
 	if(o.value("layers").isArray()) {
-		QJsonArray a = o.value("layers").toArray();
+		const QJsonArray a = o.value("layers").toArray();
 		for(int i = 0; i < a.count(); i++) {
 			PhosphorLayer layer;
 			if(a.at(i).isObject()) {

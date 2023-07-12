@@ -96,7 +96,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 {
 	sndfile.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
-	const fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
+	fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
 	if(fileLoaded) {
 
 		// set up rendering parameters, based on soundfile properties
@@ -521,7 +521,6 @@ void ScopeWidget::makeTestPlot()
 	}
 }
 
-
 void ScopeWidget::renderTrigger(QPainter* painter)
 {
 	painter->setRenderHint(QPainter::Antialiasing, false);
@@ -610,8 +609,6 @@ void ScopeWidget::calcScaling()
 	// makeTestPlot();
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 }
-
-
 
 void ScopeWidget::setAudioVolume(qreal linearVolume)
 {
