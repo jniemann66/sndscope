@@ -32,6 +32,7 @@
 #include "sweepparameters.h"
 #include "audiocontroller.h"
 #include "upsampler.h"
+#include "renderer.h"
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
@@ -208,6 +209,7 @@ class ScopeWidget : public QWidget
 {
 	Q_OBJECT
 
+	friend class Renderer;
 	static constexpr int upsampleFactor = 4;
 
 public:
@@ -231,7 +233,6 @@ public:
 
 	// setters
 	void setPaused(bool value);
-	void setTotalFrames(const int64_t &value);
 	void setBrightness(double value);
 	void setFocus(double value);
 	void setPersistence(double time_ms);
@@ -262,6 +263,7 @@ protected:
 private:
     ScopeDisplay* scopeDisplay{nullptr};
 	AudioController *audioController{nullptr};
+	Renderer *renderer{nullptr};
 	QIODevice* pushOut{nullptr};
 	QHBoxLayout *screenLayout{nullptr};
 	std::unique_ptr<SndfileHandle> sndfile;
@@ -277,10 +279,6 @@ private:
 	QTimer plotTimer;
     QTimer screenUpdateTimer;
 	QElapsedTimer elapsedTimer;
-
-	// plot buffers
-	QVector<QPointF> testPlot;
-	QVector<QPointF> plotBuffer;
 
 	Plotmode plotMode{XY};
 	bool showTrigger{false};
@@ -307,17 +305,9 @@ private:
 	qreal brightness{80.0};
 	qreal focus{80.0};
 	qreal persistence{32.0};
-	qreal beamWidth;
-	qreal beamIntensity;
-	int darkenNthFrame{1};
-	int darkenCooldownCounter{1};
-	QColor phosphorColor{0x3e, 0xff, 0x6f, 0xff};
-	QColor darkencolor{0, 0, 0, 0};
+
 	QColor backgroundColor{0, 0, 0, 255};
-	QPainter::CompositionMode compositionMode{QPainter::CompositionMode_SourceOver};
-	int darkenAlpha;
-	int beamAlpha;
-    bool freshRender{false};
+	int beamAlpha; // todo: try AlphaF (qreal)
 
 	// plot dimensions
 	qreal cx;
@@ -328,15 +318,11 @@ private:
 	qreal divy;
 
 	// private functions
-	void calcScaling();
-	void readInput();
-	void render();
-	void renderTest();
-	void calcBeamAlpha();
-	void renderTrigger(QPainter *painter);
-	void makeTestPlot();
-signals:
 
+	void readInput();
+	void calcBeamAlpha();
+	void drawTrigger(QPainter *painter);
+	void makeTestPlot();
 };
 
 

@@ -50,6 +50,7 @@ SOURCES += \
     phosphor.cpp \
     plotmode.cpp \
     plotmodewidget.cpp \
+    renderer.cpp \
     scopewidget.cpp \
     sweepsettingswidget.cpp \
     transportwidget.cpp
@@ -66,6 +67,7 @@ HEADERS += \
     phosphor.h \
     plotmode.h \
     plotmodewidget.h \
+    renderer.h \
     scopewidget.h \
     sweepparameters.h \
     sweepsettingswidget.h \

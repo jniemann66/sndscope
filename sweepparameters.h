@@ -7,6 +7,8 @@
 struct SweepParameters
 {
 	friend class ScopeWidget;
+	friend class Renderer;
+
 	double triggerTolerance{0.01};
 	double triggerLevel{0.0};
 	double slope{1.0};
