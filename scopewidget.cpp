@@ -48,8 +48,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	sweepParameters.verticalDivisions = divs.second;
 	sweepParameters.sweepUnused = {plotMode != Sweep};
 
-	//upsampler.setCoefficients(Interpolator<float, float, upsampleFactor>::small_minphase4);
-
 	setUpsampling(getUpsampling());
 
 	calcScaling();
@@ -98,7 +96,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 {
 	sndfile.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
-	fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
+	const fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
 	if(fileLoaded) {
 
 		// set up rendering parameters, based on soundfile properties
