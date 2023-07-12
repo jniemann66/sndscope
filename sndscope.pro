@@ -9,14 +9,16 @@ QT += core gui multimedia widgets
 
 CONFIG += c++17
 
-# force -O3
-# QMAKE_CXXFLAGS_RELEASE -= -O2
-# QMAKE_CXXFLAGS_RELEASE += -O3
-# QMAKE_CXXFLAGS_RELEASE += -mavx2
-# --
+AVX2 {
+ message(Enabling AVX2)
+ QMAKE_CXXFLAGS_RELEASE -= -O2
+ QMAKE_CXXFLAGS_RELEASE += -O3
+ QMAKE_CXXFLAGS_RELEASE += -mavx2
+ message($${QMAKE_CXXFLAGS_RELEASE})
+}
 
 #import libsndfile
-unix!macx {
+linux {
     LIBS += -L/usr/lib/x86_64-linux-gnu/ -lsndfile
     INCLUDEPATH += /usr/include
 }

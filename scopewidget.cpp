@@ -386,7 +386,7 @@ void ScopeWidget::render()
 	painter.setPen(pen);
 
 	int64_t expected = expectedFrames * (upsampling ? upsampleFactor : 1);
-	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max(0ll, framesAvailable - 2 * expected);
+	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max<int64_t>(0ll, framesAvailable - 2 * expected);
 
 	// draw
 	for(int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
