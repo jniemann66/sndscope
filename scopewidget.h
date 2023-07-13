@@ -25,6 +25,7 @@
 #include <QPixmap>
 #include <QHBoxLayout>
 #include <QAudioDeviceInfo>
+#include <QThread>
 
 #include <sndfile.hh>
 
@@ -219,12 +220,15 @@ private:
 class ScopeWidget : public QWidget
 {
 	Q_OBJECT
-
 	friend class Renderer;
 	static constexpr int upsampleFactor = 4;
 
+	QThread renderThread;
+
 public:
 	explicit ScopeWidget(QWidget *parent = nullptr);
+	~ScopeWidget();
+
 	QPair<bool, QString> loadSoundFile(const QString &filename);
 
 	// getters

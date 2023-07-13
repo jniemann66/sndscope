@@ -11,10 +11,11 @@
 
 #include "delayline.h"
 #include "differentiator.h"
-#include "movingaverage.h"
 
-#define TIME_RENDER_FUNC
+
+//#define TIME_RENDER_FUNC
 #ifdef TIME_RENDER_FUNC
+#include "movingaverage.h"
 #include "functimer.h"
 // #define SHOW_AVG_RENDER_TIME
 #define SHOW_PANIC
@@ -31,7 +32,6 @@
 Renderer::Renderer(QObject *parent)
 	: QObject{parent}
 {
-
 }
 
 void Renderer::calcScaling()
@@ -46,7 +46,6 @@ void Renderer::calcScaling()
 		sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 	}
 }
-
 
 void Renderer::render(const QVector<QVector<float>> &inputBuffers, int64_t framesAvailable, int64_t currentFrame)
 {
@@ -224,8 +223,6 @@ void Renderer::setShowTrigger(bool newShowTrigger)
 {
 	showTrigger = newShowTrigger;
 }
-
-
 
 SweepParameters Renderer::getSweepParameters() const
 {

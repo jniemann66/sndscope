@@ -19,7 +19,11 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
-	renderer = new Renderer(this);
+	renderer = new Renderer;
+
+	renderer->moveToThread(&renderThread);
+	connect(&renderThread, &QThread::finished, renderer, &QObject::deleteLater);
+	renderThread.start();
 
 	auto mainLayout = new QVBoxLayout;
 	screenLayout = new QHBoxLayout;
@@ -91,6 +95,14 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	plotTimer.start();
     screenUpdateTimer.start();
 	outputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
+}
+
+ScopeWidget::~ScopeWidget()
+{
+	qDebug().noquote() << "Goodbye";
+	renderThread.quit();
+	renderThread.wait();
+	qDebug().noquote() << "See you next time";
 }
 
 QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
@@ -224,7 +236,7 @@ void ScopeWidget::setPersistence(double time_ms)
 	constexpr double decayTarget = 0.2;
 
 	// set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
-	constexpr int minDarkenAlpha = 32;
+	constexpr qreal minDarkenAlpha = 32;
 
 	int darkenAlpha = 0;
 	int  darkenNthFrame = 0;
