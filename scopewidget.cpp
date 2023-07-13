@@ -236,7 +236,7 @@ void ScopeWidget::setPersistence(double time_ms)
 	constexpr double decayTarget = 0.2;
 
 	// set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
-	constexpr qreal minDarkenAlpha = 32;
+	constexpr qreal minDarkenAlpha = 0.125;
 
 	int darkenAlpha = 0;
 	int  darkenNthFrame = 0;
