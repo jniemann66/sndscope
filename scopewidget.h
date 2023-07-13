@@ -33,7 +33,7 @@
 #include "sweepparameters.h"
 #include "audiocontroller.h"
 #include "upsampler.h"
-#include "renderer.h"
+#include "plotter.h"
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
@@ -220,7 +220,7 @@ private:
 class ScopeWidget : public QWidget
 {
 	Q_OBJECT
-	friend class Renderer;
+	friend class Plotter;
 	static constexpr int upsampleFactor = 4;
 
 	QThread renderThread;
@@ -278,7 +278,7 @@ protected:
 private:
     ScopeDisplay* scopeDisplay{nullptr};
 	AudioController *audioController{nullptr};
-	Renderer *renderer{nullptr};
+	Plotter *renderer{nullptr};
 	QIODevice* pushOut{nullptr};
 	QHBoxLayout *screenLayout{nullptr};
 	std::unique_ptr<SndfileHandle> sndfile;

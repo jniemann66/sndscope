@@ -7,7 +7,7 @@
 * with this file. If not, please refer to: https://github.com/jniemann66/sndscope.git
 */
 
-#include "renderer.h"
+#include "plotter.h"
 
 #include "delayline.h"
 #include "differentiator.h"
@@ -29,12 +29,12 @@
 
 #include <cmath>
 
-Renderer::Renderer(QObject *parent)
+Plotter::Plotter(QObject *parent)
 	: QObject{parent}
 {
 }
 
-void Renderer::calcScaling()
+void Plotter::calcScaling()
 {
 	if(pixmap != nullptr) {
 		w = pixmap->width();
@@ -47,7 +47,7 @@ void Renderer::calcScaling()
 	}
 }
 
-void Renderer::render(const QVector<QVector<float>> &inputBuffers, int64_t framesAvailable, int64_t currentFrame)
+void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t framesAvailable, int64_t currentFrame)
 {
 	bool panicMode = false;
 
@@ -198,7 +198,7 @@ void Renderer::render(const QVector<QVector<float>> &inputBuffers, int64_t frame
 	emit renderedFrame(currentFrame);
 }
 
-void Renderer::drawTrigger(QPainter* painter)
+void Plotter::drawTrigger(QPainter* painter)
 {
 	painter->setRenderHint(QPainter::Antialiasing, false);
 	painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -214,154 +214,154 @@ void Renderer::drawTrigger(QPainter* painter)
 	painter->drawLine(QPointF{0, y}, QPointF{cx * 2, y});
 }
 
-bool Renderer::getShowTrigger() const
+bool Plotter::getShowTrigger() const
 {
 	return showTrigger;
 }
 
-void Renderer::setShowTrigger(bool newShowTrigger)
+void Plotter::setShowTrigger(bool newShowTrigger)
 {
 	showTrigger = newShowTrigger;
 }
 
-SweepParameters Renderer::getSweepParameters() const
+SweepParameters Plotter::getSweepParameters() const
 {
 	return sweepParameters;
 }
 
-void Renderer::setSweepParameters(const SweepParameters &newSweepParameters)
+void Plotter::setSweepParameters(const SweepParameters &newSweepParameters)
 {
 	sweepParameters = newSweepParameters;
 	calcScaling();
 }
 
-double Renderer::getTimeLimit_ms() const
+double Plotter::getTimeLimit_ms() const
 {
 	return timeLimit_ms;
 }
 
-void Renderer::setTimeLimit_ms(double newTimeLimit_ms)
+void Plotter::setTimeLimit_ms(double newTimeLimit_ms)
 {
 	timeLimit_ms = newTimeLimit_ms;
 }
 
-bool Renderer::getFreshRender() const
+bool Plotter::getFreshRender() const
 {
 	return freshRender;
 }
 
-void Renderer::setFreshRender(bool newFreshRender)
+void Plotter::setFreshRender(bool newFreshRender)
 {
 	freshRender = newFreshRender;
 }
 
-QPixmap *Renderer::getPixmap() const
+QPixmap *Plotter::getPixmap() const
 {
 	return pixmap;
 }
 
-void Renderer::setPixmap(QPixmap *newPixmap)
+void Plotter::setPixmap(QPixmap *newPixmap)
 {
 	pixmap = newPixmap;
 }
 
-int Renderer::getAudioFramesPerMs() const
+int Plotter::getAudioFramesPerMs() const
 {
 	return audioFramesPerMs;
 }
 
-void Renderer::setAudioFramesPerMs(int newAudioFramesPerMs)
+void Plotter::setAudioFramesPerMs(int newAudioFramesPerMs)
 {
 	audioFramesPerMs = newAudioFramesPerMs;
 }
 
-QColor Renderer::getDarkencolor() const
+QColor Plotter::getDarkencolor() const
 {
 	return darkencolor;
 }
 
-void Renderer::setDarkencolor(const QColor &newDarkencolor)
+void Plotter::setDarkencolor(const QColor &newDarkencolor)
 {
 	darkencolor = newDarkencolor;
 }
 
-int Renderer::getDarkenNthFrame() const
+int Plotter::getDarkenNthFrame() const
 {
 	return darkenNthFrame;
 }
 
-void Renderer::setDarkenNthFrame(int newDarkenNthFrame)
+void Plotter::setDarkenNthFrame(int newDarkenNthFrame)
 {
 	darkenNthFrame = newDarkenNthFrame;
 	darkenCooldownCounter = darkenNthFrame;
 }
 
-int64_t Renderer::getExpectedFrames() const
+int64_t Plotter::getExpectedFrames() const
 {
 	return expectedFrames;
 }
 
-void Renderer::setExpectedFrames(int64_t newExpectedFrames)
+void Plotter::setExpectedFrames(int64_t newExpectedFrames)
 {
 	expectedFrames = newExpectedFrames;
 }
 
-qreal Renderer::getBeamWidth() const
+qreal Plotter::getBeamWidth() const
 {
 	return beamWidth;
 }
 
-void Renderer::setBeamWidth(qreal newBeamWidth)
+void Plotter::setBeamWidth(qreal newBeamWidth)
 {
 	beamWidth = newBeamWidth;
 }
 
-qreal Renderer::getBeamIntensity() const
+qreal Plotter::getBeamIntensity() const
 {
 	return beamIntensity;
 }
 
-void Renderer::setBeamIntensity(qreal newBeamIntensity)
+void Plotter::setBeamIntensity(qreal newBeamIntensity)
 {
 	beamIntensity = newBeamIntensity;
 }
 
-int Renderer::getNumInputChannels() const
+int Plotter::getNumInputChannels() const
 {
 	return numInputChannels;
 }
 
-void Renderer::setNumInputChannels(int newNumInputChannels)
+void Plotter::setNumInputChannels(int newNumInputChannels)
 {
 	numInputChannels = newNumInputChannels;
 }
 
-QColor Renderer::getPhosphorColor() const
+QColor Plotter::getPhosphorColor() const
 {
 	return phosphorColor;
 }
 
-void Renderer::setPhosphorColor(const QColor &newPhosphorColor)
+void Plotter::setPhosphorColor(const QColor &newPhosphorColor)
 {
 	phosphorColor = newPhosphorColor;
 }
 
-QPainter::CompositionMode Renderer::getCompositionMode() const
+QPainter::CompositionMode Plotter::getCompositionMode() const
 {
 	return compositionMode;
 }
 
-void Renderer::setCompositionMode(QPainter::CompositionMode newCompositionMode)
+void Plotter::setCompositionMode(QPainter::CompositionMode newCompositionMode)
 {
 	compositionMode = newCompositionMode;
 }
 
-Plotmode Renderer::getPlotMode() const
+Plotmode Plotter::getPlotMode() const
 {
 	return plotMode;
 }
 
-void Renderer::setPlotMode(Plotmode newPlotMode)
+void Plotter::setPlotMode(Plotmode newPlotMode)
 {
 	plotMode = newPlotMode;
 }

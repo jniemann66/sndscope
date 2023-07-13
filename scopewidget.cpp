@@ -19,7 +19,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
-	renderer = new Renderer;
+	renderer = new Plotter;
 
 	renderer->moveToThread(&renderThread);
 	connect(&renderThread, &QThread::finished, renderer, &QObject::deleteLater);
@@ -84,7 +84,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 		emit outputVolume(linearVol);
 	});
 
-	connect(renderer, &Renderer::renderedFrame, this, [this](int64_t frame){
+	connect(renderer, &Plotter::renderedFrame, this, [this](int64_t frame){
 		emit renderedFrame(frame * msPerAudioFrame);
 	});
 
@@ -236,7 +236,7 @@ void ScopeWidget::setPersistence(double time_ms)
 	constexpr double decayTarget = 0.2;
 
 	// set minimum darkening amount threshold. (If the darkening amount is too low, traces will never completely disappear)
-	constexpr qreal minDarkenAlpha = 0.125;
+	constexpr qreal minDarkenAlpha = 32;
 
 	int darkenAlpha = 0;
 	int  darkenNthFrame = 0;

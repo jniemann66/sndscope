@@ -8,8 +8,8 @@
 */
 
 
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef PLOTTER_H
+#define PLOTTER_H
 
 #include "sweepparameters.h"
 #include "plotmode.h"
@@ -17,11 +17,11 @@
 #include <QObject>
 #include <QPainter>
 
-class Renderer : public QObject
+class Plotter : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Renderer(QObject *parent = nullptr);
+	explicit Plotter(QObject *parent = nullptr);
 	void render(const QVector<QVector<float> > &inputBuffers, int64_t framesAvailable, int64_t currentFrame);
 	void calcScaling();
 
@@ -88,4 +88,4 @@ private:
 	bool showTrigger{false};
 };
 
-#endif // RENDERER_H
+#endif // PLOTTER_H
