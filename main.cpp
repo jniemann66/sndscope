@@ -20,12 +20,5 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	MainWindow w;
 	w.show();
-
-
-	QColor r{127, 0, 0, 128};
-	qDebug() << r.toRgb();
-	r.setAlphaF(0.5 + 0.00390625);
-	qDebug() << r.toRgb();
-
 	return a.exec();
 }
