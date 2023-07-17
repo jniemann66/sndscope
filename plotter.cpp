@@ -12,7 +12,6 @@
 #include "delayline.h"
 #include "differentiator.h"
 
-
 //#define TIME_RENDER_FUNC
 #ifdef TIME_RENDER_FUNC
 #include "movingaverage.h"
@@ -94,31 +93,11 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 							  (sweepParameters.getSamplesPerSweep() > 25)
 							  );
 
-	QPainter painter(pixmap);
-	painter.beginNativePainting();
-	painter.setCompositionMode(compositionMode);
-	painter.setRenderHint(QPainter::TextAntialiasing, false);
-
-	if(--darkenCooldownCounter == 0) {
-		// darken:
-		painter.setBackgroundMode(Qt::OpaqueMode);
-		painter.setRenderHint(QPainter::Antialiasing, false);
-		painter.fillRect(pixmap->rect(), darkencolor);
-		darkenCooldownCounter = darkenNthFrame;
-	}
-
-	// set pen
-	painter.setRenderHint(QPainter::Antialiasing, !panicMode);
-	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine,
-				panicMode ? Qt::SquareCap : Qt::RoundCap,
-				Qt::BevelJoin};
-	painter.setPen(pen);
-
 	// todo: whenever upsampling changes, reset this with upsampled value
 	int64_t expected = expectedFrames * sweepParameters.upsampleFactor;
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max<int64_t>(0ll, framesAvailable - 2 * expected);
 
-	// draw
+	// calculate all the points to draw
 	for(int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
 
 		// types converted here : audio data is float, graphics is qreal (aka double)
@@ -173,13 +152,6 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 		} // ends switch
 	} // ends loop over i
 
-	if(drawLines) {
-		painter.drawLines(plotBuffer);
-	} else {
-		painter.drawPoints(plotBuffer);
-	}
-	plotBuffer.clear();
-
 	constexpr bool debugPlotBufferSize = false;
 	if constexpr(debugPlotBufferSize) {
 		static decltype(plotBuffer.size()) maxSize = 0ll;
@@ -189,11 +161,43 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 		}
 	}
 
+	QPainter painter(pixmap);
+	painter.beginNativePainting();
+	painter.setCompositionMode(compositionMode);
+	painter.setRenderHint(QPainter::TextAntialiasing, false);
+
+	if(--darkenCooldownCounter == 0) {
+		// darken:
+		painter.setBackgroundMode(Qt::OpaqueMode);
+		painter.setRenderHint(QPainter::Antialiasing, false);
+		painter.fillRect(pixmap->rect(), darkencolor);
+		darkenCooldownCounter = darkenNthFrame;
+	}
+
+	// set pen
+	painter.setRenderHint(QPainter::Antialiasing, !panicMode);
+	const QPen pen{phosphorColor, beamWidth, Qt::SolidLine,
+				panicMode ? Qt::SquareCap : Qt::RoundCap,
+				Qt::BevelJoin};
+	painter.setPen(pen);
+
+	if(drawLines) {
+		painter.drawLines(plotBuffer);
+	} else {
+		painter.drawPoints(plotBuffer);
+	}
+	plotBuffer.clear();
+
+
+
 	if(showTrigger) {
 		drawTrigger(&painter);
 	}
 
 	painter.endNativePainting();
+
+
+
 	freshRender = true;
 	emit renderedFrame(currentFrame);
 }

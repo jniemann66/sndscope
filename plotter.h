@@ -16,6 +16,11 @@
 
 #include <QObject>
 #include <QPainter>
+#include <QImage>
+
+#ifdef SNDSCOPE_BLEND2D
+	#include <blimagewrapper.h>
+#endif
 
 class Plotter : public QObject
 {
@@ -86,6 +91,12 @@ private:
 	int darkenNthFrame{1};
 	int numInputChannels;
 	bool showTrigger{false};
+
+	//bl.createFromData(img->width(), img->height(), BL_FORMAT_PRGB32, img->bits(), img->bytesPerLine());
+#ifdef SNDSCOPE_BLEND2D
+	std::unique_ptr<BLImageWrapper> blImageWrapper;
+#endif
+
 };
 
 #endif // PLOTTER_H

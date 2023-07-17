@@ -9,6 +9,9 @@ QT += core gui multimedia widgets
 
 CONFIG += c++17
 
+#activate blend2d to do the rendering (instead of QPainter):
+#CONFIG += blend2d
+
 AVX2 {
  message(Enabling AVX2)
  QMAKE_CXXFLAGS_RELEASE -= -O2
@@ -34,6 +37,21 @@ win32 {
     LIBS += -L$${LIBSNDFILEPATH}/lib -lsndfile
     INCLUDEPATH += $${LIBSNDFILEPATH}/include
 
+    blend2d {
+        # path to blend2d headers
+        BLEND2DINCLUDE = $$clean_path($$PWD/../blend2d/src)
+
+        # path to blend2d library files
+        BLEND2DLIB = $$clean_path($$PWD/../blend2dlib)
+
+        message(blend2d include path: $$BLEND2DINCLUDE)
+        message(blend2d library path: $$BLEND2DLIB)
+
+        LIBS += -L$${BLEND2DLIB} -lblend2d
+        INCLUDEPATH += $${BLEND2DINCLUDE}
+        DEFINES += SNDSCOPE_BLEND2D
+    }
+
     #copy libsndfile dll to build folder
     CONFIG += file_copies
     COPIES += dlls
@@ -58,6 +76,7 @@ SOURCES += \
 HEADERS += \
     audiocontroller.h \
     audiosettingswidget.h \
+    blimagewrapper.h \
     delayline.h \
     differentiator.h \
     displaysettingswidget.h \
@@ -73,6 +92,11 @@ HEADERS += \
     sweepsettingswidget.h \
     transportwidget.h \
     upsampler.h
+
+blend2d {
+    SOURCES +=  blimagewrapper.cpp
+    HEADERS +=  blimagewrapper.h
+}
 
 TRANSLATIONS += \
     sndscope_en_AU.ts
