@@ -49,7 +49,6 @@ win32 {
 
         LIBS += -L$${BLEND2DLIB} -lblend2d
         INCLUDEPATH += $${BLEND2DINCLUDE}
-        DEFINES += SNDSCOPE_BLEND2D
     }
 
     #copy libsndfile dll to build folder
@@ -96,6 +95,7 @@ HEADERS += \
 blend2d {
     SOURCES +=  blimagewrapper.cpp
     HEADERS +=  blimagewrapper.h
+    DEFINES += SNDSCOPE_BLEND2D
 }
 
 TRANSLATIONS += \

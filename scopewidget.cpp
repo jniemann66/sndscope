@@ -19,10 +19,10 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
-	renderer = new Plotter;
+	plotter = new Plotter;
 
-	renderer->moveToThread(&renderThread);
-	connect(&renderThread, &QThread::finished, renderer, &QObject::deleteLater);
+	plotter->moveToThread(&renderThread);
+	connect(&renderThread, &QThread::finished, plotter, &QObject::deleteLater);
 	renderThread.start();
 
 	auto mainLayout = new QVBoxLayout;
@@ -36,7 +36,6 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
     plotTimer.setInterval(plotInterval);
 
     screenUpdateTimer.setInterval(screenUpdateInterval);
-    scopeDisplay->getPixmap()->fill(backgroundColor);
 
 	const auto divs = scopeDisplay->getDivisions();
 	sweepParameters.horizontalDivisions = divs.first;
@@ -45,17 +44,35 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 
 	setUpsampling(getUpsampling());
 
-	renderer->setTimeLimit_ms(plotInterval);
-	renderer->setPixmap(scopeDisplay->getPixmap());
-	renderer->setSweepParameters(sweepParameters);
+	plotter->setTimeLimit_ms(plotInterval);
+	plotter->setSweepParameters(sweepParameters);
+
+#ifdef SNDSCOPE_BLEND2D
+	scopeDisplay->getBlImageWrapper()->getQImage()->fill(backgroundColor);
+	plotter->setBlImageWrapper(scopeDisplay->getBlImageWrapper());
+#else
+	scopeDisplay->getPixmap()->fill(backgroundColor);
+	plotter->setTimeLimit_ms(plotInterval);
+	plotter->setPixmap(scopeDisplay->getPixmap());
+	plotter->setSweepParameters(sweepParameters);
+#endif
 
     connect(scopeDisplay, &ScopeDisplay::pixmapResolutionChanged, this, [this](){
+
+#ifdef SNDSCOPE_BLEND2D
+		const auto b = scopeDisplay->getBlImageWrapper();
+		plotter->setBlImageWrapper(b);
+		w = b->getQImage()->width();
+		h = b->getQImage()->height();
+#else
 		const auto p = scopeDisplay->getPixmap();
-		renderer->setPixmap(p);
+		plotter->setPixmap(p);
 		w = p->width();
 		h = p->height();
+#endif
+
 		sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
-		renderer->calcScaling();
+		plotter->calcScaling();
 	});
 
 	connect(&plotTimer, &QTimer::timeout, this, [this]{
@@ -67,15 +84,15 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 			pushOut->write(reinterpret_cast<char*>(rawinputBuffer.data()), framesRead * audioFormat.bytesPerFrame());
 
 			// plot it
-			renderer->render(inputBuffers, framesAvailable, currentFrame);
+			plotter->render(inputBuffers, framesAvailable, currentFrame);
 		}
 	});
 
     connect(&screenUpdateTimer, &QTimer::timeout, this, [this] {
         if(!paused) {
-			if(renderer->getFreshRender()) {
+			if(plotter->getFreshRender()) {
 				scopeDisplay->update();
-				renderer->setFreshRender(false);
+				plotter->setFreshRender(false);
             }
         }
     });
@@ -84,7 +101,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 		emit outputVolume(linearVol);
 	});
 
-	connect(renderer, &Plotter::renderedFrame, this, [this](int64_t frame){
+	connect(plotter, &Plotter::renderedFrame, this, [this](int64_t frame){
 		emit renderedFrame(frame * msPerAudioFrame);
 	});
 
@@ -141,10 +158,10 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 		audioFormat.setSampleType(QAudioFormat::Float);
 		audioController->initializeAudio(audioFormat, outputDeviceInfo);
 
-		renderer->setExpectedFrames(expectedFrames);
-		renderer->setAudioFramesPerMs(audioFramesPerMs);
-		renderer->setNumInputChannels(audioFormat.channelCount());
-		renderer->calcScaling();
+		plotter->setExpectedFrames(expectedFrames);
+		plotter->setAudioFramesPerMs(audioFramesPerMs);
+		plotter->setNumInputChannels(audioFormat.channelCount());
+		plotter->calcScaling();
 
 		emit loadedFile();
 	}
@@ -211,13 +228,13 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
 	if(!colors.isEmpty()) {
-		renderer->setPhosphorColor(colors.at(0));
+		plotter->setPhosphorColor(colors.at(0));
 		if(colors.count() > 1) {
-			renderer->setCompositionMode(QPainter::CompositionMode_HardLight);
-			renderer->setDarkencolor(colors.at(1));
+			plotter->setCompositionMode(QPainter::CompositionMode_HardLight);
+			plotter->setDarkencolor(colors.at(1));
 		} else {
-			renderer->setCompositionMode(QPainter::CompositionMode_SourceOver);
-			renderer->setDarkencolor(backgroundColor);
+			plotter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+			plotter->setDarkencolor(backgroundColor);
 		}
 	}
 }
@@ -246,15 +263,15 @@ void ScopeWidget::setPersistence(double time_ms)
 		darkenAlpha = std::min(std::max(1, static_cast<int>(255 * (1.0 - std::pow(decayTarget, (1.0 / n))))), 255);
 	} while (darkenAlpha < minDarkenAlpha);
 
-	auto darkenColor = renderer->getDarkencolor();
+	auto darkenColor = plotter->getDarkencolor();
 	darkenColor.setAlpha(darkenAlpha);
-	renderer->setDarkencolor(darkenColor);
-	renderer->setDarkenNthFrame(darkenNthFrame);
+	plotter->setDarkencolor(darkenColor);
+	plotter->setDarkenNthFrame(darkenNthFrame);
 }
 
 QColor ScopeWidget::getPhosphorColor() const
 {
-	return renderer->getPhosphorColor();
+	return plotter->getPhosphorColor();
 }
 
 double ScopeWidget::getFocus() const
@@ -266,9 +283,9 @@ void ScopeWidget::setFocus(double value)
 {
 	constexpr double maxBeamWidth = 12;
 	focus = value;
-	renderer->setBeamWidth(qMax(0.5, (1.0 - (focus * 0.01)) * maxBeamWidth));
-	const auto beamWidth = renderer->getBeamWidth();
-	renderer->setBeamIntensity(8.0 / (beamWidth * beamWidth));
+	plotter->setBeamWidth(qMax(0.5, (1.0 - (focus * 0.01)) * maxBeamWidth));
+	const auto beamWidth = plotter->getBeamWidth();
+	plotter->setBeamIntensity(8.0 / (beamWidth * beamWidth));
 	calcBeamAlpha();
 }
 
@@ -285,10 +302,10 @@ void ScopeWidget::setBrightness(double value)
 
 void ScopeWidget::calcBeamAlpha()
 {
-	beamAlpha = qMin(1.27 * brightness * renderer->getBeamIntensity(), 255.0);
-	auto phosphorColor = renderer->getPhosphorColor();
+	beamAlpha = qMin(1.27 * brightness * plotter->getBeamIntensity(), 255.0);
+	auto phosphorColor = plotter->getPhosphorColor();
 	phosphorColor.setAlpha(beamAlpha);
-	renderer->setPhosphorColor(phosphorColor);
+	plotter->setPhosphorColor(phosphorColor);
 }
 
 int64_t ScopeWidget::getTotalFrames() const
@@ -332,7 +349,10 @@ void ScopeWidget::readInput()
 
 void ScopeWidget::wipeScreen()
 {
-    auto pixmap = scopeDisplay->getPixmap();
+#ifdef SNDSCOPE_BLEND2D
+	// todo: wipe screen
+#else
+	auto pixmap = scopeDisplay->getPixmap();
     QPainter painter(pixmap);
 	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
@@ -342,6 +362,7 @@ void ScopeWidget::wipeScreen()
     // darken:
     painter.fillRect(pixmap->rect(), d);
 	scopeDisplay->update();
+#endif
 }
 
 QAudioDeviceInfo ScopeWidget::getOutputDeviceInfo() const
@@ -371,7 +392,7 @@ void ScopeWidget::setPlotmode(Plotmode newPlotmode)
 	} else {
 		sweepParameters.sweepUnused = true;
 	}
-	renderer->setPlotMode(plotMode);
+	plotter->setPlotMode(plotMode);
 }
 
 bool ScopeWidget::getUpsampling() const
@@ -383,7 +404,7 @@ void ScopeWidget::setUpsampling(bool val)
 {
 	upsampling = val;
 	sweepParameters.setUpsampleFactor(upsampling ? static_cast<double>(upsampleFactor) : 1.0);
-	renderer->setSweepParameters(sweepParameters);
+	plotter->setSweepParameters(sweepParameters);
 	if(upsampling) {
 		upsampler.reset();
 	}
@@ -417,8 +438,8 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 	sweepParameters.triggerEnabled = newSweepParameters.triggerEnabled;
 	sweepParameters.connectDots = newSweepParameters.connectDots;
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
-	if(renderer != nullptr) {
-		renderer->setSweepParameters(sweepParameters);
+	if(plotter != nullptr) {
+		plotter->setSweepParameters(sweepParameters);
 	}
 }
 
@@ -431,7 +452,9 @@ void ScopeWidget::setShowTrigger(bool val)
 {
 	showTrigger = (plotMode == Sweep) && val;
 	if(paused) {
+#ifdef SNDSCOPE_BLEND2D
 
+#else
 		auto pixmap = scopeDisplay->getPixmap();
 		QPainter painter(pixmap);
 		painter.beginNativePainting();
@@ -439,12 +462,13 @@ void ScopeWidget::setShowTrigger(bool val)
 		painter.fillRect(pixmap->rect(), Qt::black);
 
 		if(showTrigger) {
-			renderer->drawTrigger(&painter);
+			plotter->drawTrigger(&painter);
 		}
 		painter.endNativePainting();
 		scopeDisplay->update();
+#endif
 	} else {
-		renderer->setShowTrigger(showTrigger);
+		plotter->setShowTrigger(showTrigger);
 	}
 }
 
@@ -453,7 +477,6 @@ SweepParameters ScopeWidget::getSweepParameters() const
 {
 	return sweepParameters;
 }
-
 
 
 

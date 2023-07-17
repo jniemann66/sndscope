@@ -35,6 +35,10 @@
 #include "upsampler.h"
 #include "plotter.h"
 
+#ifdef SNDSCOPE_BLEND2D
+	#include "blimagewrapper.h"
+#endif
+
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()
 
@@ -42,7 +46,13 @@ class ScopeDisplay : public QWidget
 {
 	Q_OBJECT
 public:
+
+#ifdef SNDSCOPE_BLEND2D
+	ScopeDisplay(QWidget* parent = nullptr) : QWidget(parent), pixmap(800, 640), blImageWrapper(std::make_unique<BLImageWrapper>(800, 640))
+#else
 	ScopeDisplay(QWidget* parent = nullptr) : QWidget(parent), pixmap(800, 640)
+#endif
+
     {
         setAutoFillBackground(false);
         resizeCooldownTimer.setSingleShot(true);
@@ -55,18 +65,30 @@ public:
                 const int h = height();
 				const int w = aspectRatio.first * h / aspectRatio.second;
                 qDebug().noquote() << QStringLiteral("adjusting pixmap resolution to %1x%2").arg(w).arg(h);
+				#ifdef SNDSCOPE_BLEND2D
+				blImageWrapper = std::make_unique<BLImageWrapper>(w, h);
+#else
                 pixmap = pixmap.scaled(w, h);
+#endif
 				calcGraticule();
                 emit pixmapResolutionChanged(pixmap.size());
             }
         });
 	}
 
-	// getters
-    QPixmap* getPixmap()
+	// getters 
+#ifdef SNDSCOPE_BLEND2D
+	BLImageWrapper*getBlImageWrapper() const
+	{
+		return blImageWrapper.get();
+	}
+
+#else
+	QPixmap* getPixmap()
     {
         return &pixmap;
     }
+#endif
 
     bool getAllowPixmapResolutionChange() const
     {
@@ -90,7 +112,6 @@ public:
         allowPixmapResolutionChange = value;
     }
 
-
 	void setAspectRatio(const QPair<int, int> &newAspectRatio)
 	{
 		aspectRatio = newAspectRatio;
@@ -110,6 +131,8 @@ public:
 		showGraticule = newShowGraticule;
 	}
 
+
+
 signals:
 	void pixmapResolutionChanged(const QSizeF& size);
 
@@ -125,11 +148,15 @@ protected:
 		QPainter p(this);
 		p.setRenderHint(QPainter::TextAntialiasing, false);
 
+#ifdef SNDSCOPE_BLEND2D
+		p.drawImage(0, 0, *blImageWrapper->getQImage());
+#else
         if(size() == pixmap.size()) {
             p.drawPixmap(0, 0, pixmap);
         } else {
             p.drawPixmap(0, 0, pixmap.scaled(size()));
         }
+#endif
 
 		if(showGraticule) {
 			p.setRenderHint(QPainter::Antialiasing, true);
@@ -209,7 +236,13 @@ private:
 	QPair<int, int> divisions{10, 8};
 	QPair<int, int> aspectRatio{5, 4};
 	QTimer resizeCooldownTimer;
+
     QPixmap pixmap;
+
+#ifdef SNDSCOPE_BLEND2D
+	std::unique_ptr<BLImageWrapper> blImageWrapper;
+#endif
+
 	bool allowPixmapResolutionChange{true};
 	QVector<QPointF> graticuleLines;
 	bool showGraticule{true};
@@ -278,7 +311,7 @@ protected:
 private:
     ScopeDisplay* scopeDisplay{nullptr};
 	AudioController *audioController{nullptr};
-	Plotter *renderer{nullptr};
+	Plotter *plotter{nullptr};
 	QIODevice* pushOut{nullptr};
 	QHBoxLayout *screenLayout{nullptr};
 	std::unique_ptr<SndfileHandle> sndfile;

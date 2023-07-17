@@ -66,6 +66,8 @@ public:
 	bool getShowTrigger() const;
 	void setShowTrigger(bool newShowTrigger);
 
+
+
 signals:
 	void renderedFrame(int64_t frame);
 
@@ -94,7 +96,10 @@ private:
 
 	//bl.createFromData(img->width(), img->height(), BL_FORMAT_PRGB32, img->bits(), img->bytesPerLine());
 #ifdef SNDSCOPE_BLEND2D
-	std::unique_ptr<BLImageWrapper> blImageWrapper;
+	BLImageWrapper *blImageWrapper;
+public:
+	BLImageWrapper *getBlImageWrapper() const;
+	void setBlImageWrapper(BLImageWrapper *newBlImageWrapper);
 #endif
 
 };

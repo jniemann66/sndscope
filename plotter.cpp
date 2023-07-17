@@ -161,6 +161,16 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 		}
 	}
 
+#ifdef SNDSCOPE_BLEND2D
+	BLContext ctx;
+	ctx.begin(*blImageWrapper->getBlImage());
+
+	blImageWrapper->getBlImage();
+	//todo: draw some stuff
+
+#else
+
+
 	QPainter painter(pixmap);
 	painter.beginNativePainting();
 	painter.setCompositionMode(compositionMode);
@@ -195,8 +205,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 	}
 
 	painter.endNativePainting();
-
-
+#endif
 
 	freshRender = true;
 	emit renderedFrame(currentFrame);
@@ -227,6 +236,18 @@ void Plotter::setShowTrigger(bool newShowTrigger)
 {
 	showTrigger = newShowTrigger;
 }
+
+#ifdef SNDSCOPE_BLEND2D
+BLImageWrapper *Plotter::getBlImageWrapper() const
+{
+	return blImageWrapper;
+}
+
+void Plotter::setBlImageWrapper(BLImageWrapper *newBlImageWrapper)
+{
+	blImageWrapper = newBlImageWrapper;
+}
+#endif
 
 SweepParameters Plotter::getSweepParameters() const
 {
