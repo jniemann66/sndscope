@@ -17,8 +17,6 @@
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
-
-	// todo : fix inpuutFramnes_per_ms
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
 	plotter = new Plotter;
@@ -145,6 +143,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 
 		audioFramesPerMs = sndfile->samplerate() / 1000;
 		msPerAudioFrame = 1000.0 / sndfile->samplerate();
+		sweepParameters.setInputFrames_per_ms(audioFramesPerMs);
 		expectedFrames = plotTimer.interval() * audioFramesPerMs;
 		maxFramesToRead = rawinputBuffer.size() / sndfile->channels();
 

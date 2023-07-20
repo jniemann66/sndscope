@@ -96,6 +96,9 @@ public:
 
 	void setUpsampleFactor(double newUpsampleFactor);
 
+	double getInputFrames_per_ms() const;
+	void setInputFrames_per_ms(double newInputFrames_per_ms);
+
 private:
 	double duration_ms{10.0};
 	int width_pixels{640};
@@ -133,6 +136,16 @@ inline void SweepParameters::setUpsampleFactor(double newUpsampleFactor)
 {
 	upsampleFactor = newUpsampleFactor;
 	calcSweepAdvance();
+}
+
+inline double SweepParameters::getInputFrames_per_ms() const
+{
+	return inputFrames_per_ms;
+}
+
+inline void SweepParameters::setInputFrames_per_ms(double newInputFrames_per_ms)
+{
+	inputFrames_per_ms = newInputFrames_per_ms;
 }
 
 inline void SweepParameters::setConnectDots(bool newConnectDots)
