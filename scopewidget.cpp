@@ -17,6 +17,8 @@
 
 ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 {
+
+	// todo : fix inpuutFramnes_per_ms
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
 	plotter = new Plotter;
