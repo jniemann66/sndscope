@@ -32,6 +32,8 @@ PlotmodeWidget::PlotmodeWidget(QWidget *parent)
 	setLayout(mainLayout);
 
 	connect(plotmodeSelector,  QOverload<int>::of(&QComboBox::activated), this, [this](){
+		auto  p = getPlotmode();
+		connectSamples->setEnabled(p == Sweep);
 		emit plotmodeChanged(getPlotmode());
 	});
 
