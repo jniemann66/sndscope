@@ -9,12 +9,15 @@ PlotmodeWidget::PlotmodeWidget(QWidget *parent)
 {
 	plotmodeSelector = new QComboBox;
 	upsamplingCheckbox = new QCheckBox("upsampling");
+	connectSamples = new QCheckBox("Connect Dots");
+	connectSamples->setChecked(true);
 
 	auto plotmodeLayout = new QHBoxLayout;
 	auto mainLayout = new QVBoxLayout;
+
 	plotmodeLayout->addWidget(plotmodeSelector);
 	plotmodeLayout->addWidget(upsamplingCheckbox);
-
+	plotmodeLayout->addWidget(connectSamples);
 
 	for (const PlotmodeDefinition& p : PlotmodeManager::getPlotmodeMap())
 	{
@@ -36,6 +39,10 @@ PlotmodeWidget::PlotmodeWidget(QWidget *parent)
 		emit upsamplingChanged(upsamplingCheckbox->isChecked());
 	});
 
+	connect(connectSamples, &QCheckBox::stateChanged, this, [this]{
+		emit connectSamplesChanged(connectSamples->isChecked());
+	});
+
 }
 
 Plotmode PlotmodeWidget::getPlotmode() const
@@ -51,4 +58,9 @@ void PlotmodeWidget::setPlotmode(Plotmode newPlotmode)
 			break;
 		}
 	}
+}
+
+void PlotmodeWidget::setconnectSamples(bool val)
+{
+	connectSamples->setChecked(val);
 }

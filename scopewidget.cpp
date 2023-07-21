@@ -437,7 +437,6 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 
 	sweepParameters.slope = newSweepParameters.slope;
 	sweepParameters.triggerEnabled = newSweepParameters.triggerEnabled;
-	sweepParameters.connectDots = newSweepParameters.connectDots;
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
 	if(plotter != nullptr) {
 		plotter->setSweepParameters(sweepParameters);
@@ -447,6 +446,11 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 bool ScopeWidget::getShowTrigger() const
 {
 	return showTrigger;
+}
+
+bool ScopeWidget::getconnectSamples() const
+{
+	return plotter != nullptr && plotter->getconnectSamples();
 }
 
 void ScopeWidget::setShowTrigger(bool val)
@@ -470,6 +474,13 @@ void ScopeWidget::setShowTrigger(bool val)
 #endif
 	} else {
 		plotter->setShowTrigger(showTrigger);
+	}
+}
+
+void ScopeWidget::setconnectSamples(bool val)
+{
+	if(plotter != nullptr) {
+		plotter->setconnectSamples(val);
 	}
 }
 

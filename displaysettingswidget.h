@@ -25,13 +25,14 @@ public:
 	explicit DisplaySettingsWidget(QWidget *parent = nullptr);
 	QSize sizeHint() const override;
 
+	// getters
 	double getBrightness() const;
-	void setBrightness(double value);
-
 	double getFocus() const;
-	void setFocus(double value);
-
 	int getPersistence() const;
+
+	// setters
+	void setBrightness(double value);
+	void setFocus(double value);
 	void setPersistence(int value);
 
 signals:

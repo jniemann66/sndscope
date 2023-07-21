@@ -87,8 +87,8 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 #endif // TIME_RENDER_FUNC
 
 	constexpr bool catchAllFrames = false;
-	const bool drawLines =  ( sweepParameters.connectDots &&
-							  plotMode == Sweep  &&
+	const bool drawLines =  ( connectSamples &&
+							/*  plotMode == Sweep  && */
 							  !panicMode &&
 							  (sweepParameters.getSamplesPerSweep() > 25)
 							  );
@@ -108,13 +108,27 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 		switch(plotMode) {
 		case XY:
 		default:
-			plotBuffer.append({(1.0 + ch0val) * cx, (1.0 - ch1val) * cy});
+		{
+			QPointF pt{(1.0 + ch0val) * cx, (1.0 - ch1val) * cy};
+			static QPointF lastPoint = pt;
+			if(drawLines) {
+				plotBuffer.append(lastPoint);
+			}
+			plotBuffer.append(pt);
+			lastPoint = pt;
+		}
 			break;
 		case MidSide:
 		{
-			constexpr double rsqrt2 = 0.707;
-			plotBuffer.append({(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
-							   (1.0 - rsqrt2 * (ch0val + ch1val)) * cy});
+			static constexpr double rsqrt2 = 0.707;
+			QPointF pt{(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
+						(1.0 - rsqrt2 * (ch0val + ch1val)) * cy};
+			static QPointF lastPoint = pt;
+			if(drawLines) {
+				plotBuffer.append(lastPoint);
+			}
+			plotBuffer.append(pt);
+			lastPoint = pt;
 		}
 			break;
 		case Sweep:
@@ -235,6 +249,16 @@ bool Plotter::getShowTrigger() const
 void Plotter::setShowTrigger(bool newShowTrigger)
 {
 	showTrigger = newShowTrigger;
+}
+
+bool Plotter::getconnectSamples() const
+{
+	return connectSamples;
+}
+
+void Plotter::setconnectSamples(bool newconnectSamples)
+{
+	connectSamples = newconnectSamples;
 }
 
 #ifdef SNDSCOPE_BLEND2D

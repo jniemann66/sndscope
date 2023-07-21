@@ -278,6 +278,7 @@ public:
 	SweepParameters getSweepParameters() const;
 	QAudioDeviceInfo getOutputDeviceInfo() const;
 	bool getShowTrigger() const;
+	bool getconnectSamples() const;
 
 	// setters
 	void setPaused(bool value);
@@ -288,7 +289,10 @@ public:
 	void setBackgroundColor(const QColor &value);
 	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
 	void setShowTrigger(bool val);
+	void setconnectSamples(bool val);
+
 	void plotTest();
+
 
 	bool getUpsampling() const;
 

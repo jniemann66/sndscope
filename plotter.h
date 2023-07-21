@@ -45,6 +45,8 @@ public:
 	QColor getPhosphorColor() const;
 	QPainter::CompositionMode getCompositionMode() const;
 	Plotmode getPlotMode() const;
+	bool getconnectSamples() const;
+	bool getShowTrigger() const;
 
 	// setters
 	void setSweepParameters(const SweepParameters &newSweepParameters);
@@ -61,12 +63,10 @@ public:
 	void setPhosphorColor(const QColor &newPhosphorColor);
 	void setCompositionMode(QPainter::CompositionMode newCompositionMode);
 	void setPlotMode(Plotmode newPlotMode);
-
-	void drawTrigger(QPainter *painter);
-	bool getShowTrigger() const;
+	void setconnectSamples(bool newconnectSamples);
 	void setShowTrigger(bool newShowTrigger);
 
-
+	void drawTrigger(QPainter *painter);
 
 signals:
 	void renderedFrame(int64_t frame);
@@ -80,6 +80,7 @@ private:
 	bool freshRender{false};
 	int audioFramesPerMs{0};
 	Plotmode plotMode;
+	bool connectSamples{false};
 	qreal cx;
 	qreal cy;
 	qreal w;

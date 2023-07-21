@@ -40,14 +40,10 @@ public:
 		calcSweepAdvance();
 	}
 
-	void setConnectDots(bool newConnectDots);
-
 	double getSamplesPerSweep() const
 	{
 		return duration_ms * inputFrames_per_ms;
 	}
-
-	bool getConnectDots() const;
 
 	double getUpsampleFactor() const;
 
@@ -92,10 +88,7 @@ public:
 				.arg(prefixMap.value(p), units);
 	}
 
-
-
 	void setUpsampleFactor(double newUpsampleFactor);
-
 	double getInputFrames_per_ms() const;
 	void setInputFrames_per_ms(double newInputFrames_per_ms);
 
@@ -107,7 +100,6 @@ private:
 	qreal sweepAdvance; // pixels per input frame
 	double triggerMin{triggerLevel - triggerTolerance};
 	double triggerMax{triggerLevel + triggerTolerance};
-	bool connectDots{true};
 
 	void setWidthFrameRate(int width_pixels, double inputFrames_per_ms)
 	{
@@ -121,11 +113,6 @@ private:
 		sweepAdvance = width_pixels / inputFrames_per_ms / duration_ms / upsampleFactor;
 	}
 };
-
-inline bool SweepParameters::getConnectDots() const
-{
-	return connectDots;
-}
 
 inline double SweepParameters::getUpsampleFactor() const
 {
@@ -146,11 +133,6 @@ inline double SweepParameters::getInputFrames_per_ms() const
 inline void SweepParameters::setInputFrames_per_ms(double newInputFrames_per_ms)
 {
 	inputFrames_per_ms = newInputFrames_per_ms;
-}
-
-inline void SweepParameters::setConnectDots(bool newConnectDots)
-{
-	connectDots = newConnectDots;
 }
 
 #endif // SWEEPPARAMETERS_H

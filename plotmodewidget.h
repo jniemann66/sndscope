@@ -16,19 +16,24 @@ constexpr int PlotmodeRole = Qt::UserRole;
 class PlotmodeWidget : public QWidget
 {
 	Q_OBJECT
+
 public:
 	explicit PlotmodeWidget(QWidget *parent = nullptr);
 
 	Plotmode getPlotmode() const;
+
 	void setPlotmode(Plotmode newPlotmode);
+	void setconnectSamples(bool val);
 
 signals:
 	void plotmodeChanged(Plotmode plotmode);
 	void upsamplingChanged(bool enableUpsampling);
+	void connectSamplesChanged(bool enableconnectSamples);
 
 private:
 	QComboBox *plotmodeSelector{nullptr};
 	QCheckBox *upsamplingCheckbox{nullptr};
+	QCheckBox *connectSamples{nullptr};
 
 };
 

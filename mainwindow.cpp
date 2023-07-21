@@ -143,15 +143,19 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	});
 
 	connect(plotmodeWidget, &PlotmodeWidget::upsamplingChanged, scopeWidget, &ScopeWidget::setUpsampling);
+	connect(plotmodeWidget, &PlotmodeWidget::connectSamplesChanged, scopeWidget, &ScopeWidget::setconnectSamples);
 
 	scopeWidget->setBrightness(80.0);
 	scopeWidget->setFocus(80.0);
 	scopeWidget->setPersistence(48);
 
 	sweepSettingsWidget->setSweepParameters(scopeWidget->getSweepParameters());
-	Plotmode plotmode = scopeWidget->getPlotmode();
+
+	const Plotmode plotmode = scopeWidget->getPlotmode();
 	plotmodeWidget->setPlotmode(plotmode);
 	sweepSettingsWidget->setEnabled(plotmode == Sweep);
+
+	plotmodeWidget->setconnectSamples(scopeWidget->getconnectSamples());
 
 }
 
