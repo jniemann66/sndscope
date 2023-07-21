@@ -4,6 +4,8 @@
 #include <QString>
 #include <QMap>
 
+static constexpr bool connectSamplesSweepOnly = true;
+
 enum Plotmode
 {
 	XY,

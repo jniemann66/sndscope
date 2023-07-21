@@ -87,7 +87,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 #endif // TIME_RENDER_FUNC
 
 	constexpr bool catchAllFrames = false;
-	const bool drawLines =  ( connectSamples &&
+	const bool drawLines =  ( (!connectSamplesSweepOnly || connectSamples) &&
 							  plotMode == Sweep  &&
 							  !panicMode &&
 							  (sweepParameters.getSamplesPerSweep() > 25)

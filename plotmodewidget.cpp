@@ -33,7 +33,7 @@ PlotmodeWidget::PlotmodeWidget(QWidget *parent)
 
 	connect(plotmodeSelector,  QOverload<int>::of(&QComboBox::activated), this, [this](){
 		auto  p = getPlotmode();
-		connectSamples->setEnabled(p == Sweep);
+		connectSamples->setEnabled(!connectSamplesSweepOnly || (p == Sweep));
 		emit plotmodeChanged(getPlotmode());
 	});
 
@@ -54,6 +54,8 @@ Plotmode PlotmodeWidget::getPlotmode() const
 
 void PlotmodeWidget::setPlotmode(Plotmode newPlotmode)
 {
+	connectSamples->setEnabled(!connectSamplesSweepOnly || (newPlotmode == Sweep));
+
 	for(int i = 0; i < plotmodeSelector->count(); i++) {
 		if(plotmodeSelector->itemData(i, PlotmodeRole).value<Plotmode>() == newPlotmode) {
 			plotmodeSelector->setCurrentIndex(i);
