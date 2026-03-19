@@ -25,6 +25,7 @@ public:
 	void initializeAudio(const QAudioFormat &format, const QAudioDevice &deviceInfo);
 	void setOutputVolume(qreal linearVolume);
 	QIODevice *start();
+	void stop();
 
 signals:
 	void outputVolume(qreal linearVol);

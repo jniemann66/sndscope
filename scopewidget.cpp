@@ -190,6 +190,8 @@ void ScopeWidget::setPaused(bool value)
 		pushOut=audioController->start();
 		startFrame = currentFrame;
 		elapsedTimer.restart();
+	} else {
+		audioController->stop();
 	}
 }
 

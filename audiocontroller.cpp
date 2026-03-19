@@ -57,5 +57,15 @@ void AudioController::setOutputVolume(qreal linearVolume)
 
 QIODevice* AudioController::start()
 {
+	if (audioOutput->state() != QAudio::StoppedState) {
+		audioOutput->stop();
+	}
 	return audioOutput->start();
+}
+
+void AudioController::stop()
+{
+	if (audioOutput != nullptr) {
+		audioOutput->stop();
+	}
 }
