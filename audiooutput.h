@@ -11,7 +11,8 @@
 #define AUDIOOUTPUT_H
 
 #include <QObject>
-#include <QAudioOutput>
+#include <QAudioSink>
+#include <QAudioDevice>
 #include <memory>
 #include <QDataStream>
 
@@ -20,7 +21,7 @@ class AudioOutputQueue : public QObject
     Q_OBJECT
 public:
     explicit AudioOutputQueue(QObject *parent = nullptr);
-    void setConfiguration(const QAudioDeviceInfo &audioDevice, const QAudioFormat &format = QAudioFormat());
+    void setConfiguration(const QAudioDevice &audioDevice, const QAudioFormat &format = QAudioFormat());
     void addAudio(float val);
     void play();
     void stop();
@@ -30,8 +31,8 @@ public:
 signals:
 
 private:
-    std::unique_ptr<QAudioOutput> _output;
-    QAudioDeviceInfo audioDeviceInfo;
+    std::unique_ptr<QAudioSink> _output;
+    QAudioDevice audioDeviceInfo;
     QDataStream datastream;
     QByteArray buffer;
 };

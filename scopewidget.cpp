@@ -111,7 +111,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 
 	plotTimer.start();
     screenUpdateTimer.start();
-	outputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
+	outputDeviceInfo = QMediaDevices::defaultAudioOutput();
 }
 
 ScopeWidget::~ScopeWidget()
@@ -153,10 +153,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 		// set up audio
 		audioFormat.setSampleRate(sndfile->samplerate());
 		audioFormat.setChannelCount(sndfile->channels());
-		audioFormat.setSampleSize(32);
-		audioFormat.setCodec("audio/pcm");
-		audioFormat.setByteOrder(QAudioFormat::LittleEndian);
-		audioFormat.setSampleType(QAudioFormat::Float);
+		audioFormat.setSampleFormat(QAudioFormat::Float);
 		audioController->initializeAudio(audioFormat, outputDeviceInfo);
 
 		plotter->setExpectedFrames(expectedFrames);
@@ -366,12 +363,12 @@ void ScopeWidget::wipeScreen()
 #endif
 }
 
-QAudioDeviceInfo ScopeWidget::getOutputDeviceInfo() const
+QAudioDevice ScopeWidget::getOutputDeviceInfo() const
 {
 	return outputDeviceInfo;
 }
 
-void ScopeWidget::setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo)
+void ScopeWidget::setOutputDevice(const QAudioDevice &newOutputDeviceInfo)
 {
 	bool changed = (outputDeviceInfo != newOutputDeviceInfo);
 	outputDeviceInfo = newOutputDeviceInfo;

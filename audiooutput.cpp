@@ -15,9 +15,9 @@ AudioOutputQueue::AudioOutputQueue(QObject *parent) : QObject(parent), datastrea
     datastream.setFloatingPointPrecision(QDataStream::SinglePrecision);
 }
 
-void AudioOutputQueue::setConfiguration(const QAudioDeviceInfo& audioDevice, const QAudioFormat& format)
+void AudioOutputQueue::setConfiguration(const QAudioDevice& audioDevice, const QAudioFormat& format)
 {
-    _output.reset(new QAudioOutput(audioDevice, format));
+    _output.reset(new QAudioSink(audioDevice, format));
     _output->setVolume(1.0);
     qDebug() << _output->state() << _output->error();
 }

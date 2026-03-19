@@ -5,19 +5,20 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QSlider>
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
+#include <QMediaDevices>
 
 class AudioSettingsWidget : public QWidget
 {
 	Q_OBJECT
 public:
 	explicit AudioSettingsWidget(QWidget *parent = nullptr);
-	void setAvailableOutputDevices(const QList<QAudioDeviceInfo> &deviceList);
+	void setAvailableOutputDevices(const QList<QAudioDevice> &deviceList);
 	void setVolume(qreal linearVol);
-	QAudioDeviceInfo getSelectedAudioDevice() const;
+	QAudioDevice getSelectedAudioDevice() const;
 
 signals:
-	void outputDeviceSelected(const QAudioDeviceInfo &device);
+	void outputDeviceSelected(const QAudioDevice &device);
 	void outputVolumeChanged(qreal linearVolume);
 
 private:

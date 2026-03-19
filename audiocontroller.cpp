@@ -16,31 +16,32 @@ AudioController::AudioController(QObject *parent) : QObject(parent)
 {
 }
 
-void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo)
+void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDevice &deviceInfo)
 {
-	static const QMap<QAudioFormat::SampleType, QString> sampleTypeMap
+	static const QMap<QAudioFormat::SampleFormat, QString> sampleTypeMap
 	{
 		{QAudioFormat::Unknown, "Unknown"},
-		{QAudioFormat::SignedInt, "Signed Int"},
-		{QAudioFormat::UnSignedInt, "Unsigned Int"},
+		{QAudioFormat::Int16, "Signed Int 16"},
+		{QAudioFormat::Int32, "Signed Int 32"},
+		{QAudioFormat::UInt8, "Unsigned Int 8"},
 		{QAudioFormat::Float, "Floating Point"}
 	};
 
 	if (!deviceInfo.isFormatSupported(format)) {
 		const QString msg = QStringLiteral("Audio Format Not Supported: %1Hz %2bit %3")
 				.arg(QString::number(format.sampleRate()),
-					 QString::number(format.sampleSize()),
-					 sampleTypeMap.value(format.sampleType(), "Unknown"));
+					 QString::number(format.bytesPerSample() * 8),
+					 sampleTypeMap.value(format.sampleFormat(), "Unknown"));
 		QMessageBox::warning(nullptr, "Audio Format Not Supported", msg);
 		return;
 	}
 
-	audioOutput.reset(new QAudioOutput(deviceInfo, format));
+	audioOutput.reset(new QAudioSink(deviceInfo, format));
 	emit outputVolume(audioOutput->volume());
 
 	audioOutput->setBufferSize(2 * format.sampleRate() * format.bytesPerFrame());
 
-	connect(audioOutput.get(), &QAudioOutput::stateChanged, this, [this]{
+	connect(audioOutput.get(), &QAudioSink::stateChanged, this, [this]{
 		qDebug().noquote() << "Audio Status:" << audioOutput->state();
 	});
 

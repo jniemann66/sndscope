@@ -13,15 +13,15 @@
 #include <memory>
 
 #include <QObject>
-#include <QAudioDeviceInfo>
-#include <QAudioOutput>
+#include <QAudioDevice>
+#include <QAudioSink>
 
 class AudioController : public QObject
 {
 	Q_OBJECT
 public:
 	explicit AudioController(QObject *parent = nullptr);
-	void initializeAudio(const QAudioFormat &format, const QAudioDeviceInfo &deviceInfo);
+	void initializeAudio(const QAudioFormat &format, const QAudioDevice &deviceInfo);
 	void setOutputVolume(qreal linearVolume);
 	QIODevice *start();
 
@@ -29,7 +29,7 @@ signals:
 	void outputVolume(qreal linearVol);
 
 private:
-	std::unique_ptr<QAudioOutput> audioOutput;
+	std::unique_ptr<QAudioSink> audioOutput;
 };
 
 #endif // AUDIOCONTROLLER_H

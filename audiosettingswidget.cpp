@@ -32,10 +32,10 @@ AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 	mainLayout->addLayout(volumeLayout);
 	setLayout(mainLayout);
 
-	setAvailableOutputDevices(QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioOutput));
+	setAvailableOutputDevices(QMediaDevices::audioOutputs());
 
 	connect(deviceSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this]{
-		const auto d  = deviceSelector->currentData().value<QAudioDeviceInfo>();
+		const auto d  = deviceSelector->currentData().value<QAudioDevice>();
 		emit outputDeviceSelected(d);
 	});
 
@@ -45,16 +45,16 @@ AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 	});
 }
 
-void AudioSettingsWidget::setAvailableOutputDevices(const QList<QAudioDeviceInfo> &deviceList)
+void AudioSettingsWidget::setAvailableOutputDevices(const QList<QAudioDevice> &deviceList)
 {
 	deviceSelector->clear();
 	for(auto it = deviceList.constBegin(); it != deviceList.constEnd(); ++it)
 	{
 		QVariant v;
 		v.setValue(*it);
-		deviceSelector->addItem(it->deviceName(), v);
+		deviceSelector->addItem(it->description(), v);
 	}
-	deviceSelector->setCurrentText(QAudioDeviceInfo::defaultOutputDevice().deviceName());
+	deviceSelector->setCurrentText(QMediaDevices::defaultAudioOutput().description());
 }
 
 void AudioSettingsWidget::setVolume(qreal linearVol)
@@ -65,7 +65,7 @@ void AudioSettingsWidget::setVolume(qreal linearVol)
 
 }
 
-QAudioDeviceInfo AudioSettingsWidget::getSelectedAudioDevice() const
+QAudioDevice AudioSettingsWidget::getSelectedAudioDevice() const
 {
-	return deviceSelector->currentData().value<QAudioDeviceInfo>();
+	return deviceSelector->currentData().value<QAudioDevice>();
 }

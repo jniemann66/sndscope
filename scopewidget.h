@@ -24,7 +24,8 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QHBoxLayout>
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
+#include <QMediaDevices>
 #include <QThread>
 
 #include <sndfile.hh>
@@ -276,7 +277,7 @@ public:
 	bool getMultiColor() const;
 	QColor getBackgroundColor() const;
 	SweepParameters getSweepParameters() const;
-	QAudioDeviceInfo getOutputDeviceInfo() const;
+	QAudioDevice getOutputDeviceInfo() const;
 	bool getShowTrigger() const;
 	bool getconnectSamples() const;
 
@@ -287,7 +288,7 @@ public:
 	void setPersistence(double time_ms);
 	void setPhosporColors(const QVector<QColor> &colors);
 	void setBackgroundColor(const QColor &value);
-	void setOutputDevice(const QAudioDeviceInfo &newOutputDeviceInfo);
+	void setOutputDevice(const QAudioDevice &newOutputDeviceInfo);
 	void setShowTrigger(bool val);
 	void setconnectSamples(bool val);
 
@@ -320,7 +321,7 @@ private:
 	QHBoxLayout *screenLayout{nullptr};
 	std::unique_ptr<SndfileHandle> sndfile;
 	QAudioFormat audioFormat;
-	QAudioDeviceInfo outputDeviceInfo;
+	QAudioDevice outputDeviceInfo;
 	UpSampler<float, float, upsampleFactor> upsampler;
 
 	// audio buffers

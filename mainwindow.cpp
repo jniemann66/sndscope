@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 
 	connect(displaySettingsWidget, &DisplaySettingsWidget::wipeScreenRequested, scopeWidget, &ScopeWidget::wipeScreen);
 
-	connect(audioSettingsWidget, &AudioSettingsWidget::outputDeviceSelected, this, [scopeWidget, transportWidget](const QAudioDeviceInfo& audioDeviceInfo){
+	connect(audioSettingsWidget, &AudioSettingsWidget::outputDeviceSelected, this, [scopeWidget, transportWidget](const QAudioDevice& audioDeviceInfo){
 
 		scopeWidget->setOutputDevice(audioDeviceInfo);
 		if(!transportWidget->getPaused()) {
