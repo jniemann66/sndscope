@@ -41,7 +41,7 @@ PlotmodeWidget::PlotmodeWidget(QWidget *parent)
 		emit upsamplingChanged(upsamplingCheckbox->isChecked());
 	});
 
-	connect(connectSamples, &QCheckBox::stateChanged, this, [this]{
+	connect(connectSamples, &QCheckBox::checkStateChanged, this, [this]{
 		emit connectSamplesChanged(connectSamples->isChecked());
 	});
 
@@ -56,8 +56,8 @@ void PlotmodeWidget::setPlotmode(Plotmode newPlotmode)
 {
 	connectSamples->setEnabled(!connectSamplesSweepOnly || (newPlotmode == Sweep));
 
-	for(int i = 0; i < plotmodeSelector->count(); i++) {
-		if(plotmodeSelector->itemData(i, PlotmodeRole).value<Plotmode>() == newPlotmode) {
+	for (int i = 0; i < plotmodeSelector->count(); i++) {
+		if (plotmodeSelector->itemData(i, PlotmodeRole).value<Plotmode>() == newPlotmode) {
 			plotmodeSelector->setCurrentIndex(i);
 			break;
 		}

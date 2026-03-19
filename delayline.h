@@ -19,7 +19,7 @@ public:
     T get(const T input) {
         T output = history[index];
         history[index] = input;
-        if(++index == size) {
+        if (++index == size) {
             index = 0ull;
         }
         return output;

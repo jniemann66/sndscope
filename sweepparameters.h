@@ -78,7 +78,7 @@ public:
 
 		double m = 0.0;
 		int p = 0;
-		if(std::fpclassify(duration_s) != FP_ZERO) {
+		if (std::fpclassify(duration_s) != FP_ZERO) {
 			p = 3 * std::floor(std::log10(std::abs(duration_s)) / 3.0);
 			m =  static_cast<double>(duration_s / std::pow(10, p));
 		}

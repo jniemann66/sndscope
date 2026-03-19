@@ -12,7 +12,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
-AudioController::AudioController(QObject *parent) : QObject(parent)
+AudioController::AudioController(QObject *parent)
+	: QObject(parent)
 {
 }
 
@@ -49,7 +50,7 @@ void AudioController::initializeAudio(const QAudioFormat &format, const QAudioDe
 
 void AudioController::setOutputVolume(qreal linearVolume)
 {
-	if(audioOutput != nullptr) {
+	if (audioOutput != nullptr) {
 		audioOutput->setVolume(linearVolume);
 	}
 }

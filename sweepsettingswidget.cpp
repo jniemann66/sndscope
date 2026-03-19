@@ -102,14 +102,14 @@ SweepSettingsWidget::SweepSettingsWidget(QWidget *parent)
 	});
 
 	auto setSlopeLabel = [slopeDialLabel](int s) {
-		if(s < 0) {
+		if (s < 0) {
 			slopeDialLabel->setText("Slope: \\");
 		} else {
 			slopeDialLabel->setText("Slope: /");
 		}
 	};
 
-	connect(triggerEnabled, &QCheckBox::stateChanged, this, [this](int state){
+	connect(triggerEnabled, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){
 		triggerResetButton->setEnabled(state == Qt::Checked);
 		triggerLevel->setEnabled(state == Qt::Checked);
 		triggerTolerance->setEnabled(state == Qt::Checked);
@@ -195,8 +195,8 @@ void SweepSettingsWidget::setSweepParameters(const SweepParameters &newSweepPara
 {
 	sweepParameters = newSweepParameters;
 	double d = sweepParameters.getDuration();
-	for(int v = 0; v < sweepRateMap.size(); v++) {
-		if(d >= sweepRateMap.value(v)) {
+	for (int v = 0; v < sweepRateMap.size(); v++) {
+		if (d >= sweepRateMap.value(v)) {
 			sweepDial->setValue(v);
 			break;
 		}

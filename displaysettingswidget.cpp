@@ -15,7 +15,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
+DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent)
+	: QWidget(parent)
 {
 	brightnessControl = new QDial;
 	focusControl = new QDial;
@@ -90,7 +91,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 
 	connect(phosphorSelectControl, &QComboBox::currentTextChanged, this, [this](const QString& name){
 
-		if(phosphors.contains(name)) {
+		if (phosphors.contains(name)) {
 			Phosphor phosphor = phosphors.value(name);
 			QVector<QColor> phosphorColors;
 			for (int i = 0; i < phosphor.layers.count(); i++) {
@@ -98,7 +99,7 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 				phosphorColors.append(c);
 			}
 
-			if(phosphorColors.count() > 0) {
+			if (phosphorColors.count() > 0) {
 				emit phosphorColorChanged(phosphorColors);
 				setPersistence(phosphor.layers.at(0).persistence);
 			}
@@ -110,10 +111,10 @@ DisplaySettingsWidget::DisplaySettingsWidget(QWidget *parent) : QWidget(parent)
 	});
 
 	auto _r  = loadPhosphors(":/phosphors.json");
-	if(_r.first) {
+	if (_r.first) {
 		phosphorSelectControl->clear();
 		const QStringList phosphorNames = phosphors.keys();
-		for(const QString& phosphorName : phosphorNames) {
+		for (const QString& phosphorName : phosphorNames) {
 			phosphorSelectControl->addItem(phosphorName);
 		}
 		phosphorSelectControl->setCurrentText("P31");
@@ -158,18 +159,18 @@ void DisplaySettingsWidget::setPersistence(int value)
 QPair<bool, QString> DisplaySettingsWidget::loadPhosphors(const QString& filename)
 {
 	QFile f(filename);
-	if(f.open(QFile::ReadOnly)) {
+	if (f.open(QFile::ReadOnly)) {
 		QJsonParseError e;
 		auto doc = QJsonDocument::fromJson(f.readAll(), &e);
-		if(e.error != QJsonParseError::NoError) {
+		if (e.error != QJsonParseError::NoError) {
 			return {false, e.errorString()};
 		}
 		phosphors.clear();
 		QJsonObject o = doc.object();
-		if(o.value("phosphors").isArray()) {
+		if (o.value("phosphors").isArray()) {
 			auto a = o.value("phosphors").toArray();
-			for(int i = 0; i < a.count(); i++) {
-				if(a.at(i).isObject()) {
+			for (int i = 0; i < a.count(); i++) {
+				if (a.at(i).isObject()) {
 					Phosphor phosphor;
 					phosphor.fromJson(a.at(i).toObject());
 					phosphors.insert(phosphor.name, phosphor);

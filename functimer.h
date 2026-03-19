@@ -36,7 +36,7 @@ public:
 	~FuncTimer()
 	{
 		endTimer = std::chrono::high_resolution_clock::now();
-		if(duration != nullptr) {
+		if (duration != nullptr) {
 			*duration = std::chrono::duration_cast<D>(endTimer - beginTimer).count();
 		}
 	}

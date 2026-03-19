@@ -48,7 +48,7 @@ AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 void AudioSettingsWidget::setAvailableOutputDevices(const QList<QAudioDevice> &deviceList)
 {
 	deviceSelector->clear();
-	for(auto it = deviceList.constBegin(); it != deviceList.constEnd(); ++it)
+	for (auto it = deviceList.constBegin(); it != deviceList.constEnd(); ++it)
 	{
 		QVariant v;
 		v.setValue(*it);

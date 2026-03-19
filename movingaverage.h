@@ -22,7 +22,7 @@ public:
     {
         movingTotal -= history[index];
         movingTotal += (history[index] = input);
-        if(++index == size) {
+        if (++index == size) {
             index = 0ull;
         }
         return r * movingTotal;

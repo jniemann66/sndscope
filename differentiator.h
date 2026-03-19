@@ -50,15 +50,15 @@ public:
 		// perform the convolution
 		FloatType dP{0.0}; // differentiator result
         size_t p = index;
-        for(size_t j = 0 ; j < length; j++) {
+        for (size_t j = 0 ; j < length; j++) {
             dP += coeffs[j] * history.at(p);
-            if(++p == length) {
+            if (++p == length) {
                 p = 0; // wrap
 			}
 		}
 
 		// update the current index
-        if(index == 0) {
+        if (index == 0) {
             index = length - 1; // wrap
 		} else {
             index--;

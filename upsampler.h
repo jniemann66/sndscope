@@ -140,7 +140,7 @@ public:
 
 	UpSampler()
     {
-		switch(L) {
+		switch (L) {
 		case 1:
 			break;
 		case 2:
@@ -169,7 +169,7 @@ public:
 		fir_length = count;
 
 		fir_coeffs.clear();
-		for(size_t i = 0; i < count; i++) {
+		for (size_t i = 0; i < count; i++) {
 			fir_coeffs.push_back(L * firCoeffs[i]);
 		}
 
@@ -177,7 +177,7 @@ public:
 
 		// add padding
 		size_t r = n * L - fir_length;
-		for(size_t i = 0; i < r; i++) {
+		for (size_t i = 0; i < r; i++) {
 			fir_coeffs.push_back(0.0);
 		}
 
@@ -195,7 +195,7 @@ public:
 
 	void upsampleBlockMono(OutputType* output, const InputType* input, size_t sampleCount)
 	{
-		for(size_t s = 0; s < sampleCount; s++) {
+		for (size_t s = 0; s < sampleCount; s++) {
 			upsampleSingleMono(output, *input++);
 			output += L;
 		}
@@ -203,7 +203,7 @@ public:
 
 	void upsampleBlockStereo(OutputType* output0, OutputType* output1, const InputType* interleaved, size_t sampleCount)
 	{
-		for(size_t s = 0; s < sampleCount; s ++) {
+		for (size_t s = 0; s < sampleCount; s ++) {
 			upsampleSingleStereo(output0, output1, *interleaved, *(interleaved + 1));
 			interleaved += 2;
 			output0 += L;
@@ -224,7 +224,7 @@ public:
 		const double mov_avg_renderTime = movingAverage.get(renderTime);
 
 		constexpr int64_t every = 10000;
-		if(++callCount % every == 0) {
+		if (++callCount % every == 0) {
 			qDebug() << QStringLiteral("Avg Upsample time(last %1)=%2ns")
 						.arg(historyLength)
 						.arg(mov_avg_renderTime, 0, 'f', 2);
@@ -236,17 +236,17 @@ public:
 
 		memset(output, 0.0, L * sizeof(OutputType));
 
-		for(size_t j = 0; j < n * L; j+= L) {
-			for(size_t k = 0; k < L; k++) {
+		for (size_t j = 0; j < n * L; j+= L) {
+			for (size_t k = 0; k < L; k++) {
 				output[k] += fir_coeffs[j+k] * history0[p];
 			}
 
-			if(++p == fir_length) {
+			if (++p == fir_length) {
 				p = 0;
 			}
 		}
 
-		if(index-- == 0) {
+		if (index-- == 0) {
 			index = fir_length - 1;
 		}
 	}
@@ -261,18 +261,18 @@ public:
 		memset(output0, 0.0, L * sizeof(OutputType));
 		memset(output1, 0.0, L * sizeof(OutputType));
 
-		for(size_t j = 0; j < n * L; j+= L) {
-			for(size_t k = 0; k < L; k++) {
+		for (size_t j = 0; j < n * L; j+= L) {
+			for (size_t k = 0; k < L; k++) {
 				output0[k] += fir_coeffs[j+k] * history0[p];
 				output1[k] += fir_coeffs[j+k] * history1[p];
 			}
 
-			if(++p == fir_length) {
+			if (++p == fir_length) {
 				p = 0;
 			}
 		}
 
-		if(index-- == 0) {
+		if (index-- == 0) {
 			index = fir_length - 1;
 		}
 	}

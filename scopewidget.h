@@ -152,14 +152,14 @@ protected:
 #ifdef SNDSCOPE_BLEND2D
 		p.drawImage(0, 0, *blImageWrapper->getQImage());
 #else
-        if(size() == pixmap.size()) {
+        if (size() == pixmap.size()) {
             p.drawPixmap(0, 0, pixmap);
         } else {
             p.drawPixmap(0, 0, pixmap.scaled(size()));
         }
 #endif
 
-		if(showGraticule) {
+		if (showGraticule) {
 			p.setRenderHint(QPainter::Antialiasing, true);
 			QPen graticulePen(graticuleColor, 1.5);
 			p.setPen(graticulePen);
@@ -176,7 +176,7 @@ protected:
 		setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 		updateGeometry();
 
-		if(allowPixmapResolutionChange) {
+		if (allowPixmapResolutionChange) {
 			resizeCooldownTimer.start();
 		}
 
@@ -207,11 +207,11 @@ protected:
 		const double tx0 = cx - tl;
 		const double tx1 = cx + tl;
 
-		for(int i = 0; i <= divisions.first; i++) {
+		for (int i = 0; i <= divisions.first; i++) {
 			graticuleLines.append(QPointF{gx, 0});
 			graticuleLines.append(QPointF{gx, h});
 			double tx = gx + txd;
-			for(int j = 1; j <= 4; j++) {
+			for (int j = 1; j <= 4; j++) {
 				graticuleLines.append(QPointF{tx, ty0});
 				graticuleLines.append(QPointF{tx, ty1});
 				tx += txd;
@@ -219,11 +219,11 @@ protected:
 			gx += divx;
 		}
 
-		for(int i = 0; i <= divisions.second; i++) {
+		for (int i = 0; i <= divisions.second; i++) {
 			graticuleLines.append(QPointF{0, gy});
 			graticuleLines.append(QPointF{w, gy});
 			double ty = gy + tyd;
-			for(int j = 1; j <= 4; j++) {
+			for (int j = 1; j <= 4; j++) {
 				graticuleLines.append(QPointF{tx0, ty});
 				graticuleLines.append(QPointF{tx1, ty});
 				ty += tyd;

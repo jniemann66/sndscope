@@ -35,7 +35,7 @@ Plotter::Plotter(QObject *parent)
 
 void Plotter::calcScaling()
 {
-	if(pixmap != nullptr) {
+	if (pixmap != nullptr) {
 		w = pixmap->width();
 		h = pixmap->height();
 		cx = 0.5 * w;
@@ -66,7 +66,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 	panicMode = (mov_avg_renderTime > timeLimit_ms);
 
 #ifdef SHOW_PANIC
-	if(panicMode) {
+	if (panicMode) {
 		qDebug() << QStringLiteral("Panic: recent avg (%1ms) > plot-interval (%2ms)")
 					.arg(mov_avg_renderTime, 0, 'f', 2)
 					.arg(timeLimit_ms);
@@ -74,7 +74,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 #endif
 
 #ifdef SHOW_AVG_RENDER_TIME
-	if(callCount % 100 == 0) {
+	if (callCount % 100 == 0) {
 		qDebug() << QStringLiteral("Avg render time: Overall=%1ms Recent(last %2)=%3ms")
 					.arg(total_renderTime / std::max(1ll, callCount), 0, 'f', 2)
 					.arg(historyLength)
@@ -98,20 +98,20 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 	int64_t firstFrameToPlot = catchAllFrames ? 0ll : std::max<int64_t>(0ll, framesAvailable - 2 * expected);
 
 	// calculate all the points to draw
-	for(int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
+	for (int64_t i = firstFrameToPlot; i < framesAvailable; i++) {
 
 		// types converted here : audio data is float, graphics is qreal (aka double)
 		double ch0val = static_cast<double>(inputBuffers[0][i]);
 		double ch1val = (numInputChannels > 1 ? static_cast<double>(inputBuffers[1][i]) : 0.0);
 		// ---
 
-		switch(plotMode) {
+		switch (plotMode) {
 		case XY:
 		default:
 		{
 			QPointF pt{(1.0 + ch0val) * cx, (1.0 - ch1val) * cy};
 			static QPointF lastPoint = pt;
-			if(drawLines) {
+			if (drawLines) {
 				plotBuffer.append(lastPoint);
 			}
 			plotBuffer.append(pt);
@@ -124,7 +124,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 			QPointF pt{(1.0 + rsqrt2 * (ch0val - ch1val)) * cx,
 						(1.0 - rsqrt2 * (ch0val + ch1val)) * cy};
 			static QPointF lastPoint = pt;
-			if(drawLines) {
+			if (drawLines) {
 				plotBuffer.append(lastPoint);
 			}
 			plotBuffer.append(pt);
@@ -146,15 +146,15 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 						|| !sweepParameters.triggerEnabled // when trigger disabled -> Always Triggered
 						|| (sweepParameters.triggerMin <= delayed && delayed <= sweepParameters.triggerMax && slope > 0.0);
 
-			if(triggered) {
+			if (triggered) {
 				QPointF pt{x, cy * (1.0 - delayed)};
-				if(drawLines)  {
+				if (drawLines)  {
 					plotBuffer.append(lastPoint);
 				}
 				lastPoint = pt;
 				plotBuffer.append(pt);
 				x += sweepParameters.sweepAdvance;
-				if(x > w) { // sweep completed
+				if (x > w) { // sweep completed
 					x = 0.0;
 					triggered = false;
 					lastPoint = {x, cy * (1.0 - sweepParameters.triggerLevel)};
@@ -169,7 +169,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 	constexpr bool debugPlotBufferSize = false;
 	if constexpr(debugPlotBufferSize) {
 		static decltype(plotBuffer.size()) maxSize = 0ll;
-		if(plotBuffer.size() > maxSize) {
+		if (plotBuffer.size() > maxSize) {
 			maxSize = plotBuffer.size();
 			qDebug() << "new size:" << maxSize;
 		}
@@ -190,7 +190,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 	painter.setCompositionMode(compositionMode);
 	painter.setRenderHint(QPainter::TextAntialiasing, false);
 
-	if(--darkenCooldownCounter == 0) {
+	if (--darkenCooldownCounter == 0) {
 		// darken:
 		painter.setBackgroundMode(Qt::OpaqueMode);
 		painter.setRenderHint(QPainter::Antialiasing, false);
@@ -205,7 +205,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 				Qt::BevelJoin};
 	painter.setPen(pen);
 
-	if(drawLines) {
+	if (drawLines) {
 		painter.drawLines(plotBuffer);
 	} else {
 		painter.drawPoints(plotBuffer);
@@ -214,7 +214,7 @@ void Plotter::render(const QVector<QVector<float>> &inputBuffers, int64_t frames
 
 
 
-	if(showTrigger) {
+	if (showTrigger) {
 		drawTrigger(&painter);
 	}
 

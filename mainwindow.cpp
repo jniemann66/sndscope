@@ -24,7 +24,8 @@
 #include <QMenuBar>
 #include <QMimeData>
 
-MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget	*parent)
+	: QMainWindow(parent)
 {
 	auto scopeWidget = new ScopeWidget(this);
 	auto transportDock = new QDockWidget("Transport", this);
@@ -123,7 +124,7 @@ MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 	connect(audioSettingsWidget, &AudioSettingsWidget::outputDeviceSelected, this, [scopeWidget, transportWidget](const QAudioDevice& audioDeviceInfo){
 
 		scopeWidget->setOutputDevice(audioDeviceInfo);
-		if(!transportWidget->getPaused()) {
+		if (!transportWidget->getPaused()) {
 			scopeWidget->setPaused(false); // force restart
 		}
 	});
@@ -166,7 +167,7 @@ MainWindow::~MainWindow()
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
 	auto mimeData = event->mimeData();
-	if(mimeData->hasText()) {
+	if (mimeData->hasText()) {
 		event->acceptProposedAction();
 	}
 }
@@ -174,12 +175,12 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
 	auto mimeData = event->mimeData();
-	if(mimeData->hasText()) {
+	if (mimeData->hasText()) {
 		QUrl url{mimeData->text()};
 		QString path = QDir::toNativeSeparators(url.path());
 
 #ifdef Q_OS_WIN
-		if(path.startsWith('\\')) {
+		if (path.startsWith('\\')) {
 			path.remove(0, 1);
 		}
 #endif

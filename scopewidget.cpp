@@ -15,7 +15,8 @@
 
 #include <cmath>
 
-ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
+ScopeWidget::ScopeWidget(QWidget *parent)
+	: QWidget(parent)
 {
     scopeDisplay = new ScopeDisplay(this);
 	audioController = new AudioController(this);
@@ -76,7 +77,7 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	});
 
 	connect(&plotTimer, &QTimer::timeout, this, [this]{
-		if(!paused) {
+		if (!paused) {
 
 			readInput();
 
@@ -89,8 +90,8 @@ ScopeWidget::ScopeWidget(QWidget *parent) : QWidget(parent)
 	});
 
     connect(&screenUpdateTimer, &QTimer::timeout, this, [this] {
-        if(!paused) {
-			if(plotter->getFreshRender()) {
+        if (!paused) {
+			if (plotter->getFreshRender()) {
 				scopeDisplay->update();
 				plotter->setFreshRender(false);
             }
@@ -126,7 +127,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 {
 	sndfile.reset(new SndfileHandle(filename.toLatin1(), SFM_READ));
 	fileLoaded = (sndfile->error() == SF_ERR_NO_ERROR);
-	if(fileLoaded) {
+	if (fileLoaded) {
 
 		// set up rendering parameters, based on soundfile properties
 		numInputChannels = sndfile->channels();
@@ -136,7 +137,7 @@ QPair<bool, QString> ScopeWidget::loadSoundFile(const QString& filename)
 
 		// initialize channel input buffers
 		inputBuffers.resize(numInputChannels);
-		for(int ch = 0; ch < numInputChannels; ch++) {
+		for (int ch = 0; ch < numInputChannels; ch++) {
 			size_t chbufSize = sndfile->samplerate() * upsampleFactor; // allow for upsampling
 			inputBuffers[ch].resize(chbufSize);
 		}
@@ -180,12 +181,12 @@ bool ScopeWidget::getPaused() const
 void ScopeWidget::setPaused(bool value)
 {
 	// disallow unpause if file not loaded
-	if(!value && paused && !fileLoaded) {
+	if (!value && paused && !fileLoaded) {
 		return;
 	}
 
 	paused = value;
-	if(!paused) {
+	if (!paused) {
 		pushOut=audioController->start();
 		startFrame = currentFrame;
 		elapsedTimer.restart();
@@ -198,7 +199,7 @@ void ScopeWidget::returnToStart()
 	currentFrame = 0ll;
 	startFrame = 0ll;
 
-	if(sndfile != nullptr && !sndfile->error()) {
+	if (sndfile != nullptr && !sndfile->error()) {
 		sndfile->seek(0ll, SEEK_SET);
 	}
 }
@@ -206,7 +207,7 @@ void ScopeWidget::returnToStart()
 void ScopeWidget::gotoPosition(int64_t milliSeconds)
 {
 	elapsedTimer.restart();
-	if(sndfile != nullptr && !sndfile->error()) {
+	if (sndfile != nullptr && !sndfile->error()) {
 		currentFrame = audioFramesPerMs * milliSeconds;
 		startFrame = currentFrame;
 		sndfile->seek(qMin(currentFrame, sndfile->frames()), SEEK_SET);
@@ -225,9 +226,9 @@ void ScopeWidget::setBackgroundColor(const QColor &value)
 
 void ScopeWidget::setPhosporColors(const QVector<QColor>& colors)
 {
-	if(!colors.isEmpty()) {
+	if (!colors.isEmpty()) {
 		plotter->setPhosphorColor(colors.at(0));
-		if(colors.count() > 1) {
+		if (colors.count() > 1) {
 			plotter->setCompositionMode(QPainter::CompositionMode_HardLight);
 			plotter->setDarkencolor(colors.at(1));
 		} else {
@@ -322,22 +323,22 @@ void ScopeWidget::readInput()
 
 	constexpr bool debugExpectedFrames = false;
 	if constexpr(debugExpectedFrames) {
-		if(framesRead > expectedFrames)
+		if (framesRead > expectedFrames)
 			qDebug() << "expected" << expectedFrames << "got" << framesRead;
 	}
 
 	// de-interleave
-	if(upsampling && numInputChannels <= 2) {
-		if(numInputChannels == 1) {
+	if (upsampling && numInputChannels <= 2) {
+		if (numInputChannels == 1) {
 			upsampler.upsampleBlockMono(inputBuffers[0].data(), rawinputBuffer.constData(), framesRead);
 			framesAvailable = framesRead * upsampleFactor;
-		} else if(numInputChannels == 2) {
+		} else if (numInputChannels == 2) {
 			upsampler.upsampleBlockStereo(inputBuffers[0].data(), inputBuffers[1].data(), rawinputBuffer.constData(), framesRead);
 			framesAvailable = framesRead * upsampleFactor;
 		}
 	} else {
-		for(int64_t f = 0ll; f < framesRead; f++) {
-			for(int ch = 0; ch < numInputChannels; ch++) {
+		for (int64_t f = 0ll; f < framesRead; f++) {
+			for (int ch = 0; ch < numInputChannels; ch++) {
 				inputBuffers[ch][f] = rawinputBuffer[f * numInputChannels + ch];
 			}
 		}
@@ -372,7 +373,7 @@ void ScopeWidget::setOutputDevice(const QAudioDevice &newOutputDeviceInfo)
 {
 	bool changed = (outputDeviceInfo != newOutputDeviceInfo);
 	outputDeviceInfo = newOutputDeviceInfo;
-	if(changed && fileLoaded) {
+	if (changed && fileLoaded) {
 		audioController->initializeAudio(audioFormat, outputDeviceInfo);
 	}
 }
@@ -385,7 +386,7 @@ Plotmode ScopeWidget::getPlotmode() const
 void ScopeWidget::setPlotmode(Plotmode newPlotmode)
 {
 	plotMode = newPlotmode;
-	if(plotMode == Sweep) {
+	if (plotMode == Sweep) {
 		//
 	} else {
 		sweepParameters.sweepUnused = true;
@@ -403,7 +404,7 @@ void ScopeWidget::setUpsampling(bool val)
 	upsampling = val;
 	sweepParameters.setUpsampleFactor(upsampling ? static_cast<double>(upsampleFactor) : 1.0);
 	plotter->setSweepParameters(sweepParameters);
-	if(upsampling) {
+	if (upsampling) {
 		upsampler.reset();
 	}
 }
@@ -416,18 +417,18 @@ void ScopeWidget::setAudioVolume(qreal linearVolume)
 void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 {
 	double newDuration = newSweepParameters.duration_ms;
-	if(sweepParameters.duration_ms != newDuration) {
+	if (sweepParameters.duration_ms != newDuration) {
 		sweepParameters.setDuration_ms(newDuration);
 	}
 
 	const double &newTriggerLevel = newSweepParameters.triggerLevel;
 	const double &newTriggerTolerance = newSweepParameters.triggerTolerance;
-	if(sweepParameters.triggerLevel != newTriggerLevel || sweepParameters.triggerTolerance != newTriggerTolerance) {
+	if (sweepParameters.triggerLevel != newTriggerLevel || sweepParameters.triggerTolerance != newTriggerTolerance) {
 		sweepParameters.triggerLevel = newTriggerLevel;
 		sweepParameters.triggerTolerance = newTriggerTolerance;
 		sweepParameters.triggerMin  = newTriggerLevel - sweepParameters.triggerTolerance;
 		sweepParameters.triggerMax  = newTriggerLevel + sweepParameters.triggerTolerance;
-		if(paused) {
+		if (paused) {
 			setShowTrigger(showTrigger);
 		}
 	}
@@ -435,7 +436,7 @@ void ScopeWidget::setSweepParameters(const SweepParameters &newSweepParameters)
 	sweepParameters.slope = newSweepParameters.slope;
 	sweepParameters.triggerEnabled = newSweepParameters.triggerEnabled;
 	sweepParameters.setWidthFrameRate(w, audioFramesPerMs);
-	if(plotter != nullptr) {
+	if (plotter != nullptr) {
 		plotter->setSweepParameters(sweepParameters);
 	}
 }
@@ -453,7 +454,7 @@ bool ScopeWidget::getconnectSamples() const
 void ScopeWidget::setShowTrigger(bool val)
 {
 	showTrigger = (plotMode == Sweep) && val;
-	if(paused) {
+	if (paused) {
 #ifdef SNDSCOPE_BLEND2D
 
 #else
@@ -463,7 +464,7 @@ void ScopeWidget::setShowTrigger(bool val)
 		painter.setRenderHint(QPainter::Antialiasing, false);
 		painter.fillRect(pixmap->rect(), Qt::black);
 
-		if(showTrigger) {
+		if (showTrigger) {
 			plotter->drawTrigger(&painter);
 		}
 		painter.endNativePainting();
@@ -476,7 +477,7 @@ void ScopeWidget::setShowTrigger(bool val)
 
 void ScopeWidget::setconnectSamples(bool val)
 {
-	if(plotter != nullptr) {
+	if (plotter != nullptr) {
 		plotter->setconnectSamples(val);
 	}
 }

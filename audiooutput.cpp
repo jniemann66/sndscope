@@ -30,14 +30,14 @@ void AudioOutputQueue::addAudio(float val)
 
 void AudioOutputQueue::play()
 {
-    if(_output.get() != nullptr) {
+    if (_output.get() != nullptr) {
         _output->start(datastream.device());
     }
 }
 
 int64_t AudioOutputQueue::size() const
 {
-    if(datastream.device() != nullptr) {
+    if (datastream.device() != nullptr) {
         return datastream.device()->size();
     }
     return 0;

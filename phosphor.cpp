@@ -12,11 +12,11 @@
 void Phosphor::fromJson(const QJsonObject &o)
 {
 	name = o.value("name").toString();
-	if(o.value("layers").isArray()) {
+	if (o.value("layers").isArray()) {
 		const QJsonArray a = o.value("layers").toArray();
-		for(int i = 0; i < a.count(); i++) {
+		for (int i = 0; i < a.count(); i++) {
 			PhosphorLayer layer;
-			if(a.at(i).isObject()) {
+			if (a.at(i).isObject()) {
 				QJsonObject layerObj = a.at(i).toObject();
 				layer.color.setRed(layerObj.value("red").toInt(94));
 				layer.color.setGreen(layerObj.value("green").toInt(255));
@@ -36,7 +36,7 @@ QJsonObject Phosphor::toJson() const
 	QJsonObject o;
 	o.insert("name", name);
 	QJsonArray a;
-	for(const PhosphorLayer& layer : layers) {
+	for (const PhosphorLayer& layer : layers) {
 		QJsonObject layerObj;
 		layerObj.insert("red", layer.color.red());
 		layerObj.insert("green", layer.color.green());

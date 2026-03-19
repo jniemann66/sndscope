@@ -15,7 +15,8 @@
 #include <QtGui>
 #include <QVBoxLayout>
 
-TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
+TransportWidget::TransportWidget(QWidget *parent)
+	: QWidget(parent)
 {
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 	QHBoxLayout* sliderLayout = new QHBoxLayout;
@@ -88,13 +89,13 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 	});
 
 	connect(slider, &QSlider::sliderPressed, this, [this]{
-		if(!paused) {
+		if (!paused) {
 			emit playPauseToggled(true);
 		}
 	});
 
 	connect(slider, &QSlider::sliderReleased, this, [this]{
-		if(!paused) {
+		if (!paused) {
 			emit playPauseToggled(false);
 		}
 
@@ -121,7 +122,7 @@ bool TransportWidget::getPaused() const
 void TransportWidget::setPaused(bool value)
 {
 	paused = value;
-	if(paused) {
+	if (paused) {
 		playPauseButton->setIcon(QIcon{":/icons/play-solid.png"});
 	} else {
 		playPauseButton->setIcon(QIcon{":/icons/pause-solid.png"});
