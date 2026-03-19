@@ -1,13 +1,12 @@
 #ifndef PLOTMODEWIDGET_H
 #define PLOTMODEWIDGET_H
 
+#include "plotmode.h"
+
+#include <QCheckBox>
+#include <QComboBox>
 #include <QObject>
 #include <QWidget>
-
-#include <QComboBox>
-#include <QCheckBox>
-
-#include "plotmode.h"
 
 Q_DECLARE_METATYPE(Plotmode)
 
@@ -34,7 +33,6 @@ private:
 	QComboBox *plotmodeSelector{nullptr};
 	QCheckBox *upsamplingCheckbox{nullptr};
 	QCheckBox *connectSamples{nullptr};
-
 };
 
 #endif // PLOTMODEWIDGET_H

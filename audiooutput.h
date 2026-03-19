@@ -10,11 +10,12 @@
 #ifndef AUDIOOUTPUT_H
 #define AUDIOOUTPUT_H
 
-#include <QObject>
-#include <QAudioSink>
 #include <QAudioDevice>
-#include <memory>
+#include <QAudioSink>
 #include <QDataStream>
+#include <QObject>
+
+#include <memory>
 
 class AudioOutputQueue : public QObject
 {

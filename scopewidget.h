@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -10,35 +10,35 @@
 #ifndef SCOPEWIDGET_H
 #define SCOPEWIDGET_H
 
-#include <memory>
-
-#include <QWidget>
-#include <QPixmap>
-#include <QLabel>
-#include <QTimer>
-#include <QElapsedTimer>
-#include <QTime>
-#include <QColor>
-#include <QPainter>
-#include <QResizeEvent>
-#include <QDebug>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QAudioDevice>
-#include <QMediaDevices>
-#include <QThread>
+#include "audiocontroller.h"
+#include "plotmode.h"
+#include "plotter.h"
+#include "sweepparameters.h"
+#include "upsampler.h"
 
 #include <sndfile.hh>
-
-#include "plotmode.h"
-#include "sweepparameters.h"
-#include "audiocontroller.h"
-#include "upsampler.h"
-#include "plotter.h"
 
 #ifdef SNDSCOPE_BLEND2D
 	#include "blimagewrapper.h"
 #endif
+
+#include <QAudioDevice>
+#include <QColor>
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMediaDevices>
+#include <QPainter>
+#include <QPixmap>
+#include <QPixmap>
+#include <QResizeEvent>
+#include <QThread>
+#include <QTime>
+#include <QTimer>
+#include <QWidget>
+
+#include <memory>
 
 // ScopeDisplay : this is the Oscilloscope's screen
 // it owns a QPixmap as an image buffer, which is accessed via getPixmap()

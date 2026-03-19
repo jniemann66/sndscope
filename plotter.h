@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -11,12 +11,12 @@
 #ifndef PLOTTER_H
 #define PLOTTER_H
 
-#include "sweepparameters.h"
 #include "plotmode.h"
+#include "sweepparameters.h"
 
+#include <QImage>
 #include <QObject>
 #include <QPainter>
-#include <QImage>
 
 #ifdef SNDSCOPE_BLEND2D
 	#include <blimagewrapper.h>
@@ -25,6 +25,7 @@
 class Plotter : public QObject
 {
 	Q_OBJECT
+
 public:
 	explicit Plotter(QObject *parent = nullptr);
 	void render(const QVector<QVector<float> > &inputBuffers, int64_t framesAvailable, int64_t currentFrame);

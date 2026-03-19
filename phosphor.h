@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -11,10 +11,10 @@
 #define PHOSPHOR_H
 
 #include <QColor>
-#include <QVector>
-#include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QVector>
 
 struct PhosphorLayer
 {

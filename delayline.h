@@ -2,6 +2,7 @@
 #define DELAYLINE_H
 
 #include <array>
+#include <cstddef>
 
 template<typename T, size_t size>
 class DelayLine

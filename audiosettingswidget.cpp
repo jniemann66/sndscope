@@ -1,9 +1,9 @@
 #include "audiosettingswidget.h"
 
-#include <QLabel>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QIcon>
+#include <QLabel>
+#include <QVBoxLayout>
 
 AudioSettingsWidget::AudioSettingsWidget(QWidget *parent)
 	: QWidget{parent}

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -10,15 +10,16 @@
 #ifndef AUDIOCONTROLLER_H
 #define AUDIOCONTROLLER_H
 
-#include <memory>
-
-#include <QObject>
 #include <QAudioDevice>
 #include <QAudioSink>
+#include <QObject>
+
+#include <memory>
 
 class AudioController : public QObject
 {
 	Q_OBJECT
+
 public:
 	explicit AudioController(QObject *parent = nullptr);
 	void initializeAudio(const QAudioFormat &format, const QAudioDevice &deviceInfo);

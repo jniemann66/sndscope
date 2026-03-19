@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -20,11 +20,11 @@
 #define SHOW_PANIC
 #endif
 
-#include <QPainter>
-#include <QEvent>
 #include <QDebug>
-#include <QVector>
+#include <QEvent>
+#include <QPainter>
 #include <QPixmap>
+#include <QVector>
 
 #include <cmath>
 

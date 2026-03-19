@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -18,9 +18,10 @@
 #include "functimer.h"
 #endif
 
-#include <vector>
-
 #include <QDebug>
+
+#include <cstddef>
+#include <vector>
 
 template <typename InputType, typename OutputType, int L>
 class UpSampler

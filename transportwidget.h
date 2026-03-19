@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -10,10 +10,10 @@
 #ifndef TRANSPORTWIDGET_H
 #define TRANSPORTWIDGET_H
 
-#include <QWidget>
+#include <QLCDNumber>
 #include <QPushButton>
 #include <QSlider>
-#include <QLCDNumber>
+#include <QWidget>
 
 class TransportWidget : public QWidget
 {

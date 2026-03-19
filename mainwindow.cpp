@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -9,20 +9,20 @@
 
 #include "mainwindow.h"
 
+#include "audiosettingswidget.h"
+#include "displaysettingswidget.h"
+#include "plotmodewidget.h"
 #include <scopewidget.h>
+#include "sweepsettingswidget.h"
+#include "transportwidget.h"
+
 #include <QDebug>
+#include <QDir>
 #include <QDockWidget>
 #include <QDropEvent>
-#include <QMimeData>
-#include <QDir>
-#include <QMenuBar>
 #include <QFileDialog>
-
-#include "audiosettingswidget.h"
-#include "transportwidget.h"
-#include "displaysettingswidget.h"
-#include "sweepsettingswidget.h"
-#include "plotmodewidget.h"
+#include <QMenuBar>
+#include <QMimeData>
 
 MainWindow::MainWindow(QWidget	*parent) : QMainWindow(parent)
 {

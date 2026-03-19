@@ -1,11 +1,10 @@
 #include "sweepsettingswidget.h"
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QTimer>
-
 #include <QDebug>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QTimer>
+#include <QVBoxLayout>
 
 #include <cmath>
 

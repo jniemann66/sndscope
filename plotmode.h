@@ -1,8 +1,8 @@
 #ifndef PLOTMODE_H
 #define PLOTMODE_H
 
-#include <QString>
 #include <QMap>
+#include <QString>
 
 static constexpr bool connectSamplesSweepOnly = true;
 

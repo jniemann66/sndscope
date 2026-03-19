@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2016 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -10,11 +10,11 @@
 #ifndef _FUNCTIMER_H
 #define _FUNCTIMER_H 
 
-#include <iostream>
-#include <iomanip>
-#include <chrono>
-
 #include <QElapsedTimer>
+
+#include <chrono>
+#include <iomanip>
+#include <iostream>
 
 // class FuncTimer : starts a high-resolution timer upon construction and
 // upon destruction, accumulates time spent alive into total_duration
@@ -47,6 +47,7 @@ class FuncTimerQ
 {
 	QElapsedTimer timer;
 	double* const duration;
+
 public:
 	explicit FuncTimerQ(double* d) : duration(d)
 	{

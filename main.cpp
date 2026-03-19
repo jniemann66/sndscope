@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -7,13 +7,11 @@
 * with this file. If not, please refer to: https://github.com/jniemann66/sndscope.git
 */
 
-#include <QDebug>
-
-#include <QColor>
-
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QColor>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {

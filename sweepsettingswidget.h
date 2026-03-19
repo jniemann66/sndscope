@@ -1,23 +1,23 @@
 #ifndef SWEEPSETTINGSWIDGET_H
 #define SWEEPSETTINGSWIDGET_H
 
-#include <QObject>
-#include <QWidget>
-
-#include <QDial>
-#include <QSlider>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QCheckBox>
-#include <QLabel>
-#include <QMap>
-#include <QPushButton>
-
 #include "sweepparameters.h"
+
+#include <QCheckBox>
+#include <QDial>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMap>
+#include <QObject>
+#include <QPushButton>
+#include <QSlider>
+#include <QTextEdit>
+#include <QWidget>
 
 class SweepSettingsWidget : public QWidget
 {
 	Q_OBJECT
+
 public:
 	explicit SweepSettingsWidget(QWidget *parent = nullptr);
 

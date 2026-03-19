@@ -8,6 +8,7 @@
 */
 
 #include "audiooutput.h"
+
 #include <QDebug>
 
 AudioOutputQueue::AudioOutputQueue(QObject *parent) : QObject(parent), datastream(&buffer, QIODevice::WriteOnly)

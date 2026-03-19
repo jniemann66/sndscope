@@ -1,7 +1,7 @@
 #include "plotmodewidget.h"
 
-#include <QVBoxLayout>
 #include <QGroupBox>
+#include <QVBoxLayout>
 
 
 PlotmodeWidget::PlotmodeWidget(QWidget *parent)

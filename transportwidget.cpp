@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2020 - 2023 Judd Niemann - All Rights Reserved.
+* Copyright (C) 2020 - 2026 Judd Niemann - All Rights Reserved.
 * You may use, distribute and modify this code under the
 * terms of the GNU Lesser General Public License, version 2.1
 *
@@ -10,10 +10,10 @@
 #include "transportwidget.h"
 
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QTime>
 #include <QtGui>
+#include <QVBoxLayout>
 
 TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
 {
@@ -56,7 +56,6 @@ TransportWidget::TransportWidget(QWidget *parent) : QWidget(parent)
     mm->setSegmentStyle(QLCDNumber::Flat);
     ss->setSegmentStyle(QLCDNumber::Flat);
     ms->setSegmentStyle(QLCDNumber::Flat);
-
 
 	setButtonsEnabled(false);
 

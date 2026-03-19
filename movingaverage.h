@@ -2,6 +2,7 @@
 #define MOVINGAVERAGE_H
 
 #include <array>
+#include <cstddef>
 
 template<typename FloatType, size_t size>
 class MovingAverage
